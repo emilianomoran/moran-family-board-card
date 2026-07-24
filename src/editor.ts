@@ -10,6 +10,7 @@ interface PersonConfig {
   calendar?: string | string[];
   color?: string;
   badges?: string[];
+  hidden?: boolean;
 }
 
 /** Curated family palette for one-click color picking. */
@@ -80,6 +81,9 @@ const LABELS: Record<string, string> = {
   calendar: "Kalender (mehrere möglich)",
   color: "Eigene Farbe (Hex, optional)",
   badges: "Badges (z. B. Akku, Sensoren)",
+  hidden: "Beim Start ausgeblendet",
+  compact: "Kompakte Darstellung",
+  map_url: "Karten-Link (Vorlage)",
 };
 
 const HELPERS: Record<string, string> = {
@@ -102,6 +106,9 @@ const HELPERS: Record<string, string> = {
   views: "Welche Umschalter oben erscheinen",
   badges: "Kleine Chips unter dem Personenkopf; Klick öffnet Details",
   color: "Leer lassen für Palettenfarbe",
+  hidden: "Spalte startet eingeklappt; ein Klick auf den Kopf holt sie zurück",
+  compact: "Kleinere Schriften und engere Abstände in einem Schalter",
+  map_url: "{location} wird ersetzt, z. B. https://maps.apple.com/?q={location}",
 };
 
 // One ha-form per person row, with entity pickers filtered by domain.
@@ -111,6 +118,7 @@ const PERSON_SCHEMA = [
   { name: "calendar", selector: { entity: { filter: { domain: "calendar" }, multiple: true } } },
   { name: "badges", selector: { entity: { multiple: true } } },
   { name: "color", selector: { text: {} } },
+  { name: "hidden", selector: { boolean: {} } },
 ];
 
 /** Expandable group for ha-form (flat data, name must stay empty). */
@@ -203,6 +211,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
       { name: "show_now_line", selector: { boolean: {} } },
       { name: "show_progress", selector: { boolean: {} } },
       { name: "weather_entity", selector: { entity: { filter: { domain: "weather" } } } },
+      { name: "map_url", selector: { text: {} } },
     ];
     if (cfg.weather_entity) extras.push({ name: "show_weather", selector: { boolean: {} } });
     extras.push({
@@ -257,6 +266,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
       group("🎨 Aussehen (Feintuning)", "mdi:palette", [
         { name: "show_focus", selector: { boolean: {} } },
         { name: "drag_drop", selector: { boolean: {} } },
+        { name: "compact", selector: { boolean: {} } },
         { name: "auto_icons", selector: { boolean: {} } },
         ...(cfg.auto_icons
           ? [{ name: "icon_patterns", selector: { text: { multiple: true } } }]
@@ -359,6 +369,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     // drop empty optional fields so the YAML stays clean
     if (!value.color) delete value.color;
     if (Array.isArray(value.badges) && value.badges.length === 0) delete value.badges;
+    if (!value.hidden) delete value.hidden;
     // collapse a single-calendar array back to a string for tidy YAML
     if (Array.isArray(value.calendar)) {
       if (value.calendar.length === 0) delete value.calendar;
@@ -425,17 +436,20 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
 
   private _setCalMeta(
     entity: string,
-    patch: { color?: string | null; label?: string | null },
+    patch: {
+      color?: string | null;
+      label?: string | null;
+      icon?: string | null;
+      title_field?: string | null;
+    },
   ): void {
     const map = { ...(this._config.calendars ?? {}) };
-    const entry = { ...(map[entity] ?? {}) };
-    if (patch.color !== undefined) {
-      if (patch.color) entry.color = patch.color;
-      else delete entry.color;
-    }
-    if (patch.label !== undefined) {
-      if (patch.label) entry.label = patch.label;
-      else delete entry.label;
+    const entry = { ...(map[entity] ?? {}) } as Record<string, string>;
+    for (const key of ["color", "label", "icon", "title_field"] as const) {
+      const val = patch[key];
+      if (val === undefined) continue;
+      if (val) entry[key] = val;
+      else delete entry[key];
     }
     if (Object.keys(entry).length === 0) delete map[entity];
     else map[entity] = entry;
@@ -604,11 +618,33 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                     ${this._swatches(meta.color, (col) =>
                       this._setCalMeta(c, { color: col ?? null }),
                     )}
+                    <div class="cal-extra">
+                      <input
+                        type="text"
+                        placeholder="Symbol, z. B. mdi:school"
+                        .value=${meta.icon ?? ""}
+                        @change=${(e: Event) =>
+                          this._setCalMeta(c, {
+                            icon: (e.target as HTMLInputElement).value || null,
+                          })}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Titel aus Feld (z. B. description)"
+                        .value=${meta.title_field ?? ""}
+                        @change=${(e: Event) =>
+                          this._setCalMeta(c, {
+                            title_field: (e.target as HTMLInputElement).value || null,
+                          })}
+                      />
+                    </div>
                   </div>
                 `;
               })}
               <div class="hint">
-                Farben wirken bei „Einfärben nach: Kalender“; Labels erscheinen im Termin-Dialog.
+                Farben wirken bei „Einfärben nach: Kalender“, Labels im Termin-Dialog. Symbol =
+                mdi-Icon vor dem Titel. „Titel aus Feld“ nutzt z. B. <code>description</code> statt
+                <code>summary</code> als Termin-Titel.
               </div>
             </div>
           `
@@ -731,6 +767,22 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .cal-extra {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .cal-extra input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--divider-color);
+      border-radius: 6px;
+      background: var(--card-background-color, #fff);
+      color: var(--primary-text-color);
+      font: inherit;
+      font-size: 12px;
+      padding: 4px 8px;
     }
     .cal-label {
       margin-left: auto;

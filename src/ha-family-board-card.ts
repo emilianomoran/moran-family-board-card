@@ -38,6 +38,7 @@ interface PersonConfig {
   calendar?: string | string[]; // calendar.* entity/entities -> events
   color?: string; // optional override; default falls back to a palette
   badges?: string[]; // extra entities shown as chips under the person header
+  hidden?: boolean; // start collapsed (person toggle can bring them back)
 }
 
 export interface FamilyBoardConfig extends LovelaceCardConfig {
@@ -56,12 +57,17 @@ export interface FamilyBoardConfig extends LovelaceCardConfig {
   show_patterns?: string[]; // allow-list: only show events whose title matches
   replace_patterns?: string[]; // clean up titles: "search => replacement" (or "search" to strip)
   filter_duplicates?: boolean; // drop identical events (title/start/end) per person + in agenda
-  calendars?: Record<string, { color?: string; label?: string }>; // per-calendar color/label
+  calendars?: Record<
+    string,
+    { color?: string; label?: string; icon?: string; title_field?: string }
+  >; // per-calendar color/label/icon and which field supplies the title
   tentative_patterns?: string[]; // mark events tentative when title matches
   auto_icons?: boolean; // prefix events with a matching emoji by keyword. default false
   icon_patterns?: string[]; // custom icon rules: "keyword => 🎂"
   show_focus?: boolean; // show a "now / next" focus bar per person above the views
   drag_drop?: boolean; // drag to move / resize events in the day view. default true
+  compact?: boolean; // denser spacing + smaller fonts in one switch
+  map_url?: string; // location link template, {location} is replaced (URL-encoded)
   show_progress?: boolean; // progress bar on running events. default true
   weather_entity?: string; // weather.* entity for the daily forecast
   show_weather?: boolean; // show weather in headers. default true when entity set
@@ -333,6 +339,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const wanted = config.view ?? "day";
     this._view = enabled.includes(wanted) ? wanted : enabled[0];
     this._day = this._todayIndex();
+    // persons flagged `hidden` start collapsed (the header toggle brings them back)
+    this._hiddenP = config.persons.map((p, i) => (p.hidden ? i : -1)).filter((i) => i >= 0);
     // simple size knobs -> CSS tokens (also overridable via theme/card-mod)
     const colMin = Number(config.col_min_width);
     if (Number.isFinite(colMin) && colMin >= 60) {
@@ -340,6 +348,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     } else {
       this.style.removeProperty("--fb-col-min");
     }
+    this.toggleAttribute("compact", config.compact === true);
     const evSize = Number(config.event_size);
     if (Number.isFinite(evSize) && evSize >= 8 && evSize <= 20) {
       this.style.setProperty("--fb-event-size", `${evSize}px`);
@@ -742,6 +751,15 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
               );
               for (const ev of events) {
                 const raw = parseRawEvent(ev, idx, cal, color);
+                if (raw) {
+                  // optional per-calendar override: take the title from another
+                  // field (school feeds often hide the subject in `description`)
+                  const tf = this._calMeta(cal).title_field;
+                  if (tf) {
+                    const alt = (ev as Record<string, unknown>)[tf];
+                    if (typeof alt === "string" && alt.trim()) raw.summary = alt.trim();
+                  }
+                }
                 if (raw && !this._hidden(raw.summary) && this._allowed(raw.summary)) {
                   if (this._matchesTentative(raw.summary)) raw.tentative = true;
                   raw.summary = this._cleanTitle(raw.summary);
@@ -876,8 +894,29 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     return localize(this.hass, key);
   }
   /** Optional per-calendar color/label from the `calendars:` mapping. */
-  private _calMeta(entity?: string): { color?: string; label?: string } {
+  private _calMeta(entity?: string): {
+    color?: string;
+    label?: string;
+    icon?: string;
+    title_field?: string;
+  } {
     return (entity && this._config.calendars?.[entity]) || {};
+  }
+  /** Link for a location, honouring the configurable `map_url` template. */
+  private _mapUrl(location: string): string {
+    const tpl = this._config.map_url;
+    const q = encodeURIComponent(location);
+    if (typeof tpl === "string" && tpl.includes("{location}")) return tpl.replace("{location}", q);
+    return `https://www.google.com/maps/search/?api=1&query=${q}`;
+  }
+  /** Optional mdi icon configured for a calendar. */
+  private _calIcon(entity?: string): string | undefined {
+    return this._calMeta(entity).icon;
+  }
+  /** Small inline icon element for an event's calendar (or nothing). */
+  private _calIconEl(e: BoardEvent) {
+    const icon = this._calIcon(e.ref.calendar);
+    return icon ? html`<ha-icon class="cicon" .icon=${icon}></ha-icon>` : nothing;
   }
   /** Display name of a calendar entity: mapping label > friendly name > id. */
   private _calLabel(entity: string): string {
@@ -1498,7 +1537,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                           )}–${formatMinutes(this.hass, e.endMin)}"
                         >
                           <span class="etitle"
-                            >${e.continuesBefore ? "« " : ""}${this._evTitle(e)}</span
+                            >${this._calIconEl(e)}${e.continuesBefore ? "« " : ""}${this._evTitle(
+                              e,
+                            )}</span
                           >
                           ${h > 32 || dragging
                             ? html`<span class="etime"
@@ -1808,7 +1849,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                           }}
                           @keydown=${(k: KeyboardEvent) => this._onItemKey(k, e)}
                         >
-                          <span>${e.continuesBefore ? "« " : ""}${this._evTitle(e)}</span>
+                          <span
+                            >${this._calIconEl(e)}${e.continuesBefore ? "« " : ""}${this._evTitle(
+                              e,
+                            )}</span
+                          >
                           ${!e.allDay
                             ? html`<small>${formatMinutes(this.hass, e.startMin)}</small>`
                             : nothing}
@@ -1900,9 +1945,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         <span class="agenda-bar" style="background:${c}"></span>
         <span class="agenda-main">
           <span class="agenda-title"
-            >${e.continuesBefore ? "« " : ""}${this._evTitle(e)}${e.continuesAfter
-              ? " »"
-              : ""}</span
+            >${this._calIconEl(e)}${e.continuesBefore ? "« " : ""}${this._evTitle(
+              e,
+            )}${e.continuesAfter ? " »" : ""}</span
           >
           <span class="agenda-meta">${name}${e.location ? ` · ${e.location}` : ""}</span>
           ${current && this._progressOn
@@ -2360,9 +2405,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
               ${d.location.trim()
                 ? html`<a
                     class="maplink"
-                    href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      d.location,
-                    )}"
+                    href=${this._mapUrl(d.location)}
                     target="_blank"
                     rel="noopener noreferrer"
                     @click=${(e: Event) => e.stopPropagation()}
@@ -2468,6 +2511,32 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       justify-content: space-between;
       padding: 12px 16px;
       border-bottom: 1px solid var(--divider-color);
+    }
+    /* one-switch compact density */
+    :host([compact]) {
+      --fb-title-size: 14px;
+      --fb-name-size: 11.5px;
+      --fb-event-size: 10.5px;
+      --fb-time-size: 9px;
+      --fb-chip-size: 9.5px;
+      --fb-avatar-size: 26px;
+      --fb-event-pad: 2px 5px;
+      --fb-head-pad: 5px 4px;
+      --fb-axis-width: 44px;
+    }
+    :host([compact]) .top,
+    :host([compact]) .dayhead,
+    :host([compact]) .weekhead {
+      padding: 6px 10px;
+    }
+    :host([compact]) .tabs {
+      margin: 4px 10px 0;
+    }
+    :host([compact]) .focus {
+      padding: 5px 10px;
+    }
+    :host([compact]) .fchip {
+      padding: 4px 8px;
     }
     /* "now / next" glance bar */
     .focus {
@@ -2834,6 +2903,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       color: var(--primary-text-color);
       border-radius: 999px;
       padding: 1px 8px;
+    }
+    .cicon {
+      --mdc-icon-size: 13px;
+      width: 13px;
+      height: 13px;
+      vertical-align: -2px;
+      margin-right: 3px;
+      opacity: 0.85;
     }
     .event.draggable {
       touch-action: none;
@@ -3741,7 +3818,7 @@ if (!customElements.get("family-board-card")) {
 });
 
 console.info(
-  "%c FAMILY-BOARD-CARD %c v0.23.0 ",
+  "%c FAMILY-BOARD-CARD %c v0.24.0 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );
