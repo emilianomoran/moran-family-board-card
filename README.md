@@ -1,5 +1,7 @@
 # Family Board Card
 
+**Deutsch** · [English](README.en.md)
+
 ![Family Board Card – Tagesansicht](docs/preview-day.png)
 
 Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https://www.home-assistant.io/). Personen stehen als Spalten oben (mit Avatar aus der `person.*`-Entität), links läuft die Zeitleiste. Die Karte zeigt auf einen Blick, welche Aktivitäten gleichzeitig an unterschiedlichen Orten stattfinden — für bis zu 10 Personen.
@@ -41,16 +43,15 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Status: **v0.24 – vollständige Familien-Tagesplanung: 5 Ansichten, Schreibzugriff, Auto-Layout (Trim/Fit/Full-Height), Hintergrund-Bänder, Badges, Kiosk-Modus, mobil optimiert.**
+> Status: **v0.25 – vollständige Familien-Tagesplanung: 5 Ansichten, Schreibzugriff, Auto-Layout (Trim/Fit/Full-Height), Hintergrund-Bänder, Badges, Kiosk-Modus, mobil optimiert, Karte und Editor vollständig lokalisiert.**
 
-## Installation (HACS, Custom Repository)
+## Installation (HACS)
 
-Solange die Karte nicht im offiziellen HACS-Store ist:
+Die Karte ist Teil des offiziellen HACS-Stores:
 
-1. HACS öffnen → oben rechts auf die drei Punkte → **Custom repositories**.
-2. URL `https://github.com/renespeaker/ha-family-board-card` eintragen, Typ **Dashboard**, **ADD**.
-3. Karte installieren. Die Lovelace-Resource wird im Storage-Mode automatisch als `/hacsfiles/ha-family-board-card/ha-family-board-card.js` registriert (im YAML-Mode manuell eintragen).
-4. Karte aufs Dashboard setzen: `type: custom:family-board-card`.
+1. HACS öffnen → nach **Family Board Card** suchen → installieren.
+2. Die Lovelace-Resource wird im Storage-Mode automatisch als `/hacsfiles/ha-family-board-card/ha-family-board-card.js` registriert (im YAML-Mode manuell eintragen).
+3. Karte aufs Dashboard setzen: `type: custom:family-board-card` – oder einfach „Family Board Card“ im Karten-Picker auswählen.
 
 ### Manuell (schneller Test ohne HACS)
 
@@ -173,6 +174,12 @@ card_mod:
 persons: …
 ```
 
+## Sprachen
+
+Karte **und** visueller Editor sprechen **Deutsch und Englisch**. Die Sprache folgt deinem Home-Assistant-Benutzerprofil; alles, was eine Übersetzung nicht abdeckt, fällt auf Englisch zurück. Datum, Wochentage und das Zeitformat (12/24 h) kommen über `Intl` aus der HA-Locale.
+
+Noch eine Sprache? Ein Dictionary in [`src/localize.ts`](src/localize.ts) (Karte) und [`src/editor-i18n.ts`](src/editor-i18n.ts) (Editor) ergänzen – beides sind einfache Key/Value-Objekte, Pull Requests willkommen.
+
 ## Entwicklung
 
 ```bash
@@ -200,9 +207,10 @@ In der Tagesansicht eine freie Stelle in der Personenspalte anklicken öffnet de
 - [x] Mehrsprachigkeit (i18n, DE/EN) + Locale-Zeitformat
 - [x] Kiosk-/Wandtablet-Modus (`full_height`, `fit_height`, `auto_return`, Touch-Ziele)
 - [x] Mobile-Layout (kompakte Spalten, wischbar)
-- [ ] Drag & Drop zum Verschieben von Terminen
+- [x] Drag & Drop zum Verschieben von Terminen
+- [x] Aufnahme in den offiziellen HACS-Store
+- [x] Lokalisierter visueller Editor (DE/EN)
 - [ ] Orts-/Konflikterkennung (z. B. „niemand zuhause", Abhol-Lücken)
-- [ ] Aufnahme in den offiziellen HACS-Store (beantragt: [hacs/default#8745](https://github.com/hacs/default/pull/8745))
 
 ## Lizenz
 

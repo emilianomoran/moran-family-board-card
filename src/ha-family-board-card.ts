@@ -3812,13 +3812,14 @@ if (!customElements.get("family-board-card")) {
 (window as any).customCards.push({
   type: "family-board-card",
   name: "Family Board Card",
-  description: "Familienkalender / Wer-ist-wann-wo Übersicht für mehrere Personen.",
+  description:
+    "Family calendar / who-is-where board for multiple people \u2013 day, timeline, week, month and agenda views.",
   preview: true,
   documentationURL: "https://github.com/renespeaker/ha-family-board-card",
 });
 
 console.info(
-  "%c FAMILY-BOARD-CARD %c v0.24.0 ",
+  "%c FAMILY-BOARD-CARD %c v0.25.0 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

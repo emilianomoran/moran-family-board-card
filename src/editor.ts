@@ -3,6 +3,8 @@ import { property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import { autoDetectPersons } from "./ha-family-board-card";
 import type { FamilyBoardConfig } from "./ha-family-board-card";
+import { langOf, localize } from "./localize";
+import { et } from "./editor-i18n";
 
 interface PersonConfig {
   name?: string;
@@ -29,87 +31,7 @@ const PALETTE = [
   "#90a4ae",
 ];
 
-const VIEW_OPTIONS = [
-  { value: "day", label: "Tag" },
-  { value: "timeline", label: "Zeitstrahl" },
-  { value: "week", label: "Woche" },
-  { value: "month", label: "Monat" },
-  { value: "agenda", label: "Agenda" },
-];
-
-const LABELS: Record<string, string> = {
-  title: "Kartentitel",
-  refresh_interval: "Auto-Aktualisierung (Sek., 0 = aus)",
-  view: "Standardansicht",
-  views: "Verfügbare Ansichten (Umschalter)",
-  time_grid: "Zeitraster",
-  start_hour: "Startstunde",
-  end_hour: "Endstunde",
-  hour_height: "Höhe pro Stunde",
-  hour_width: "Zeitstrahl: Breite pro Stunde",
-  fit_height: "Auto-Fit: Tag ohne Scrollen einpassen",
-  full_height: "Volle Höhe: bis zum unteren Bildschirmrand",
-  trim_hours: "Leere Randstunden automatisch ausblenden",
-  col_min_width: "Min. Spaltenbreite pro Person",
-  background_hours: "Lange Termine als Hintergrund-Band ab (Std.)",
-  max_columns: "Max. Spalten pro Tag",
-  first_day: "Wochenstart",
-  scroll_to_now: "Auto-Scroll zu jetzt",
-  color_by: "Einfärben nach",
-  show_weekends: "Wochenende anzeigen",
-  show_now_line: "Jetzt-Linie",
-  dim_past: "Vergangene Termine ausgrauen",
-  show_progress: "Fortschrittsbalken anzeigen",
-  hide_patterns: "Termine ausblenden",
-  show_patterns: "Nur Termine zeigen mit",
-  replace_patterns: "Titel ersetzen",
-  filter_duplicates: "Doppelte Termine zusammenfassen",
-  tentative_patterns: "Als vorläufig markieren",
-  auto_icons: "Auto-Symbole nach Stichwort",
-  icon_patterns: "Eigene Symbol-Regeln",
-  show_focus: "„Jetzt / als Nächstes“-Leiste",
-  drag_drop: "Termine per Ziehen verschieben (Tagesansicht)",
-  weather_entity: "Wetter-Entität",
-  show_weather: "Wetter anzeigen",
-  hide_empty_persons: "Woche: Personen ohne Termine ausblenden",
-  auto_return: "Nach Inaktivität zur Startansicht (Min., 0 = aus)",
-  event_size: "Schriftgröße Termine",
-  radius: "Ecken-Radius der Blöcke",
-  past_opacity: "Deckkraft vergangener Termine",
-  name: "Anzeigename",
-  person: "Person (Avatar & Status)",
-  calendar: "Kalender (mehrere möglich)",
-  color: "Eigene Farbe (Hex, optional)",
-  badges: "Badges (z. B. Akku, Sensoren)",
-  hidden: "Beim Start ausgeblendet",
-  compact: "Kompakte Darstellung",
-  map_url: "Karten-Link (Vorlage)",
-};
-
-const HELPERS: Record<string, string> = {
-  hide_patterns: "Textmuster, z. B. „Hofpause“ – Treffer werden ausgeblendet",
-  show_patterns: "Allow-Liste: nur Termine, deren Titel eines der Muster enthält",
-  replace_patterns: "z. B. „Klassenverbund => Unterricht“ (ohne => wird der Text entfernt)",
-  tentative_patterns: "Treffer werden gestrichelt/transparent dargestellt",
-  filter_duplicates: "Gleicher Termin in mehreren Kalendern nur einmal",
-  auto_return: "Kiosk: springt nach X Minuten ohne Berührung zurück zu „heute“",
-  background_hours: "0 = aus. Lange Dauertermine (OGS, Betreuung …) als dezentes Band",
-  fit_height: "Staucht den Tag, bis alles ohne Scrollen sichtbar ist",
-  full_height: "Für Panel-Ansicht / Wandtablet",
-  trim_hours: "Zeigt nur die Stunden, in denen wirklich Termine liegen",
-  col_min_width: "Darunter wird horizontal gescrollt",
-  weather_entity: "Tages-Vorhersage im Kopf (HA-Standort)",
-  auto_icons: "z. B. Arzt → 🩺, Sport → 🏃, Geburtstag → 🎂 (Titel mit Emoji bleiben unberührt)",
-  icon_patterns: "eigene Regeln, z. B. „Oma => 👵“",
-  show_focus: "Kompakte Leiste über den Ansichten: was läuft jetzt / kommt als Nächstes",
-  drag_drop: "Nur bei schreibbaren Kalendern; Ziehen verschiebt, unterer Rand ändert die Dauer",
-  views: "Welche Umschalter oben erscheinen",
-  badges: "Kleine Chips unter dem Personenkopf; Klick öffnet Details",
-  color: "Leer lassen für Palettenfarbe",
-  hidden: "Spalte startet eingeklappt; ein Klick auf den Kopf holt sie zurück",
-  compact: "Kleinere Schriften und engere Abstände in einem Schalter",
-  map_url: "{location} wird ersetzt, z. B. https://maps.apple.com/?q={location}",
-};
+const VIEW_VALUES = ["day", "timeline", "week", "month", "agenda"];
 
 // One ha-form per person row, with entity pickers filtered by domain.
 const PERSON_SCHEMA = [
@@ -142,6 +64,33 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     return Array.isArray(this._config.persons) ? this._config.persons : [];
   }
 
+  /** Two-letter UI language of the running Home Assistant. */
+  private get _lang(): string {
+    return langOf(this.hass);
+  }
+
+  /** Editor string by key (EN fallback). */
+  private _t = (key: string): string => et(this._lang, key);
+
+  /** ha-form label for an option, falling back to the raw option name. */
+  private _label = (s: { name: string }): string => {
+    const key = `l_${s.name}`;
+    const val = et(this._lang, key);
+    return val === key ? s.name : val;
+  };
+
+  /** ha-form helper text for an option, or undefined when there is none. */
+  private _helper = (s: { name: string }): string | undefined => {
+    const key = `h_${s.name}`;
+    const val = et(this._lang, key);
+    return val === key ? undefined : val;
+  };
+
+  /** Localized view options for the dropdown / multi-select. */
+  private _viewOptions() {
+    return VIEW_VALUES.map((v) => ({ value: v, label: localize(this.hass, v) }));
+  }
+
   /** True when nothing meaningful is configured yet -> show the wizard. */
   private get _isFresh(): boolean {
     return !this._persons.some((p) => p.name || p.person || p.calendar);
@@ -154,8 +103,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   /** Grouped settings schema; irrelevant fields are hidden contextually. */
   private _schema(): unknown[] {
     const cfg = this._config;
-    const views =
-      Array.isArray(cfg.views) && cfg.views.length ? cfg.views : VIEW_OPTIONS.map((v) => v.value);
+    const views = Array.isArray(cfg.views) && cfg.views.length ? cfg.views : VIEW_VALUES;
     const hasDay = views.includes("day");
     const hasTimeline = views.includes("timeline");
     const hasWeek = views.includes("week");
@@ -221,12 +169,15 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
 
     return [
       { name: "title", selector: { text: {} } },
-      group("🗓️ Ansichten", "mdi:calendar-multiselect", [
+      group(this._t("g_views"), "mdi:calendar-multiselect", [
         {
           name: "view",
-          selector: { select: { mode: "dropdown", options: VIEW_OPTIONS } },
+          selector: { select: { mode: "dropdown", options: this._viewOptions() } },
         },
-        { name: "views", selector: { select: { multiple: true, options: VIEW_OPTIONS } } },
+        {
+          name: "views",
+          selector: { select: { multiple: true, options: this._viewOptions() } },
+        },
         {
           name: "time_grid",
           selector: {
@@ -246,16 +197,16 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
             select: {
               mode: "dropdown",
               options: [
-                { value: "monday", label: "Montag" },
-                { value: "sunday", label: "Sonntag" },
+                { value: "monday", label: this._t("o_monday") },
+                { value: "sunday", label: this._t("o_sunday") },
               ],
             },
           },
         },
         { name: "show_weekends", selector: { boolean: {} } },
       ]),
-      group("📐 Layout & Größe", "mdi:resize", layout),
-      group("🧹 Filter & Aufräumen", "mdi:broom", [
+      group(this._t("g_layout"), "mdi:resize", layout),
+      group(this._t("g_filters"), "mdi:broom", [
         { name: "hide_patterns", selector: { text: { multiple: true } } },
         { name: "show_patterns", selector: { text: { multiple: true } } },
         { name: "replace_patterns", selector: { text: { multiple: true } } },
@@ -263,7 +214,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
         { name: "tentative_patterns", selector: { text: { multiple: true } } },
         ...(hasWeek ? [{ name: "hide_empty_persons", selector: { boolean: {} } }] : []),
       ]),
-      group("🎨 Aussehen (Feintuning)", "mdi:palette", [
+      group(this._t("g_looks"), "mdi:palette", [
         { name: "show_focus", selector: { boolean: {} } },
         { name: "drag_drop", selector: { boolean: {} } },
         { name: "compact", selector: { boolean: {} } },
@@ -277,9 +228,9 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
             select: {
               mode: "dropdown",
               options: [
-                { value: "person", label: "Person" },
-                { value: "location", label: "Ort" },
-                { value: "calendar", label: "Kalender" },
+                { value: "person", label: this._t("o_person") },
+                { value: "location", label: this._t("o_location") },
+                { value: "calendar", label: this._t("o_calendar") },
               ],
             },
           },
@@ -304,7 +255,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
           },
         },
       ]),
-      group("🖥️ Kiosk & Extras", "mdi:tablet-dashboard", extras),
+      group(this._t("g_kiosk"), "mdi:tablet-dashboard", extras),
     ];
   }
 
@@ -479,7 +430,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
         )}
         <button
           class="swatch none ${!current ? "on" : ""}"
-          title="Automatisch"
+          title=${this._t("b_auto")}
           @click=${() => pick()}
         >
           A
@@ -494,19 +445,11 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     if (this._isFresh) {
       return html`
         <div class="wizard">
-          <div class="wtitle">👨‍👩‍👧‍👦 Willkommen beim Familienplan!</div>
-          <div class="wtext">
-            In zwei Klicks startklar – die Karte erkennt deine Familie automatisch aus den Personen-
-            und Kalender-Entitäten deines Home Assistant.
-          </div>
-          <button class="wbtn primary" @click=${this._autoDetect}>
-            ✨ Schritt 1: Personen automatisch erkennen
-          </button>
-          <div class="wtext small">
-            Danach optional: Profil wählen (unten) oder Feinheiten in den Gruppen einstellen.
-            Natürlich kannst du Personen auch von Hand anlegen:
-          </div>
-          <button class="wbtn" @click=${this._addPerson}>＋ Leer starten</button>
+          <div class="wtitle">${this._t("w_title")}</div>
+          <div class="wtext">${this._t("w_text")}</div>
+          <button class="wbtn primary" @click=${this._autoDetect}>${this._t("w_detect")}</button>
+          <div class="wtext small">${this._t("w_hint")}</div>
+          <button class="wbtn" @click=${this._addPerson}>${this._t("w_empty")}</button>
         </div>
       `;
     }
@@ -515,27 +458,18 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     const cals = this._calsUsed();
     return html`
       <div class="presets">
-        <button
-          title="Vollbild, Auto-Fit, Rückkehr zu heute"
-          @click=${() => this._applyPreset("tablet")}
-        >
-          🖥️ Wandtablet
+        <button title=${this._t("p_tablet_title")} @click=${() => this._applyPreset("tablet")}>
+          ${this._t("p_tablet")}
         </button>
-        <button
-          title="Agenda als Startansicht, kompakte Spalten"
-          @click=${() => this._applyPreset("phone")}
-        >
-          📱 Handy
+        <button title=${this._t("p_phone_title")} @click=${() => this._applyPreset("phone")}>
+          ${this._t("p_phone")}
         </button>
-        <button
-          title="Layout-Einstellungen zurücksetzen"
-          @click=${() => this._applyPreset("reset")}
-        >
-          🧩 Standard
+        <button title=${this._t("p_reset_title")} @click=${() => this._applyPreset("reset")}>
+          ${this._t("p_reset")}
         </button>
       </div>
 
-      <div class="section-title">Personen</div>
+      <div class="section-title">${this._t("s_persons")}</div>
       <div class="persons">
         ${persons.map(
           (p, idx) => html`
@@ -545,11 +479,11 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                   class="pdot"
                   style="background:${p.color || PALETTE[idx % PALETTE.length]}"
                 ></span>
-                <span class="pidx">${p.name || `Person ${idx + 1}`}</span>
+                <span class="pidx">${p.name || `${this._t("person_n")} ${idx + 1}`}</span>
                 <div class="ptools">
                   <button
                     class="icon"
-                    title="Nach oben"
+                    title=${this._t("b_up")}
                     ?disabled=${idx === 0}
                     @click=${() => this._movePerson(idx, -1)}
                   >
@@ -557,7 +491,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                   </button>
                   <button
                     class="icon"
-                    title="Nach unten"
+                    title=${this._t("b_down")}
                     ?disabled=${idx === persons.length - 1}
                     @click=${() => this._movePerson(idx, 1)}
                   >
@@ -565,7 +499,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                   </button>
                   <button
                     class="icon danger"
-                    title="Entfernen"
+                    title=${this._t("b_remove")}
                     @click=${() => this._removePerson(idx)}
                   >
                     ✕
@@ -577,22 +511,22 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                 .hass=${this.hass}
                 .data=${this._personData(p)}
                 .schema=${PERSON_SCHEMA}
-                .computeLabel=${(s: { name: string }) => LABELS[s.name] ?? s.name}
-                .computeHelper=${(s: { name: string }) => HELPERS[s.name]}
+                .computeLabel=${this._label}
+                .computeHelper=${this._helper}
                 @value-changed=${(e: CustomEvent) => this._personChanged(idx, e)}
               ></ha-form>
             </div>
           `,
         )}
         <div class="addrow">
-          <button class="add" @click=${this._addPerson}>＋ Person hinzufügen</button>
-          <button class="add detect" @click=${this._autoDetect}>✨ Automatisch erkennen</button>
+          <button class="add" @click=${this._addPerson}>${this._t("b_add_person")}</button>
+          <button class="add detect" @click=${this._autoDetect}>${this._t("b_detect")}</button>
         </div>
       </div>
 
       ${cals.length > 1 || this._config.calendars
         ? html`
-            <div class="section-title">Kalender (Farbe & Label)</div>
+            <div class="section-title">${this._t("s_calendars")}</div>
             <div class="cals">
               ${cals.map((c) => {
                 const meta = this._config.calendars?.[c] ?? {};
@@ -607,7 +541,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                       <input
                         class="cal-label"
                         type="text"
-                        placeholder="Eigenes Label"
+                        placeholder=${this._t("ph_label")}
                         .value=${meta.label ?? ""}
                         @change=${(e: Event) =>
                           this._setCalMeta(c, {
@@ -621,7 +555,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                     <div class="cal-extra">
                       <input
                         type="text"
-                        placeholder="Symbol, z. B. mdi:school"
+                        placeholder=${this._t("ph_icon")}
                         .value=${meta.icon ?? ""}
                         @change=${(e: Event) =>
                           this._setCalMeta(c, {
@@ -630,7 +564,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                       />
                       <input
                         type="text"
-                        placeholder="Titel aus Feld (z. B. description)"
+                        placeholder=${this._t("ph_title_field")}
                         .value=${meta.title_field ?? ""}
                         @change=${(e: Event) =>
                           this._setCalMeta(c, {
@@ -642,21 +576,20 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
                 `;
               })}
               <div class="hint">
-                Farben wirken bei „Einfärben nach: Kalender“, Labels im Termin-Dialog. Symbol =
-                mdi-Icon vor dem Titel. „Titel aus Feld“ nutzt z. B. <code>description</code> statt
-                <code>summary</code> als Termin-Titel.
+                ${this._t("cal_hint_1")} <code>description</code> ${this._t("cal_hint_2")}
+                <code>summary</code> ${this._t("cal_hint_3")}
               </div>
             </div>
           `
         : nothing}
 
-      <div class="section-title">Einstellungen</div>
+      <div class="section-title">${this._t("s_settings")}</div>
       <ha-form
         .hass=${this.hass}
         .data=${this._settingsData}
         .schema=${this._schema()}
-        .computeLabel=${(s: { name: string }) => LABELS[s.name] ?? s.name}
-        .computeHelper=${(s: { name: string }) => HELPERS[s.name]}
+        .computeLabel=${this._label}
+        .computeHelper=${this._helper}
         @value-changed=${this._settingsChanged}
       ></ha-form>
     `;
