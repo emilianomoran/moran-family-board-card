@@ -16,6 +16,8 @@ import {
   splitAcrossDays,
   layoutDayColumns,
   dragTimes,
+  routeEventToPeople,
+  displayTitleForRoute,
 } from "./events";
 import {
   localize,
@@ -32,13 +34,18 @@ import {
 type ViewName = "day" | "week" | "month" | "agenda" | "timeline";
 const ALL_VIEWS: ViewName[] = ["day", "timeline", "week", "month", "agenda"];
 
-interface PersonConfig {
+export interface PersonConfig {
   name?: string;
   person?: string; // person.* entity -> avatar (entity_picture) + live status
   calendar?: string | string[]; // calendar.* entity/entities -> events
   color?: string; // optional override; default falls back to a palette
   badges?: string[]; // extra entities shown as chips under the person header
   hidden?: boolean; // start collapsed (person toggle can bring them back)
+  match_title_prefixes?: string[]; // route only matching title prefixes (leading symbols ignored)
+  match_title_contains?: string[]; // route titles containing any configured text
+  match_title_regex?: string[]; // route titles matching any case-insensitive regular expression
+  unmatched?: boolean; // fallback lane for events that no normal lane claimed
+  strip_title_prefix?: boolean; // remove a matched title prefix in this lane's display
 }
 
 export interface FamilyBoardConfig extends LovelaceCardConfig {
@@ -306,14 +313,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import("./editor");
-    return document.createElement("ha-family-board-card-editor") as LovelaceCardEditor;
+    return document.createElement("moran-family-board-card-editor") as LovelaceCardEditor;
   }
 
   /** Zero-config start: detect person.* entities and match their calendars. */
   public static getStubConfig(hass?: HomeAssistant): FamilyBoardConfig {
     const persons = hass ? autoDetectPersons(hass) : [];
     return {
-      type: "custom:family-board-card",
+      type: "custom:moran-family-board-card",
       view: "day",
       time_grid: 30,
       start_hour: 6,
@@ -621,9 +628,24 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   private async _maybeFetch(): Promise<void> {
-    const cals = this._config.persons.map((p) => this._calsOf(p).join("+")).join(",");
+    const cals = [...new Set(this._config.persons.flatMap((p) => this._calsOf(p)))]
+      .sort()
+      .join(",");
+    const routes = this._config.persons
+      .map((p) =>
+        [
+          this._calsOf(p).sort().join("~"),
+          p.color ?? "",
+          p.match_title_prefixes?.join("~") ?? "",
+          p.match_title_contains?.join("~") ?? "",
+          p.match_title_regex?.join("~") ?? "",
+          p.unmatched ? "u" : "",
+          p.strip_title_prefix ? "s" : "",
+        ].join(":"),
+      )
+      .join(",");
     const scope = this._view === "month" ? `m${this._monthOffset}` : `w${this._weekOffset}`;
-    const key = `${scope}|${cals}`;
+    const key = `${scope}|${cals}|${routes}`;
     if (key === this._fetchedKey) return;
     this._fetchedKey = key;
     await this._fetchEvents();
@@ -738,38 +760,48 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     let anyError = false;
     this._loading = true;
 
+    const configuredCalendars = [
+      ...new Set(this._config.persons.flatMap((person) => this._calsOf(person))),
+    ].filter((calendar) => this.hass.states[calendar]);
+
     await Promise.all(
-      this._config.persons.flatMap((p, idx) => {
-        const color = personColor(p, idx);
-        return this._calsOf(p)
-          .filter((cal) => this.hass.states[cal])
-          .map(async (cal) => {
-            try {
-              const events = await this.hass.callApi<any[]>(
-                "GET",
-                `calendars/${cal}?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}`,
-              );
-              for (const ev of events) {
-                const raw = parseRawEvent(ev, idx, cal, color);
-                if (raw) {
-                  // optional per-calendar override: take the title from another
-                  // field (school feeds often hide the subject in `description`)
-                  const tf = this._calMeta(cal).title_field;
-                  if (tf) {
-                    const alt = (ev as Record<string, unknown>)[tf];
-                    if (typeof alt === "string" && alt.trim()) raw.summary = alt.trim();
-                  }
-                }
-                if (raw && !this._hidden(raw.summary) && this._allowed(raw.summary)) {
-                  if (this._matchesTentative(raw.summary)) raw.tentative = true;
-                  raw.summary = this._cleanTitle(raw.summary);
-                  raws.push(raw);
-                }
+      configuredCalendars.map(async (calendar) => {
+        try {
+          const events = await this.hass.callApi<any[]>(
+            "GET",
+            `calendars/${calendar}?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}`,
+          );
+          for (const event of events) {
+            // Apply the calendar's alternate-title mapping before lane routing.
+            // Institutional feeds often keep the useful subject in description.
+            let sourceTitle = event.summary || "Termin";
+            const titleField = this._calMeta(calendar).title_field;
+            if (titleField) {
+              const alternate = (event as Record<string, unknown>)[titleField];
+              if (typeof alternate === "string" && alternate.trim()) {
+                sourceTitle = alternate.trim();
               }
-            } catch (err) {
-              anyError = true;
             }
-          });
+            if (this._hidden(sourceTitle) || !this._allowed(sourceTitle)) continue;
+
+            const personIndexes = routeEventToPeople(sourceTitle, calendar, this._config.persons);
+            for (const personIndex of personIndexes) {
+              const person = this._config.persons[personIndex];
+              const raw = parseRawEvent(
+                { ...event, summary: sourceTitle },
+                personIndex,
+                calendar,
+                personColor(person, personIndex),
+              );
+              if (!raw) continue;
+              if (this._matchesTentative(sourceTitle)) raw.tentative = true;
+              raw.summary = this._cleanTitle(displayTitleForRoute(sourceTitle, person));
+              raws.push(raw);
+            }
+          }
+        } catch (err) {
+          anyError = true;
+        }
       }),
     );
     let cleaned = raws;
@@ -3803,23 +3835,23 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   `;
 }
 
-if (!customElements.get("family-board-card")) {
-  customElements.define("family-board-card", FamilyBoardCard);
+if (!customElements.get("moran-family-board-card")) {
+  customElements.define("moran-family-board-card", FamilyBoardCard);
 }
 
 // register in the card picker
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: "family-board-card",
-  name: "Family Board Card",
+  type: "moran-family-board-card",
+  name: "Moran Family Board Card",
   description:
     "Family calendar / who-is-where board for multiple people \u2013 day, timeline, week, month and agenda views.",
   preview: true,
-  documentationURL: "https://github.com/renespeaker/ha-family-board-card",
+  documentationURL: "https://github.com/emilianomoran/moran-family-board-card",
 });
 
 console.info(
-  "%c FAMILY-BOARD-CARD %c v0.25.0 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.1 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

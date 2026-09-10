@@ -5,6 +5,9 @@ import {
   splitAcrossDays,
   layoutDayColumns,
   dragTimes,
+  eventMatchesRoute,
+  displayTitleForRoute,
+  routeEventToPeople,
   DAY_MS,
   BoardEvent,
 } from "./events";
@@ -95,6 +98,69 @@ describe("parseRawEvent", () => {
     )!;
     expect(r.rrule).toBe("FREQ=WEEKLY");
     expect(r.recurrence_id).toBe("2024-01-01T10:00:00");
+  });
+});
+
+describe("event routing", () => {
+  const sharedCalendars = ["calendar.family", "calendar.activities"];
+
+  it("matches title prefixes case-insensitively after a leading semantic marker", () => {
+    expect(eventMatchesRoute("⭐️ Matthew: Concert", { match_title_prefixes: ["matthew:"] })).toBe(
+      true,
+    );
+    expect(eventMatchesRoute("Juliet: Choir", { match_title_prefixes: ["Matthew:"] })).toBe(false);
+  });
+
+  it("supports contains and regex rules without allowing invalid regex to break routing", () => {
+    expect(eventMatchesRoute("District Holiday", { match_title_contains: ["holiday"] })).toBe(true);
+    expect(
+      eventMatchesRoute("Oliver + Eli: Field Day", { match_title_regex: ["Oliver \\+ Eli"] }),
+    ).toBe(true);
+    expect(eventMatchesRoute("Anything", { match_title_regex: ["["] })).toBe(false);
+  });
+
+  it("routes a joint event to more than one configured lane", () => {
+    const people = [
+      { calendar: sharedCalendars, match_title_prefixes: ["Oliver + Eli:"] },
+      { calendar: sharedCalendars, match_title_prefixes: ["Oliver + Eli:"] },
+      { calendar: sharedCalendars, unmatched: true },
+    ];
+    expect(routeEventToPeople("Oliver + Eli: Field Day", "calendar.activities", people)).toEqual([
+      0, 1,
+    ]);
+  });
+
+  it("uses the unmatched lane only when no normal lane claims an event", () => {
+    const people = [
+      { calendar: sharedCalendars, match_title_prefixes: ["Matthew:"] },
+      { calendar: sharedCalendars, unmatched: true },
+    ];
+    expect(routeEventToPeople("Matthew: Rehearsal", "calendar.family", people)).toEqual([0]);
+    expect(routeEventToPeople("Early Dismissal", "calendar.family", people)).toEqual([1]);
+  });
+
+  it("preserves legacy calendar-per-person behavior when no match rules are present", () => {
+    const people = [
+      { calendar: "calendar.family" },
+      { calendar: ["calendar.family", "calendar.work"] },
+    ];
+    expect(routeEventToPeople("Dinner", "calendar.family", people)).toEqual([0, 1]);
+    expect(routeEventToPeople("Planning", "calendar.work", people)).toEqual([1]);
+  });
+
+  it("strips a matched person prefix but preserves the semantic marker", () => {
+    expect(
+      displayTitleForRoute("⭐️ Matthew: Fall Concert", {
+        match_title_prefixes: ["Matthew:"],
+        strip_title_prefix: true,
+      }),
+    ).toBe("⭐️ Fall Concert");
+    expect(
+      displayTitleForRoute("Matthew: Fall Concert", {
+        match_title_prefixes: ["Juliet:"],
+        strip_title_prefix: true,
+      }),
+    ).toBe("Matthew: Fall Concert");
   });
 });
 

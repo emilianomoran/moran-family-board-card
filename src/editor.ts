@@ -13,6 +13,11 @@ interface PersonConfig {
   color?: string;
   badges?: string[];
   hidden?: boolean;
+  match_title_prefixes?: string[];
+  match_title_contains?: string[];
+  match_title_regex?: string[];
+  unmatched?: boolean;
+  strip_title_prefix?: boolean;
 }
 
 /** Curated family palette for one-click color picking. */
@@ -38,6 +43,11 @@ const PERSON_SCHEMA = [
   { name: "name", selector: { text: {} } },
   { name: "person", selector: { entity: { filter: { domain: "person" } } } },
   { name: "calendar", selector: { entity: { filter: { domain: "calendar" }, multiple: true } } },
+  { name: "match_title_prefixes", selector: { text: { multiple: true } } },
+  { name: "match_title_contains", selector: { text: { multiple: true } } },
+  { name: "match_title_regex", selector: { text: { multiple: true } } },
+  { name: "unmatched", selector: { boolean: {} } },
+  { name: "strip_title_prefix", selector: { boolean: {} } },
   { name: "badges", selector: { entity: { multiple: true } } },
   { name: "color", selector: { text: {} } },
   { name: "hidden", selector: { boolean: {} } },
@@ -320,6 +330,17 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     // drop empty optional fields so the YAML stays clean
     if (!value.color) delete value.color;
     if (Array.isArray(value.badges) && value.badges.length === 0) delete value.badges;
+    if (Array.isArray(value.match_title_prefixes) && value.match_title_prefixes.length === 0) {
+      delete value.match_title_prefixes;
+    }
+    if (Array.isArray(value.match_title_contains) && value.match_title_contains.length === 0) {
+      delete value.match_title_contains;
+    }
+    if (Array.isArray(value.match_title_regex) && value.match_title_regex.length === 0) {
+      delete value.match_title_regex;
+    }
+    if (!value.unmatched) delete value.unmatched;
+    if (!value.strip_title_prefix) delete value.strip_title_prefix;
     if (!value.hidden) delete value.hidden;
     // collapse a single-calendar array back to a string for tidy YAML
     if (Array.isArray(value.calendar)) {
@@ -800,4 +821,4 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   `;
 }
 
-customElements.define("ha-family-board-card-editor", FamilyBoardCardEditor);
+customElements.define("moran-family-board-card-editor", FamilyBoardCardEditor);

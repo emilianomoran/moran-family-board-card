@@ -5,6 +5,117 @@
 export const DAY_MS = 86400000;
 
 /**
+ * Optional routing rules for a board lane. These stay deliberately generic:
+ * household-specific names and conventions belong in Lovelace configuration,
+ * not in the public card bundle.
+ */
+export interface EventRouteConfig {
+  calendar?: string | string[];
+  match_title_prefixes?: string[];
+  match_title_contains?: string[];
+  match_title_regex?: string[];
+  unmatched?: boolean;
+  strip_title_prefix?: boolean;
+}
+
+const values = (input?: string[]): string[] =>
+  Array.isArray(input) ? input.map((value) => String(value).trim()).filter(Boolean) : [];
+
+const calendars = (input?: string | string[]): string[] => {
+  if (Array.isArray(input)) return input.filter(Boolean);
+  return input ? [input] : [];
+};
+
+/**
+ * Event titles often begin with a semantic marker (for example a star or car
+ * emoji). Prefix routing intentionally ignores those markers so a rule such as
+ * `Matthew:` also matches `⭐️ Matthew: Concert`.
+ */
+function titleBodyStart(title: string): number {
+  const match = title.match(/[\p{L}\p{N}]/u);
+  return match?.index ?? 0;
+}
+
+function titleBody(title: string): string {
+  return title.slice(titleBodyStart(title));
+}
+
+export function hasEventRouteRules(config: EventRouteConfig): boolean {
+  return (
+    values(config.match_title_prefixes).length > 0 ||
+    values(config.match_title_contains).length > 0 ||
+    values(config.match_title_regex).length > 0
+  );
+}
+
+/** Match one event title against one lane's configured rules. */
+export function eventMatchesRoute(title: string, config: EventRouteConfig): boolean {
+  if (!hasEventRouteRules(config)) return true;
+
+  const lowerTitle = title.toLocaleLowerCase();
+  const lowerBody = titleBody(title).toLocaleLowerCase();
+
+  if (
+    values(config.match_title_prefixes).some((prefix) =>
+      lowerBody.startsWith(prefix.toLocaleLowerCase()),
+    )
+  ) {
+    return true;
+  }
+  if (
+    values(config.match_title_contains).some((part) =>
+      lowerTitle.includes(part.toLocaleLowerCase()),
+    )
+  ) {
+    return true;
+  }
+  return values(config.match_title_regex).some((pattern) => {
+    try {
+      return new RegExp(pattern, "iu").test(title);
+    } catch {
+      // A malformed user pattern should never break the whole calendar.
+      return false;
+    }
+  });
+}
+
+/**
+ * Return every lane that should receive an event. Legacy lanes without match
+ * rules continue to receive every event from their configured calendars.
+ * `unmatched` lanes receive the event only when no normal lane claimed it.
+ */
+export function routeEventToPeople(
+  title: string,
+  calendar: string,
+  people: EventRouteConfig[],
+): number[] {
+  const isEligible = (person: EventRouteConfig) => calendars(person.calendar).includes(calendar);
+  const matched = people.flatMap((person, index) => {
+    if (person.unmatched || !isEligible(person)) return [];
+    return eventMatchesRoute(title, person) ? [index] : [];
+  });
+  if (matched.length > 0) return matched;
+
+  return people.flatMap((person, index) => (person.unmatched && isEligible(person) ? [index] : []));
+}
+
+/** Remove only the matched person prefix while preserving leading markers. */
+export function displayTitleForRoute(title: string, config: EventRouteConfig): string {
+  if (!config.strip_title_prefix) return title;
+  const start = titleBodyStart(title);
+  const leading = title.slice(0, start).trim();
+  const body = title.slice(start);
+  const lowerBody = body.toLocaleLowerCase();
+  const prefix = values(config.match_title_prefixes).find((candidate) =>
+    lowerBody.startsWith(candidate.toLocaleLowerCase()),
+  );
+  if (!prefix) return title;
+
+  const remainder = body.slice(prefix.length).trimStart();
+  return [leading, remainder].filter(Boolean).join(" ").trim() || title;
+}
+
+/**
  * Compute new start/end for a drag (move) or resize gesture.
  * `deltaMin` is the raw dragged offset in minutes; the result snaps to the
  * `gridMin` raster (absolute, from midnight of the event's day) and keeps a

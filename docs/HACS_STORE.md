@@ -1,57 +1,33 @@
-# Aufnahme in den offiziellen HACS-Store
+# HACS distribution for the Moran fork
 
-Diese Karte ist bereits per **Custom Repository** installierbar. Damit sie im
-**Standard-HACS-Store** (ohne Custom-Repo, direkt suchbar) auftaucht, muss das
-Repo einmalig in die `hacs/default`-Liste aufgenommen werden.
+Status: custom-repository distribution only. This fork is intentionally not submitted as a second
+copy of the upstream card in the default HACS store.
 
-## Voraussetzungen (alle erfüllt ✅)
+## Install from the custom repository
 
-- [x] Öffentliches Repository
-- [x] Repo-**Description** gesetzt
-- [x] Repo-**Topics** gesetzt
-- [x] `hacs.json` mit `name` und `filename`
-- [x] README mit Beschreibung **und Bild**
-- [x] `hacs/action` (Plugin) Validierung grün — siehe `.github/workflows/validate.yml`
-- [ ] **Mindestens ein veröffentlichtes GitHub-Release** mit angehängtem
-      `ha-family-board-card.js` (übernimmt `.github/workflows/release.yml` automatisch)
+1. Open HACS.
+2. Open the three-dot menu and select **Custom repositories**.
+3. Add `https://github.com/emilianomoran/moran-family-board-card` with category **Dashboard**.
+4. Install **Moran Family Board Card**.
 
-> Wichtig: Ohne veröffentlichtes Release lehnt HACS die Aufnahme ab. Das Release
-> muss **published** sein (nicht „Draft"); erst dann existiert das Tag und der
-> Release-Workflow hängt das Bundle an.
+HACS installs `moran-family-board-card.js`. The card type is:
 
-## Schritt 1 – Release veröffentlichen
-
-```bash
-gh release create v0.3.0 \
-  --repo renespeaker/ha-family-board-card \
-  --target main \
-  --title "v0.3.0" \
-  --notes "Wochen-Navigation, Nebeneinander-Layout, color_by location, Auto-Refresh, i18n (DE/EN), Tests/CI."
+```yaml
+type: custom:moran-family-board-card
 ```
 
-Danach prüfen, dass unter **Releases → v0.3.0 → Assets** die Datei
-`ha-family-board-card.js` hängt.
+The distinct repository, bundle, and custom-element names allow the upstream Family Board Card and
+this fork to coexist during evaluation.
 
-## Schritt 2 – PR an `hacs/default`
+## Release checklist
 
-1. `https://github.com/hacs/default` forken.
-2. In der Datei **`plugin`** (eine Repo-Slug pro Zeile, alphabetisch) ergänzen:
+1. Run `npm ci`.
+2. Run `npm run format:check`, `npm run lint`, `npm test`, and `npm run build`.
+3. Confirm `dist/moran-family-board-card.js` is the only release bundle.
+4. Tag a tested Moran version such as `v0.25.1-moran.1`.
+5. Publish a GitHub release. `.github/workflows/release.yml` attaches the bundle automatically.
+6. Install the release through HACS in a non-primary test dashboard before changing a production
+   wall display.
 
-   ```
-   renespeaker/ha-family-board-card
-   ```
-
-3. Pull Request öffnen. Die HACS-Action im `hacs/default`-Repo prüft das Repo
-   automatisch erneut; bei grünem Check übernimmt ein Maintainer den Merge.
-
-## Schritt 3 – nach dem Merge
-
-- Die Karte ist über HACS → **Frontend** direkt suchbar.
-- Neue Versionen werden allein durch ein neues **GitHub-Release** ausgeliefert
-  (Tag erhöhen → `release.yml` baut & hängt das Bundle an → HACS bietet Update an).
-
-## Brands (optional)
-
-Für ein Icon/Logo in HACS kann zusätzlich ein PR an
-[`home-assistant/brands`](https://github.com/home-assistant/brands) gestellt
-werden. Für Lovelace-Plugins ist das **nicht zwingend**.
+Do not commit household configuration, entity IDs, credentials, or Calendar Bridge connection
+details to this public repository.

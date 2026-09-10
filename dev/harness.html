@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moran Family Board development harness</title>
+    <style>
+      :root {
+        --primary-color: #1296ed;
+        --primary-text-color: #111827;
+        --secondary-text-color: #526071;
+        --secondary-background-color: #f6f8fb;
+        --divider-color: #dfe5ec;
+        --card-background-color: #ffffff;
+        --ha-card-border-radius: 0;
+        --error-color: #e84235;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-width: 1180px;
+        min-height: 100vh;
+        background: #ffffff;
+        color: var(--primary-text-color);
+      }
+      main {
+        min-height: 100vh;
+      }
+      moran-family-board-card {
+        display: block;
+        min-height: 100vh;
+      }
+      ha-icon {
+        display: inline-flex;
+        width: 18px;
+        height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script type="module">
+      import "/dist/moran-family-board-card.js";
+
+      const dateAt = (dayOffset, hour, minute = 0) => {
+        const date = new Date();
+        date.setDate(date.getDate() + dayOffset);
+        date.setHours(hour, minute, 0, 0);
+        return date.toISOString();
+      };
+      const event = (summary, startHour, endHour, dayOffset = 0, location = "") => ({
+        summary,
+        location,
+        start: { dateTime: dateAt(dayOffset, startHour) },
+        end: { dateTime: dateAt(dayOffset, endHour) },
+      });
+
+      const calendarEvents = {
+        "calendar.family": [
+          event("Alex: Home office", 8, 10),
+          event("Jamie: Project work", 11, 13),
+          event("Family dinner", 18, 19),
+          event("⭐️ Alex: Fall concert", 19, 21, 1, "Auditorium"),
+        ],
+        "calendar.activities": [
+          event("Riley: School", 8, 15),
+          event("Alex + Jamie: Soccer practice", 16, 18, 0, "Sports fields"),
+          event("Riley: Swim practice", 16, 18, 0, "Aquatic center"),
+        ],
+      };
+
+      const states = {
+        "calendar.family": {
+          entity_id: "calendar.family",
+          state: "off",
+          attributes: { friendly_name: "Family", supported_features: 1 },
+        },
+        "calendar.activities": {
+          entity_id: "calendar.activities",
+          state: "off",
+          attributes: { friendly_name: "Activities", supported_features: 1 },
+        },
+        "person.alex": {
+          entity_id: "person.alex",
+          state: "home",
+          attributes: { friendly_name: "Alex" },
+        },
+        "person.jamie": {
+          entity_id: "person.jamie",
+          state: "not_home",
+          attributes: { friendly_name: "Jamie" },
+        },
+      };
+
+      const hass = {
+        states,
+        locale: { language: "en-US", time_format: "12" },
+        config: { unit_system: { temperature: "°F" } },
+        callApi: async (_method, path) => {
+          const calendar = Object.keys(calendarEvents).find((entityId) => path.includes(entityId));
+          return calendar ? calendarEvents[calendar] : [];
+        },
+        callWS: async () => ({}),
+      };
+
+      const sharedCalendars = ["calendar.family", "calendar.activities"];
+      const card = document.createElement("moran-family-board-card");
+      card.setConfig({
+        type: "custom:moran-family-board-card",
+        title: "Family Board",
+        view: "day",
+        views: ["day", "timeline", "week", "month", "agenda"],
+        start_hour: 7,
+        end_hour: 21,
+        trim_hours: false,
+        hour_height: 54,
+        full_height: true,
+        show_focus: true,
+        show_now_line: true,
+        scroll_to_now: false,
+        refresh_interval: 0,
+        event_size: 14,
+        radius: 10,
+        persons: [
+          {
+            name: "Alex",
+            person: "person.alex",
+            calendar: sharedCalendars,
+            color: "#8fa8f5",
+            match_title_prefixes: ["Alex:", "Alex + Jamie:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Jamie",
+            person: "person.jamie",
+            calendar: sharedCalendars,
+            color: "#62cfbe",
+            match_title_prefixes: ["Jamie:", "Alex + Jamie:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Riley",
+            calendar: sharedCalendars,
+            color: "#f58eae",
+            match_title_prefixes: ["Riley:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Household",
+            calendar: sharedCalendars,
+            color: "#e5b85c",
+            unmatched: true,
+          },
+        ],
+      });
+      card.hass = hass;
+      document.querySelector("#app").append(card);
+    </script>
+  </body>
+</html>
