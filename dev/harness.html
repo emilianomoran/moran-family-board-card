@@ -26,15 +26,37 @@
       * {
         box-sizing: border-box;
       }
+      html,
       body {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
         margin: 0;
         min-width: 1180px;
-        min-height: 100vh;
+        min-height: 0;
+        overflow: hidden;
         background: #ffffff;
         color: var(--primary-text-color);
       }
+      #host-chrome {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--divider-color);
+        background: var(--secondary-background-color);
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #host-chrome[hidden] {
+        display: none;
+      }
       main {
-        min-height: 100vh;
+        flex: 1 1 auto;
+        min-height: 0;
       }
       #timezone-warning {
         position: fixed;
@@ -55,7 +77,9 @@
       }
       moran-family-board-card {
         display: block;
-        min-height: 100vh;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
       }
       ha-icon {
         display: inline-flex;
@@ -65,6 +89,7 @@
     </style>
   </head>
   <body>
+    <header id="host-chrome" hidden>Synthetic host chrome</header>
     <main id="app"></main>
     <aside id="timezone-warning" role="alert" hidden></aside>
     <script type="module">
@@ -72,9 +97,18 @@
 
       const EVIDENCE_TIME_ZONE = "America/Chicago";
       const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
-      const scenario = new URLSearchParams(window.location.search).get("scenario") ?? "legacy";
+      const query = new URLSearchParams(window.location.search);
+      const scenario = query.get("scenario") ?? "legacy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
+      }
+
+      const chromeHeight = Number(query.get("chrome") ?? 0);
+      if (Number.isFinite(chromeHeight) && chromeHeight > 0) {
+        const hostChrome = document.querySelector("#host-chrome");
+        hostChrome.hidden = false;
+        hostChrome.style.height = `${chromeHeight}px`;
+        hostChrome.style.flexBasis = `${chromeHeight}px`;
       }
 
       const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -248,6 +282,19 @@
 
         const wall = root.querySelector(".moran-wall-shell");
         if (!wall) throw new Error("Wall scenario did not render the wall shell.");
+        if (chromeHeight > 0) {
+          const mainRect = document.querySelector("#app").getBoundingClientRect();
+          const wallRect = wall.getBoundingClientRect();
+          if (
+            document.documentElement.scrollHeight > window.innerHeight ||
+            wallRect.top < mainRect.top - 1 ||
+            wallRect.bottom > mainRect.bottom + 1
+          ) {
+            throw new Error(
+              "Wall shell overflowed the available host panel below synthetic chrome.",
+            );
+          }
+        }
         const todayAction = wall.querySelector(".dayhead .nav-now");
         if (
           todayAction?.textContent.trim() !== "Today" ||
@@ -330,7 +377,7 @@
         return results;
       };
 
-      if (new URLSearchParams(window.location.search).has("checks")) {
+      if (query.has("checks")) {
         runInteractionChecks()
           .then((results) => writeCheckResult("pass", results.join("; ")))
           .catch((error) => {

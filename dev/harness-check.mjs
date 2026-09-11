@@ -109,12 +109,12 @@ class CdpClient {
 }
 
 const scenarios = [
-  { name: "wall", checks: "interactions" },
-  { name: "legacy", checks: "smoke" },
+  { name: "wall", checks: "interactions", chromeHeight: 64 },
+  { name: "legacy", checks: "smoke", chromeHeight: 0 },
 ];
 
 try {
-  for (const { name, checks } of scenarios) {
+  for (const { name, checks, chromeHeight } of scenarios) {
     const targetResponse = await fetch(`http://127.0.0.1:${devToolsPort}/json/new?about:blank`, {
       method: "PUT",
     });
@@ -139,7 +139,7 @@ try {
       mobile: false,
     });
 
-    const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}`;
+    const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}`;
     await cdp.send("Page.navigate", { url });
 
     let result;
