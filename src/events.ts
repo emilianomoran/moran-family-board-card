@@ -29,7 +29,7 @@ const calendars = (input?: string | string[]): string[] => {
 /**
  * Event titles often begin with a semantic marker (for example a star or car
  * emoji). Prefix routing intentionally ignores those markers so a rule such as
- * `Matthew:` also matches `⭐️ Matthew: Concert`.
+ * `Avery:` also matches `⭐️ Avery: Concert`.
  */
 function titleBodyStart(title: string): number {
   const match = title.match(/[\p{L}\p{N}]/u);

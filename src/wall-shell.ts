@@ -324,6 +324,7 @@ export const wallShellStyles = css`
   }
 
   .moran-wall-shell button:focus-visible,
+  .moran-wall-shell .phead:focus-visible,
   .moran-wall-shell .event:focus-visible,
   .moran-wall-shell .wchip:focus-visible,
   .moran-wall-shell .adchip:focus-visible {

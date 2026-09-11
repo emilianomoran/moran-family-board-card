@@ -87,7 +87,7 @@ const EN: Dict = {
   h_match_title_contains: "Also route titles containing one of these values",
   h_match_title_regex: "Advanced case-insensitive title patterns; invalid patterns are ignored",
   h_unmatched: "Receives events from these calendars only when no normal lane claimed them",
-  h_strip_title_prefix: "For example, show ‘Rehearsal’ instead of ‘Matthew: Rehearsal’",
+  h_strip_title_prefix: "For example, show ‘Rehearsal’ instead of ‘Avery: Rehearsal’",
   h_color: "Leave empty for the palette color",
   h_hidden: "Column starts collapsed; a click on the header brings it back",
   h_compact: "Smaller fonts and tighter spacing in a single switch",
@@ -226,7 +226,7 @@ const DE: Dict = {
   h_match_title_regex:
     "Erweiterte Titelmuster ohne Groß-/Kleinschreibung; ungültige Muster werden ignoriert",
   h_unmatched: "Erhält Termine aus diesen Kalendern nur, wenn keine normale Spalte sie zuordnet",
-  h_strip_title_prefix: "Zeigt zum Beispiel ‘Probe’ statt ‘Matthew: Probe’",
+  h_strip_title_prefix: "Zeigt zum Beispiel ‘Probe’ statt ‘Avery: Probe’",
   h_color: "Leer lassen für Palettenfarbe",
   h_hidden: "Spalte startet eingeklappt; ein Klick auf den Kopf holt sie zurück",
   h_compact: "Kleinere Schriften und engere Abstände in einem Schalter",

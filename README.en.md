@@ -32,7 +32,7 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Household fallback lane** – an `unmatched` lane receives events that no configured person rule
   claimed.
 - **Clean lane titles** – optionally remove a matched person prefix while preserving a leading
-  semantic marker, so `⭐️ Matthew: Concert` can display as `⭐️ Concert` inside Matthew's lane.
+  semantic marker, so `⭐️ Avery: Concert` can display as `⭐️ Concert` inside Avery's lane.
 - **Robust event logic** – all-day events (exclusive end), events across midnight and multi-day events are split onto the correct days; time zones are respected.
 - **Multilingual & localized** – texts in English/German, weekday names and clock format (12/24 h) from the HA locale; relative days (“Today/Tomorrow”).
 - **Everyday polish** – past events dimmed, coloring by calendar, open a location straight in the maps app, hide noisy events by pattern.
@@ -79,7 +79,7 @@ type: module
 
 ```yaml
 type: custom:moran-family-board-card
-title: Family board # optional, custom card title
+title: Family Board # optional, custom card title
 view: day           # day | timeline | week | month | agenda
 time_grid: 30       # 15 | 30 | 60
 start_hour: 6
@@ -90,15 +90,29 @@ color_by: person      # person | location | calendar
 hour_height: 64       # pixels per hour (40–96), day view
 refresh_interval: 300 # seconds; 0 = off
 persons:
-  - name: Anna
-    person: person.anna     # avatar (entity_picture) + live status
-    calendar: calendar.anna # source of the events
+  - name: Avery
+    person: person.fixture_avery        # avatar (entity_picture) + live status
+    calendar: calendar.fixture_avery    # source of the events
     color: '#8B7CF6'        # optional, otherwise the default palette
-  - name: Ben
-    person: person.ben
+  - name: Jordan
+    person: person.fixture_jordan
     calendar:               # several calendars per person are possible
-      - calendar.ben_work
-      - calendar.ben_private
+      - calendar.fixture_jordan_work
+      - calendar.fixture_jordan_private
+```
+
+To try the calendar-first full-panel proof, add `layout: wall`. Omitting `layout` keeps the
+existing card and all current behavior. Wall currently starts as a calendar-only Day proof; its
+other views remain functional but do not yet claim final wall styling.
+
+```yaml
+type: custom:moran-family-board-card
+layout: wall
+view: day
+persons:
+  - name: Avery
+    person: person.fixture_avery
+    calendar: calendar.fixture_family
 ```
 
 ### Shared managed calendars
@@ -111,23 +125,23 @@ type: custom:moran-family-board-card
 persons:
   - name: Person A
     calendar:
-      - calendar.family
-      - calendar.activities
+      - calendar.fixture_family
+      - calendar.fixture_activities
     match_title_prefixes:
       - "Person A:"
     strip_title_prefix: true
   - name: Person B
     calendar:
-      - calendar.family
-      - calendar.activities
+      - calendar.fixture_family
+      - calendar.fixture_activities
     match_title_prefixes:
       - "Person B:"
       - "Person B + Person C:"
     strip_title_prefix: true
   - name: Household
     calendar:
-      - calendar.family
-      - calendar.activities
+      - calendar.fixture_family
+      - calendar.fixture_activities
     unmatched: true
 ```
 
@@ -151,6 +165,7 @@ breaking the calendar.
 | `icon_patterns` | list | – | Custom icon rules, e.g. `["Grandma => 👵"]` |
 | `auto_return` | number | `0` | Kiosk: return to the start view / today after X minutes without a touch (0 = off) |
 | `title` | string | – | Custom card title (default: localized “Family board”) |
+| `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
 | `time_grid` | number | `30` | Time axis grid in minutes |

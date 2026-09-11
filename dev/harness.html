@@ -15,7 +15,13 @@
         --ha-card-border-radius: 0;
         --error-color: #e84235;
         font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
       }
       * {
         box-sizing: border-box;
@@ -30,6 +36,23 @@
       main {
         min-height: 100vh;
       }
+      #timezone-warning {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 100;
+        max-width: 520px;
+        padding: 12px 16px;
+        border: 2px solid #e84235;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #111827;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #timezone-warning[hidden] {
+        display: none;
+      }
       moran-family-board-card {
         display: block;
         min-height: 100vh;
@@ -43,56 +66,80 @@
   </head>
   <body>
     <main id="app"></main>
+    <aside id="timezone-warning" role="alert" hidden></aside>
     <script type="module">
       import "/dist/moran-family-board-card.js";
 
-      const dateAt = (dayOffset, hour, minute = 0) => {
-        const date = new Date();
-        date.setDate(date.getDate() + dayOffset);
-        date.setHours(hour, minute, 0, 0);
-        return date.toISOString();
-      };
-      const event = (summary, startHour, endHour, dayOffset = 0, location = "") => ({
+      const EVIDENCE_TIME_ZONE = "America/Chicago";
+      const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
+      const scenario = new URLSearchParams(window.location.search).get("scenario") ?? "legacy";
+      if (scenario !== "legacy" && scenario !== "wall") {
+        throw new Error("Use scenario=legacy or scenario=wall.");
+      }
+
+      const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const warning = document.querySelector("#timezone-warning");
+      if (detectedTimeZone !== EVIDENCE_TIME_ZONE) {
+        warning.hidden = false;
+        warning.textContent = `Evidence timezone mismatch: expected ${EVIDENCE_TIME_ZONE}, detected ${detectedTimeZone}.`;
+      }
+
+      const timedEvent = (summary, startTime, endTime, location = "") => ({
         summary,
         location,
-        start: { dateTime: dateAt(dayOffset, startHour) },
-        end: { dateTime: dateAt(dayOffset, endHour) },
+        start: { dateTime: `2026-02-18T${startTime}:00-06:00` },
+        end: { dateTime: `2026-02-18T${endTime}:00-06:00` },
       });
 
       const calendarEvents = {
-        "calendar.family": [
-          event("Alex: Home office", 8, 10),
-          event("Jamie: Project work", 11, 13),
-          event("Family dinner", 18, 19),
-          event("⭐️ Alex: Fall concert", 19, 21, 1, "Auditorium"),
+        "calendar.fixture_family": [
+          {
+            summary: "Community Day",
+            start: { date: "2026-02-18" },
+            end: { date: "2026-02-19" },
+          },
+          timedEvent("Avery: School Drop-Off", "08:00", "09:00", "Community School"),
+          timedEvent("Jordan: Planning Session", "10:00", "11:30", "Community Center"),
+          timedEvent("Avery + Jordan: Family Appointment", "14:45", "16:15", "Civic Center"),
+          timedEvent("Neighborhood Potluck", "18:00", "19:00", "Community Hall"),
         ],
-        "calendar.activities": [
-          event("Riley: School", 8, 15),
-          event("Alex + Jamie: Soccer practice", 16, 18, 0, "Sports fields"),
-          event("Riley: Swim practice", 16, 18, 0, "Aquatic center"),
+        "calendar.fixture_activities": [
+          timedEvent("Avery: Library Visit", "12:00", "13:00", "Public Library"),
+          timedEvent("Casey: Practice", "15:00", "16:30", "Recreation Center"),
+          timedEvent("Casey: Music Lesson", "15:30", "17:00", "Music Studio"),
         ],
       };
 
       const states = {
-        "calendar.family": {
-          entity_id: "calendar.family",
+        "calendar.fixture_family": {
+          entity_id: "calendar.fixture_family",
           state: "off",
-          attributes: { friendly_name: "Family", supported_features: 1 },
+          attributes: { friendly_name: "Fixture Family", supported_features: 0 },
         },
-        "calendar.activities": {
-          entity_id: "calendar.activities",
+        "calendar.fixture_activities": {
+          entity_id: "calendar.fixture_activities",
           state: "off",
-          attributes: { friendly_name: "Activities", supported_features: 1 },
+          attributes: { friendly_name: "Fixture Activities", supported_features: 0 },
         },
-        "person.alex": {
-          entity_id: "person.alex",
+        "person.fixture_avery": {
+          entity_id: "person.fixture_avery",
           state: "home",
-          attributes: { friendly_name: "Alex" },
+          attributes: { friendly_name: "Avery" },
         },
-        "person.jamie": {
-          entity_id: "person.jamie",
+        "person.fixture_jordan": {
+          entity_id: "person.fixture_jordan",
           state: "not_home",
-          attributes: { friendly_name: "Jamie" },
+          attributes: { friendly_name: "Jordan" },
+        },
+        "person.fixture_casey": {
+          entity_id: "person.fixture_casey",
+          state: "home",
+          attributes: { friendly_name: "Casey" },
+        },
+        "person.fixture_household": {
+          entity_id: "person.fixture_household",
+          state: "home",
+          attributes: { friendly_name: "Household" },
         },
       };
 
@@ -107,9 +154,10 @@
         callWS: async () => ({}),
       };
 
-      const sharedCalendars = ["calendar.family", "calendar.activities"];
+      const sharedCalendars = ["calendar.fixture_family", "calendar.fixture_activities"];
       const card = document.createElement("moran-family-board-card");
-      card.setConfig({
+      card.nowProvider = () => new Date(FIXED_NOW.getTime());
+      const config = {
         type: "custom:moran-family-board-card",
         title: "Family Board",
         view: "day",
@@ -117,46 +165,46 @@
         start_hour: 7,
         end_hour: 21,
         trim_hours: false,
-        hour_height: 54,
-        full_height: true,
-        show_focus: true,
+        hour_height: 64,
         show_now_line: true,
         scroll_to_now: false,
         refresh_interval: 0,
-        event_size: 14,
-        radius: 10,
+        drag_drop: false,
         persons: [
           {
-            name: "Alex",
-            person: "person.alex",
+            name: "Avery",
+            person: "person.fixture_avery",
             calendar: sharedCalendars,
             color: "#8fa8f5",
-            match_title_prefixes: ["Alex:", "Alex + Jamie:"],
+            match_title_prefixes: ["Avery:", "Avery + Jordan:"],
             strip_title_prefix: true,
           },
           {
-            name: "Jamie",
-            person: "person.jamie",
+            name: "Jordan",
+            person: "person.fixture_jordan",
             calendar: sharedCalendars,
             color: "#62cfbe",
-            match_title_prefixes: ["Jamie:", "Alex + Jamie:"],
+            match_title_prefixes: ["Jordan:", "Avery + Jordan:"],
             strip_title_prefix: true,
           },
           {
-            name: "Riley",
+            name: "Casey",
+            person: "person.fixture_casey",
             calendar: sharedCalendars,
             color: "#f58eae",
-            match_title_prefixes: ["Riley:"],
+            match_title_prefixes: ["Casey:"],
             strip_title_prefix: true,
           },
           {
             name: "Household",
+            person: "person.fixture_household",
             calendar: sharedCalendars,
             color: "#e5b85c",
             unmatched: true,
           },
         ],
-      });
+      };
+      card.setConfig(scenario === "wall" ? { ...config, layout: "wall" } : config);
       card.hass = hass;
       document.querySelector("#app").append(card);
     </script>
