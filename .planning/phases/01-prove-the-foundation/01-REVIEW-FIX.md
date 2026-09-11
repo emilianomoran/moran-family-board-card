@@ -1,64 +1,52 @@
 ---
 phase: 01-prove-the-foundation
-fixed_at: 2026-09-11T08:28:15Z
+fixed_at: 2026-09-11T08:44:28Z
 review_path: .planning/phases/01-prove-the-foundation/01-REVIEW.md
-iteration: 1
-findings_in_scope: 4
-fixed: 4
+iteration: 2
+findings_in_scope: 1
+fixed: 1
 skipped: 0
 status: all_fixed
 ---
 
 # Phase 01: Code Review Fix Report
 
-**Fixed at:** 2026-09-11T08:28:15Z
+**Fixed at:** 2026-09-11T08:44:28Z
 **Source review:** `.planning/phases/01-prove-the-foundation/01-REVIEW.md`
-**Iteration:** 1
+**Iteration:** 2
 
 **Summary:**
 
-- Findings in scope: 4
-- Fixed: 4
+- Findings in scope: 1
+- Fixed: 1
 - Skipped: 0
 
 ## Fixed Issues
 
-### CR-01: Wall mode does not apply the required touch and focus treatment to every button-like target
+### WR-01: Keyboard activation of a person badge also toggles its parent person lane
 
-**Files modified:** `src/wall-shell.ts`, `src/ha-family-board-card.ts`, `dev/harness.html`, `dev/harness-check.mjs`, `package.json`, `dist/moran-family-board-card.js`
-**Commit:** cc27832
-**Applied fix:** Added one wall-scoped 48×48 interaction rule and accent focus treatment for native and ARIA button/tab targets, made month event chips keyboard-operable, and added a deterministic Chrome assertion that checks every focusable target in Day, Timeline, Week, Month, and Agenda for size, focus visibility, and native or explicit keyboard activation.
-
-### WR-01: The wall current-date action does not use the contracted label or accessible name
-
-**Files modified:** `src/ha-family-board-card.ts`, `src/localize.ts`, `dev/harness.html`, `dist/moran-family-board-card.js`
-**Commit:** fc241d4
-**Applied fix:** Added localized `show_today` copy and made the wall Day navigation render visible `Today` with accessible name `Show today`, while legacy, Timeline, Week, and Agenda retain the week-range action.
-
-### WR-02: The synthetic harness detects a timezone mismatch but still renders non-deterministic output
-
-**Files modified:** `dev/harness.html`
-**Commit:** 6b0e68c
-**Applied fix:** Made timezone mismatch fail closed before the card is rendered and required the checked-in harness runner to prove both wall and legacy scenarios at 1920×1080 in `America/Chicago`.
-
-### WR-03: `100vh` sizes the card to the browser viewport rather than the available Home Assistant panel
-
-**Files modified:** `src/wall-shell.ts`, `dev/harness.html`, `dev/harness-check.mjs`, `dist/moran-family-board-card.js`
-**Commit:** 2c00449
-**Applied fix:** Replaced viewport sizing with a 100%-height container contract and zero-min-height flex chain, then added a 64px synthetic host-chrome fixture and browser assertion that rejects outer-page or parent-panel overflow.
+**Files modified:** `src/ha-family-board-card.ts`, `dev/harness.html`, `dist/moran-family-board-card.js`
+**Commit:** cb8dc47
+**Applied fix:** Stopped Enter and Space propagation from nested person badges before opening
+Home Assistant entity details. Added a generic wall-only sensor badge and deterministic browser
+assertions proving that Enter, Space, and click activate badge details without toggling the parent
+lane, while the same parent-header inputs toggle the lane without opening badge details.
 
 ## Verification
 
 - `npm run format:check`: passed
+- `npx prettier --check dev/harness.html`: passed
 - `npm run lint`: passed
 - `npm test`: 39 tests passed
-- `npm run build`: passed; committed distribution bundle remains source-generated
-- `npm run test:harness`: passed for wall Day, Timeline, Week, Month, Agenda, and legacy at 1920×1080 in `America/Chicago`
-- Explicit privacy and live-path scans across the changed source, harness, package, and bundle files: passed
+- `npm run build`: passed; `dist/moran-family-board-card.js` rebuilt from source
+- `npm run test:harness`: passed for wall Day, Timeline, Week, Month, Agenda, and legacy at
+  1920×1080 in `America/Chicago`; wall Day included independent badge/header activation checks
+- Explicit credential, live Home Assistant path, and household-name scans across the changed source,
+  harness, and distribution bundle: passed
 - `git diff --check`: passed
 
 ---
 
-_Fixed: 2026-09-11T08:28:15Z_
+_Fixed: 2026-09-11T08:44:28Z_
 _Fixer: Codex (gsd-code-fixer)_
-_Iteration: 1_
+_Iteration: 2_
