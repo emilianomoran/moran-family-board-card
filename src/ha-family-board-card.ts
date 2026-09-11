@@ -23,6 +23,7 @@ import {
   type ViewName,
 } from "./config";
 import { readCalendarEvents } from "./calendar-source";
+import { renderWallShell, wallShellStyles } from "./wall-shell";
 import {
   localize,
   formatTime,
@@ -213,6 +214,7 @@ export function autoDetectPersons(hass: HomeAssistant): PersonConfig[] {
 /* ------------------------------------------------------------------ */
 export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
+  public nowProvider: () => Date = () => new Date();
   @state() private _config!: FamilyBoardConfig;
   private _layout: FamilyBoardLayout = "default";
   @state() private _events: BoardEvent[] = [];
@@ -247,6 +249,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _restoreFocus?: HTMLElement;
   private _ro?: ResizeObserver;
   private _lastInteract = Date.now();
+
+  /** Clone the injected display time so render calculations cannot mutate provider state. */
+  private _now(): Date {
+    return new Date(this.nowProvider().getTime());
+  }
 
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import("./editor");
@@ -332,7 +339,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
   /** Column index (0..6 from week start) of the real today. */
   private _todayIndex(): number {
-    return (new Date().getDay() - this._firstDayJs + 7) % 7;
+    return (this._now().getDay() - this._firstDayJs + 7) % 7;
   }
 
   public getCardSize(): number {
@@ -380,7 +387,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
   /** Whether an event is happening right now. */
   private _isCurrent(e: BoardEvent): boolean {
-    const n = Date.now();
+    const n = this._now().getTime();
     return e.ref.start.getTime() <= n && n < e.ref.end.getTime();
   }
   /** Elapsed percentage (0–100) of a currently running event. */
@@ -388,7 +395,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const s = e.ref.start.getTime();
     const en = e.ref.end.getTime();
     if (en <= s) return 0;
-    return Math.min(100, Math.max(0, ((Date.now() - s) / (en - s)) * 100));
+    return Math.min(100, Math.max(0, ((this._now().getTime() - s) / (en - s)) * 100));
   }
 
   private _onInteract = (): void => {
@@ -533,7 +540,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /* ---- data ---------------------------------------------------- */
   private _weekBounds(): { monday: Date; nextMonday: Date } {
-    const now = new Date();
+    const now = this._now();
     const monday = new Date(now); // "monday" = configured week start
     monday.setHours(0, 0, 0, 0);
     monday.setDate(
@@ -546,7 +553,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /** Grid geometry for the currently shown month (week-start aware). */
   private _monthGrid(): { gridStart: Date; weeks: number; month: number; year: number } {
-    const base = new Date();
+    const base = this._now();
     const target = new Date(base.getFullYear(), base.getMonth() + this._monthOffset, 1);
     const offset = (target.getDay() - this._firstDayJs + 7) % 7;
     const gridStart = startOfDay(new Date(target.getFullYear(), target.getMonth(), 1 - offset));
@@ -824,7 +831,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     let last = Math.max(...evs.map((e) => e.endMin));
     // keep the now-line visible on today
     if (this._isRealToday(day)) {
-      const now = new Date();
+      const now = this._now();
       const nowMin = now.getHours() * 60 + now.getMinutes();
       if (nowMin >= cfgStart && nowMin <= cfgEnd) {
         first = Math.min(first, nowMin);
@@ -900,12 +907,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
   /** Whether an event has already ended (for dimming). */
   private _isPast(e: BoardEvent): boolean {
-    return this._config.dim_past !== false && e.ref.end.getTime() <= Date.now();
+    return this._config.dim_past !== false && e.ref.end.getTime() <= this._now().getTime();
   }
   /** Localized "Today"/"Tomorrow"/"Yesterday" for a date, else null. */
   private _relativeDay(date: Date): string | null {
     const diff = Math.round(
-      (startOfDay(date).getTime() - startOfDay(new Date()).getTime()) / DAY_MS,
+      (startOfDay(date).getTime() - startOfDay(this._now()).getTime()) / DAY_MS,
     );
     if (diff === 0) return this._t("today");
     if (diff === 1) return this._t("tomorrow");
@@ -1147,7 +1154,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
   /** Jump to the day view for a specific date (from the month grid). */
   private _goToDate(date: Date): void {
-    const today = startOfDay(new Date());
+    const today = startOfDay(this._now());
     const toWeekStart = (d: Date) => {
       const s = startOfDay(d);
       s.setDate(s.getDate() - ((s.getDay() - this._firstDayJs + 7) % 7));
@@ -1164,45 +1171,63 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   /* ---- render -------------------------------------------------- */
   protected render() {
     if (!this._config || !this.hass) return nothing;
-    const title = this._config.title ?? this._t("board_title");
-    return html`
-      <ha-card>
-        <div class="top">
-          <div class="title">${title}</div>
-          ${this._enabledViews.length > 1
-            ? html`<div class="switch" role="tablist">
-                ${this._enabledViews.map(
-                  (v) =>
-                    html`<button
-                      role="tab"
-                      aria-selected=${this._view === v}
-                      class=${this._view === v ? "on" : ""}
-                      @click=${() => (this._view = v)}
-                    >
-                      ${this._t(v)}
-                    </button>`,
-                )}
-              </div>`
-            : nothing}
-        </div>
-        ${this._config.show_focus ? this._renderFocus() : nothing}
-        ${this._view === "day"
-          ? this._renderDay()
-          : this._view === "timeline"
-            ? this._renderTimeline()
-            : this._view === "week"
-              ? this._renderWeek()
-              : this._view === "month"
-                ? this._renderMonth()
-                : this._renderAgenda()}
-      </ha-card>
-      ${this._dialog ? this._renderDialog() : nothing}
-    `;
+    const viewNavigation = this._renderViewSwitcher();
+    const focus = this._config.show_focus ? this._renderFocus() : nothing;
+    const content = this._renderActiveView();
+    const surface =
+      this._layout === "wall"
+        ? renderWallShell({
+            title: this._config.title ?? this._t("wall_board_title"),
+            calendarIdentity: this._t("wall_calendar_identity"),
+            viewNavigation,
+            focus,
+            content,
+          })
+        : html`
+            <ha-card>
+              <div class="top">
+                <div class="title">${this._config.title ?? this._t("board_title")}</div>
+                ${viewNavigation}
+              </div>
+              ${focus} ${content}
+            </ha-card>
+          `;
+    return html`${surface} ${this._dialog ? this._renderDialog() : nothing}`;
+  }
+
+  private _renderViewSwitcher() {
+    return this._enabledViews.length > 1
+      ? html`<div class="switch" role="tablist">
+          ${this._enabledViews.map(
+            (view) =>
+              html`<button
+                role="tab"
+                aria-selected=${this._view === view}
+                class=${this._view === view ? "on" : ""}
+                @click=${() => (this._view = view)}
+              >
+                ${this._t(view)}
+              </button>`,
+          )}
+        </div>`
+      : nothing;
+  }
+
+  private _renderActiveView() {
+    return this._view === "day"
+      ? this._renderDay()
+      : this._view === "timeline"
+        ? this._renderTimeline()
+        : this._view === "week"
+          ? this._renderWeek()
+          : this._view === "month"
+            ? this._renderMonth()
+            : this._renderAgenda();
   }
 
   /** Current + next timed event for a person, view-independent (from _raw). */
   private _focusFor(idx: number): { current?: RawEvent; next?: RawEvent } {
-    const now = Date.now();
+    const now = this._now().getTime();
     const mine = this._raw
       .filter((r) => r.personIdx === idx && !r.allDay)
       .sort((a, b) => a.start.getTime() - b.start.getTime());
@@ -1234,7 +1259,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                   : next
                     ? html`<span class="fnext">
                         ${this._t("focus_next")}: ${icon(next)} ${next.summary}
-                        <small>${formatCountdown(this.hass, next.start)}</small>
+                        <small>${formatCountdown(this.hass, next.start, this._now())}</small>
                       </span>`
                     : html`<span class="ffree">${this._t("focus_free")}</span>`}
               </div>
@@ -1289,7 +1314,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const hours: number[] = [];
     for (let h = startMin / 60; h <= endMin / 60; h++) hours.push(h);
 
-    const now = new Date();
+    const now = this._now();
     const nowMin = Math.max(startMin, Math.min(endMin, now.getHours() * 60 + now.getMinutes()));
     const showNow = this._config.show_now_line !== false && this._isRealToday(day);
     const hasAllDay = this._persons.some((_, i) => this._allDayFor(day, i).length > 0);
@@ -1586,7 +1611,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
     const hours: number[] = [];
     for (let h = startMin / 60; h <= endMin / 60; h++) hours.push(h);
-    const now = new Date();
+    const now = this._now();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     const showNow =
       this._config.show_now_line !== false &&
@@ -1895,7 +1920,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const current = this._isCurrent(e);
     const tent = this._isTentative(e);
     const countdown =
-      !e.allDay && !current && !e.continuesBefore ? formatCountdown(this.hass, e.ref.start) : "";
+      !e.allDay && !current && !e.continuesBefore
+        ? formatCountdown(this.hass, e.ref.start, this._now())
+        : "";
     return html`
       <div
         class="agenda-row ${this._isPast(e) ? "past" : ""} ${current ? "current" : ""} ${tent
@@ -1943,7 +1970,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         else byDay.set(s.day, [s]);
       }
     }
-    const today = startOfDay(new Date()).getTime();
+    const today = startOfDay(this._now()).getTime();
     const maxChips = 3;
     return html`
       <div class="weekhead">
@@ -3765,6 +3792,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       opacity: 0.6;
       cursor: default;
     }
+    ${wallShellStyles}
   `;
 }
 
