@@ -207,6 +207,125 @@
       card.setConfig(scenario === "wall" ? { ...config, layout: "wall" } : config);
       card.hass = hass;
       document.querySelector("#app").append(card);
+
+      const nextRender = async () => {
+        await card.updateComplete;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      };
+
+      const writeCheckResult = (status, details) => {
+        const report = document.createElement("output");
+        report.id = "harness-check-result";
+        report.dataset.harnessCheck = status;
+        report.dataset.scenario = scenario;
+        report.textContent = details;
+        document.body.append(report);
+      };
+
+      const runInteractionChecks = async () => {
+        await nextRender();
+        const root = card.shadowRoot;
+        if (!root) throw new Error("Card shadow root did not render.");
+
+        if (scenario === "legacy") {
+          if (root.querySelector(".moran-wall-shell")) {
+            throw new Error("Legacy scenario unexpectedly rendered the wall shell.");
+          }
+          if (!root.querySelector("ha-card")) {
+            throw new Error("Legacy scenario did not render the existing card root.");
+          }
+          return ["legacy: existing card root"];
+        }
+
+        const wall = root.querySelector(".moran-wall-shell");
+        if (!wall) throw new Error("Wall scenario did not render the wall shell.");
+
+        const actionMethods = [
+          "_goToDate",
+          "_moreInfo",
+          "_openDayView",
+          "_openEvent",
+          "_showDayAgenda",
+          "_togglePerson",
+        ];
+        for (const method of actionMethods) {
+          if (typeof card[method] === "function") card[method] = () => {};
+        }
+
+        const results = [];
+        const viewButtons = [...wall.querySelectorAll('.switch button[role="tab"]')];
+        for (const viewButton of viewButtons) {
+          viewButton.click();
+          await nextRender();
+
+          const activeView = viewButton.textContent.trim();
+          const activeWall = root.querySelector(".moran-wall-shell");
+          const focusable = [
+            ...activeWall.querySelectorAll(
+              'button:not([disabled]), [role="button"][tabindex="0"], [role="tab"][tabindex="0"]',
+            ),
+          ];
+          if (focusable.length === 0) throw new Error(`${activeView}: no focusable targets found.`);
+
+          for (const target of focusable) {
+            const rect = target.getBoundingClientRect();
+            if (rect.width < 48 || rect.height < 48) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} is ${rect.width}x${rect.height}.`,
+              );
+            }
+
+            target.focus();
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            const focused = getComputedStyle(target);
+            if (
+              document.activeElement !== card ||
+              root.activeElement !== target ||
+              focused.outlineStyle === "none" ||
+              Number.parseFloat(focused.outlineWidth) < 2
+            ) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} has no computed focus outline ` +
+                  `(document=${document.activeElement?.localName}, shadow=${root.activeElement?.className}, ` +
+                  `style=${focused.outlineStyle}, width=${focused.outlineWidth}, ` +
+                  `focus=${target.matches(":focus")}, connected=${target.isConnected}, ` +
+                  `wall=${Boolean(target.closest(".moran-wall-shell"))}).`,
+              );
+            }
+
+            if (!(target instanceof HTMLButtonElement)) {
+              for (const key of ["Enter", " "]) {
+                const event = new KeyboardEvent("keydown", {
+                  key,
+                  bubbles: true,
+                  cancelable: true,
+                });
+                target.dispatchEvent(event);
+                if (!event.defaultPrevented) {
+                  throw new Error(
+                    `${activeView}: ${target.className || target.localName} did not handle ${key === " " ? "Space" : key}.`,
+                  );
+                }
+              }
+            }
+          }
+          results.push(`${activeView}: ${focusable.length} targets`);
+        }
+        return results;
+      };
+
+      if (new URLSearchParams(window.location.search).has("checks")) {
+        runInteractionChecks()
+          .then((results) => writeCheckResult("pass", results.join("; ")))
+          .catch((error) => {
+            writeCheckResult("fail", error instanceof Error ? error.message : String(error));
+            console.error(error);
+          })
+          .finally(() => {
+            card.remove();
+            window.stop();
+          });
+      }
     </script>
   </body>
 </html>

@@ -2022,10 +2022,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                         ? "dashed"
                         : "solid"} ${col}"
                       title="${this._evTitle(e)}"
+                      tabindex="0"
+                      role="button"
                       @click=${(ev: MouseEvent) => {
                         ev.stopPropagation();
                         this._openEvent(e);
                       }}
+                      @keydown=${(k: KeyboardEvent) => this._onItemKey(k, e)}
                     >
                       ${e.continuesBefore ? "« " : ""}${this._evTitle(e)}
                     </div>`;

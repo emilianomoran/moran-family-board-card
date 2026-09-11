@@ -17,6 +17,7 @@
     "watch": "rollup -c --watch",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:harness": "node dev/harness-check.mjs",
     "test:watch": "vitest",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""

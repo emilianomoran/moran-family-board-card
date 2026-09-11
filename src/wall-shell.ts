@@ -323,13 +323,28 @@ export const wallShellStyles = css`
     font-weight: 400;
   }
 
+  .moran-wall-shell :is(button, [role="button"], [role="tab"], [tabindex="0"]) {
+    box-sizing: border-box;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .moran-wall-shell button:focus,
+  .moran-wall-shell [role="button"]:focus,
+  .moran-wall-shell [role="tab"]:focus,
+  .moran-wall-shell [tabindex="0"]:focus,
   .moran-wall-shell button:focus-visible,
-  .moran-wall-shell .phead:focus-visible,
-  .moran-wall-shell .event:focus-visible,
-  .moran-wall-shell .wchip:focus-visible,
-  .moran-wall-shell .adchip:focus-visible {
-    outline: 2px solid var(--moran-wall-accent);
-    outline-offset: 2px;
+  .moran-wall-shell [role="button"]:focus-visible,
+  .moran-wall-shell [role="tab"]:focus-visible,
+  .moran-wall-shell [tabindex="0"]:focus-visible,
+  .moran-wall-shell button:focus-within,
+  .moran-wall-shell [role="button"]:focus-within,
+  .moran-wall-shell [role="tab"]:focus-within,
+  .moran-wall-shell [tabindex="0"]:focus-within {
+    outline-color: var(--moran-wall-accent, #1296ed) !important;
+    outline-style: solid !important;
+    outline-width: 2px !important;
+    outline-offset: 2px !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
