@@ -8,7 +8,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 
 **Phase Numbering:** integer phases are planned milestone work; decimal phases are urgent insertions and must be marked `INSERTED`.
 
-- [ ] **Phase 1: Prove the Foundation** - Decide the right base and produce a tested opt-in wall-calendar skeleton. (implementation complete; awaiting UAT)
+- [ ] **Phase 1: Prove the Foundation** - Decide the right base and produce a tested opt-in wall-calendar skeleton. (implementation complete; awaiting repeat UAT)
 - [ ] **Phase 2: Family-at-a-Glance Day** - Make today's people, events, current activity, and next activity immediately understandable.
 - [ ] **Phase 3: Planning Horizons and Responsive Layouts** - Carry one interaction language across all views, tablet, and portrait.
 - [ ] **Phase 4: Trustworthy Interaction and Resilience** - Make event actions, failures, accessibility, and kiosk recovery safe and explicit.
@@ -30,7 +30,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 3. The same build renders an existing configuration with unchanged defaults when wall mode is absent.
 4. Card and editor compile against one shared definition for all v1 configuration added in this phase.
 
-**Plans:** 3/3 plans complete
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 
@@ -43,6 +43,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 01-03: Build the opt-in wall shell and deterministic day-view harness slice with legacy regression checks.
+
+**Wave 4** *(UAT gap closure; blocked on Wave 3 completion)*
+
+- [x] 01-04: Preserve circular wall Day avatars and enforce wall/legacy geometry in the compiled browser harness.
 
 ### Phase 2: Family-at-a-Glance Day
 
@@ -151,7 +155,7 @@ These items must enter a new milestone or an approved roadmap insertion; they ar
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prove the Foundation | 3/3 | Awaiting UAT | - |
+| 1. Prove the Foundation | 4/4 | Awaiting UAT | - |
 | 2. Family-at-a-Glance Day | 0/3 | Not started | - |
 | 3. Planning Horizons and Responsive Layouts | 0/3 | Not started | - |
 | 4. Trustworthy Interaction and Resilience | 0/3 | Not started | - |
