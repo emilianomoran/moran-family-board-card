@@ -31,11 +31,17 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 4. Card and editor compile against one shared definition for all v1 configuration added in this phase.
 
 **Plans:** 3 plans
-
 Plans:
+**Wave 1**
 
 - [ ] 01-01: Inspect the alternative base, run common scenarios, and record the implementation ADR.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02: Extract shared config defaults and the minimum typed calendar boundary needed by wall mode.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-03: Build the opt-in wall shell and deterministic day-view harness slice with legacy regression checks.
 
 ### Phase 2: Family-at-a-Glance Day

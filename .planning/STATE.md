@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to discuss and plan Phase 1
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-09-11T03:19:53.774Z"
-last_activity: 2026-09-11 — Initialized GSD artifacts and linked all five phases to GitHub issues.
+status: Ready to execute Phase 1
+stopped_at: Phase 1 planning complete
+last_updated: "2026-09-11T04:15:47.632Z"
+last_activity: 2026-09-11 — Completed and verified the three-plan Phase 1 execution package.
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 15
   completed_plans: 0
   percent: 0
 ---
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 
 Phase: 1 of 5 (Prove the Foundation)
 Plan: 0 of 3 in current phase
-Status: Ready to discuss and plan Phase 1
-Last activity: 2026-09-11 — Initialized GSD artifacts and linked all five phases to GitHub issues.
+Status: Ready to execute Phase 1
+Last activity: 2026-09-11 — Completed and verified the three-plan Phase 1 execution package.
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -60,7 +60,8 @@ Full decisions are logged in PROJECT.md.
 - Build as a Home Assistant Lit custom card, not a standalone React application.
 - Keep calendar as the v1 product; household operations are deferred.
 - Use the dedicated Moran fork as the shared home for code and GSD planning.
-- Compare the newer Family Calendar Card before major structural investment.
+- Continue the Moran TypeScript/Lit fork; use `tienou/family-calendar-card` as a source-pinned design reference rather than the implementation base.
+- Keep wall mode opt-in through `layout: wall`; configurations without that exact value stay on the legacy path.
 
 ### Pending Todos
 
@@ -68,7 +69,6 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 1 must resolve whether this fork remains the best base after source-level comparison.
 - Phase 5 live deployment requires two independent Sonnet plan reviews; substitution requires Emiliano's explicit approval.
 - The existing main component is roughly 3,800 lines and must not absorb all new wall behavior.
 
@@ -82,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-11T03:19:53.769Z
-Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-prove-the-foundation/01-UI-SPEC.md
+Last session: 2026-09-11T04:15:47.632Z
+Stopped at: Phase 1 planning complete
+Resume file: .planning/phases/01-prove-the-foundation/01-01-PLAN.md

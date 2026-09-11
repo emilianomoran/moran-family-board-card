@@ -38,11 +38,12 @@ created: 2026-09-10
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 1 | FOUND-01 | T-01 / T-02 | Decision cites pinned sources and preserves license/provenance and HA-only credentials | documentation/structural | `rg -n "target calendar behavior\|shared-calendar\|Home Assistant API\|test\|maintain\|license\|migration\|five-view\|Decision" docs/adr/0001-implementation-base.md` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 02 | 1 | FOUND-02, FOUND-03 | T-03 | Only exact `wall` opts in; defaults and unknown keys remain safe and round-trippable | unit/typecheck | `npm test -- src/config.test.ts && npm run lint` | ❌ W0 | ⬜ pending |
-| 01-02-02 | 02 | 1 | FOUND-03 | T-04 | Calendar reads remain behind the authenticated Home Assistant client with no browser credential path | unit/typecheck | `npm test -- src/calendar-source.test.ts && npm run lint` | ❌ W0 | ⬜ pending |
-| 01-03-01 | 03 | 2 | FOUND-02 | T-03 / T-05 | Wall CSS and markup are scoped; absent/unknown layout preserves the legacy shell | unit/build | `npm test -- src/config.test.ts && npm run build` | ❌ W0 | ⬜ pending |
-| 01-03-02 | 03 | 2 | FOUND-02 | T-01 | Fixed synthetic data contains no household identifiers, tokens, or live entity IDs | structural/privacy | `git diff --check && ! rg -n "/Volumes/config|HOME_ASSISTANT_TOKEN|calendar\.(?!fixture_)" dev src docs/adr --pcre2` | Existing harness needs modification | ⬜ pending |
+| 01-01-01 | 01 | 1 | FOUND-01 | T-01-01, T-01-02, T-01-03 | Decision, both full hashes, all eight evidence rows, provenance, and revisit trigger are asserted separately; source quality receives human review | documentation/structural | Separate `rg -q` assertions from Plan 01-01 Task 1, then `git diff --check` | ❌ W0 | ⬜ pending |
+| 01-02-01 | 02 | 2 | FOUND-02, FOUND-03 | T-01-04, T-01-05 | RED tests define exact Wall opt-in, Default deletion, immutability, and unknown-key preservation | unit/TDD RED | `! npm test -- src/config.test.ts` | ❌ W0 | ⬜ pending |
+| 01-02-02 | 02 | 2 | FOUND-02, FOUND-03 | T-01-04, T-01-05 | One config contract powers card/editor; exact Wall and lossless Default serialization remain registry-safe | unit/typecheck/structural | `npm test -- src/config.test.ts && npm run lint` plus the two single-export and two import assertions from Plan 01-02 Task 2 | ❌ W0 | ⬜ pending |
+| 01-02-03 | 02 | 2 | FOUND-03 | T-01-06, T-01-07, T-01-08 | Calendar access remains one encoded authenticated HA request per unique calendar and `dist` is generated from source | unit/typecheck/build | `npm test -- src/calendar-source.test.ts src/config.test.ts src/events.test.ts && npm run format:check && npm run lint && npm run build && git diff --check` | ❌ W0 | ⬜ pending |
+| 01-03-01 | 03 | 3 | FOUND-02, FOUND-03 | T-01-09, T-01-10, T-01-12, T-01-13, T-01-14 | Exact layout branching, localized wall identity, scoped CSS, safe interpolation, fixed display clock, and generated bundle are verified | full suite/static/build | Full suite plus the `renderWallShell`, `normalizeLayout`, `nowProvider`, localization-key, and unsafe-HTML assertions from Plan 01-03 Task 1 | ❌ W0 | ⬜ pending |
+| 01-03-02 | 03 | 3 | FOUND-02, FOUND-03 | T-01-11, T-01-14 | Generic paired fixtures, cleaned source examples, explicit changed/evidence-set credential/private-identifier scan, targeted implementation live-path assertion, and screenshot evidence scan protect the public artifact | full suite/structural/privacy/manual | Full suite plus the harness/README assertions, exact screenshot checks, the executable privacy gate below, screenshot `strings` scan, and `git diff --check` from Plan 01-03 Task 2 | Existing harness and evidence need modification | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -61,10 +62,10 @@ Serve the repository on loopback and inspect the production bundle at 1920×1080
 
 ## Wave 0 Requirements
 
-- [ ] `src/config.test.ts` — missing, unknown, default, and wall normalization; editor Default deletion; unknown-key preservation for FOUND-02/FOUND-03.
-- [ ] `src/calendar-source.test.ts` — authenticated Home Assistant read-boundary request, encoded range, payload, and error behavior for FOUND-03.
-- [ ] `dev/harness.html` — selectable legacy/wall scenarios with fixed synthetic data and injected time for FOUND-02.
-- [ ] `docs/adr/0001-implementation-base.md` — pinned source comparison, decision, provenance, and revisit trigger for FOUND-01.
+- [ ] `docs/adr/0001-implementation-base.md` — created by 01-01-01; pinned source comparison, decision, provenance, and revisit trigger for FOUND-01.
+- [ ] `src/config.test.ts` — created by 01-02-01 and made green by 01-02-02; missing, unknown, default, and wall normalization; editor Default deletion; unknown-key preservation for FOUND-02/FOUND-03.
+- [ ] `src/calendar-source.test.ts` — created and made green by 01-02-03; authenticated Home Assistant read-boundary request, encoded range, payload, and error behavior for FOUND-03.
+- [ ] `dev/harness.html` — updated by 01-03-02; selectable legacy/wall scenarios with fixed synthetic data and injected time for FOUND-02.
 
 No test-framework installation is required. Browser automation and screenshot diffing remain Phase 5 work.
 
@@ -81,6 +82,12 @@ Phase 1 is evaluated at ASVS Level 1 and blocks high-severity findings. Each imp
 - copied source, if any, receives explicit license and attribution review; and
 - `dist/moran-family-board-card.js` is generated only by `npm run build` and matches the reviewed source.
 
+After the completed `01-03-SUMMARY.md` exists, run this deterministic privacy gate. The credential/private-identifier scan covers only the explicit Phase 1 changed/evidence set; the `/Volumes/config` assertion is intentionally limited to Phase 1 implementation/source/test/harness files and the generated bundle so governance documentation can state that boundary without failing the gate:
+
+```bash
+privacy_files=(docs/adr/0001-implementation-base.md src/config.ts src/config.test.ts src/calendar-source.ts src/calendar-source.test.ts src/ha-family-board-card.ts src/editor.ts src/editor-i18n.ts src/localize.ts src/wall-shell.ts src/events.ts src/events.test.ts dev/harness.html README.en.md dist/moran-family-board-card.js .planning/phases/01-prove-the-foundation/01-01-SUMMARY.md .planning/phases/01-prove-the-foundation/01-02-SUMMARY.md .planning/phases/01-prove-the-foundation/01-03-SUMMARY.md) && implementation_files=(src/config.ts src/config.test.ts src/calendar-source.ts src/calendar-source.test.ts src/ha-family-board-card.ts src/editor.ts src/editor-i18n.ts src/localize.ts src/wall-shell.ts src/events.ts src/events.test.ts dev/harness.html dist/moran-family-board-card.js) && private_pattern='\b([M]atthew|[O]liver|[E]li|[J]uliet|[A]lex|[J]amie|[R]iley)\b|calendar\.(family|activities|anna|ben_work|ben_private|work)|person\.(alex|jamie|riley)|(?:HOME_ASSISTANT_TOKEN|SUPERVISOR_TOKEN)\s*[:=]\s*(?:\x22|\x27)?[^\s\x22\x27]{8,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|Bearer\s+[A-Za-z0-9._~-]{20,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----' && test -f .planning/phases/01-prove-the-foundation/01-03-SUMMARY.md && ! rg -n --hidden --pcre2 "$private_pattern" "${privacy_files[@]}" && ! rg -n --fixed-strings '/Volumes/config' "${implementation_files[@]}" && ! (strings /tmp/moran-family-board-phase-01/wall-1920x1080.png /tmp/moran-family-board-phase-01/legacy-1920x1080.png | rg -n --pcre2 "$private_pattern")
+```
+
 ---
 
 ## Final Phase Gate
@@ -90,7 +97,7 @@ Phase 1 is evaluated at ASVS Level 1 and blocks high-severity findings. Each imp
 - [ ] `npm run format:check && npm run lint && npm test && npm run build` passes.
 - [ ] Tracked `dist/moran-family-board-card.js` is rebuilt from source and not hand-edited.
 - [ ] Legacy and wall harness scenarios pass the 1920×1080 checklist with deterministic generic data.
-- [ ] Privacy/secret scan covers staged source, docs, harness assets, and the generated bundle.
+- [ ] Privacy/secret scan covers the explicit Phase 1 changed/evidence file set including the completed summary; the separate live-path assertion covers only Phase 1 implementation/source/test/harness files and the generated bundle.
 - [ ] No file under `/Volumes/config` and no live Home Assistant dashboard resource was modified.
 
 ---

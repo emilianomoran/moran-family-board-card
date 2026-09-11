@@ -366,17 +366,15 @@ The actual extraction may use callbacks or `TemplateResult` values, but the bran
 
 All factual claims in this research were verified against repository source, current GitHub metadata, local tool output, or cited official documentation. The recommended clock API and exact module names are design recommendations under Claude's discretion, not assumed external facts.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How should the fixed test timezone be enforced before Playwright exists?**
    - What we know: the UI contract requires a fixed clock/timezone; current formatting uses browser `Date`/`Intl`, and screenshot automation is deferred. [VERIFIED: UI contract and source]
-   - What's unclear: whether Phase 1 evidence will run only on the project Mac or on multiple machines with different timezones.
-   - Recommendation: keep event instants and injected clock fixed, document the harness timezone used for the Phase 1 screenshot, and defer cross-timezone browser contexts to Phase 5.
+   - **RESOLVED:** Plan 01-03 Task 2 fixes the event instants and injected clock, documents `America/Chicago` as the Phase 1 evidence timezone, and requires a visible development-only warning when the browser timezone differs. Cross-timezone browser contexts remain Phase 5 scope.
 
 2. **How much of the existing current-time call surface should Phase 1 route through the clock?**
    - What we know: wall day rendering, week bounds, current-time marker, focus/progress/countdown, and kiosk code read time in multiple places. [VERIFIED: source inventory]
-   - What's unclear: the smallest seam that makes the wall harness deterministic without broad unrelated refactoring.
-   - Recommendation: replace all display-calendar `now` reads reached by the wall day scenario; do not alter duration parsing or unrelated mutation timestamps.
+   - **RESOLVED:** Plan 01-03 Task 1 adds a non-dashboard `nowProvider` and routes all display-calendar current-time reads reached by the wall Day scenario through it. Duration parsing, unrelated mutation timestamps, and kiosk timestamps outside the proof path remain unchanged.
 
 ## Environment Availability
 
