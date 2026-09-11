@@ -8,7 +8,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 
 **Phase Numbering:** integer phases are planned milestone work; decimal phases are urgent insertions and must be marked `INSERTED`.
 
-- [x] **Phase 1: Prove the Foundation** - Decide the right base and produce a tested opt-in wall-calendar skeleton. (completed 2026-09-11)
+- [ ] **Phase 1: Prove the Foundation** - Decide the right base and produce a tested opt-in wall-calendar skeleton. (implementation complete; awaiting UAT)
 - [ ] **Phase 2: Family-at-a-Glance Day** - Make today's people, events, current activity, and next activity immediately understandable.
 - [ ] **Phase 3: Planning Horizons and Responsive Layouts** - Carry one interaction language across all views, tablet, and portrait.
 - [ ] **Phase 4: Trustworthy Interaction and Resilience** - Make event actions, failures, accessibility, and kiosk recovery safe and explicit.
@@ -18,7 +18,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 
 ### Phase 1: Prove the Foundation
 
-**Goal:** Confirm the implementation base and render one real wall-mode day slice without changing legacy behavior.
+**Goal:** As a Home Assistant administrator, I want an opt-in wall-mode day slice built on a validated implementation base, so that I can evaluate the family calendar experience without changing legacy behavior.
 **Mode:** mvp
 **Depends on:** Nothing
 **Requirements:** FOUND-01, FOUND-02, FOUND-03
@@ -151,7 +151,7 @@ These items must enter a new milestone or an approved roadmap insertion; they ar
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prove the Foundation | 3/3 | Complete   | 2026-09-11 |
+| 1. Prove the Foundation | 3/3 | Awaiting UAT | - |
 | 2. Family-at-a-Glance Day | 0/3 | Not started | - |
 | 3. Planning Horizons and Responsive Layouts | 0/3 | Not started | - |
 | 4. Trustworthy Interaction and Resilience | 0/3 | Not started | - |
