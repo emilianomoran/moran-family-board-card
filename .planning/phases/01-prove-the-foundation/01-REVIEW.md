@@ -1,6 +1,6 @@
 ---
 phase: 01-prove-the-foundation
-reviewed: 2026-09-11T08:39:29Z
+reviewed: 2026-09-11T08:50:41Z
 depth: standard
 files_reviewed: 14
 files_reviewed_list:
@@ -20,66 +20,47 @@ files_reviewed_list:
   - src/wall-shell.ts
 findings:
   critical: 0
-  warning: 1
+  warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 01: Code Review Report
 
-**Reviewed:** 2026-09-11T08:39:29Z
+**Reviewed:** 2026-09-11T08:50:41Z
 **Depth:** standard
 **Files Reviewed:** 14
-**Status:** issues_found
+**Status:** clean
 
 ## Narrative Findings (AI reviewer)
 
-The four findings from the first review are materially resolved. Wall mode now applies its 48px
-target and 2px focus treatment to native and ARIA button/tab targets, month event chips are
-keyboard-focusable, the wall Day action is visibly labeled `Today` with the accessible name
-`Show today`, timezone mismatch stops the fixture before card creation, and the wall shell is sized
-against a constrained host panel instead of `100vh`. The checked-in browser test passed Day,
-Timeline, Week, Month, and Agenda interaction-target checks plus the legacy-shell check at
-1920x1080 in `America/Chicago` with 64px of synthetic host chrome.
+All reviewed files meet quality standards. No actionable correctness, security, or robustness
+issues remain in the Phase 1 implementation scope.
+
+The previously identified findings are resolved in the current source, compiled distribution, and
+browser evidence path:
+
+- Wall-mode native and ARIA button/tab targets meet the 48×48px minimum and receive a computed
+  2px visible focus outline.
+- The wall Day current-date action has visible text `Today` and the accessible label `Show today`.
+- The browser harness explicitly overrides and verifies `America/Chicago` before accepting evidence.
+- The wall shell remains within a constrained host panel beneath 64px of synthetic host chrome.
+- A nested person badge handles pointer, Enter, and Space independently; each badge action opens
+  more-info without toggling its parent person lane, while direct parent activation still toggles it.
 
 `npm run format:check`, `npm run lint`, all 39 Vitest tests, `npm run test:harness`, and
-`npm run build` pass. The rebuilt distribution bundle has the same SHA-256 digest as the committed
-artifact (`0d2544dd3df058dbdfac2bc8ec3c51d12c78f43e15d87716a55ece7400c529e4`), and
-`git diff --check` is clean. No credential, live Home Assistant path, or private household fixture
-was found in the reviewed implementation set.
+`npm run build` passed. The harness passed Day, Timeline, Week, Month, and Agenda target/focus checks
+at 1920×1080 in `America/Chicago`, plus the legacy-shell smoke check. Rebuilding produced the same
+tracked distribution digest (`424851b98e440aa2e3e99a3f81ea2ef20eeeaac78e031372a9b3193bd7487dda`),
+and the generated bundle remained clean against Git.
 
-The requested `dev/harness-runner.mjs` path does not exist in the repository; the committed Phase 1
-runner is `dev/harness-check.mjs`, which was reviewed as the fourteenth file. One keyboard behavior
-defect remains in an interaction target that the original review explicitly called out.
-
-## Warnings
-
-### WR-01: Keyboard activation of a person badge also toggles its parent person lane
-
-**File:** `/Users/emiliano/GitHub-Personal/moran-family-board-card/src/ha-family-board-card.ts:1115-1119`
-
-**Issue:** A `.pbadge` is nested inside the focusable `.phead`. Its click handler stops propagation,
-but its Enter/Space handler only calls `preventDefault()` before `_moreInfo(id)`. The same keydown
-therefore bubbles to the `.phead` handler at lines 1351-1355, which also handles Enter/Space and
-calls `_togglePerson(i)`. A keyboard user opening badge details unexpectedly collapses or expands
-the person's lane as a second action. The deterministic fixture currently has no badge, and its
-generic keyboard assertion checks only `defaultPrevented`, so this regression is not detected.
-
-**Fix:** Stop propagation in the badge keyboard handler, matching its click behavior, and include
-one generic badge entity in the wall fixture with assertions that Enter and Space invoke
-`_moreInfo` without invoking `_togglePerson`.
-
-```ts
-if (k.key === "Enter" || k.key === " ") {
-  k.preventDefault();
-  k.stopPropagation();
-  this._moreInfo(id);
-}
-```
+The explicit privacy scan found no credential values, private household identifiers, or live Home
+Assistant paths in the reviewed implementation/evidence set. `git diff --check` passed, and the
+verification run introduced no source or distribution change.
 
 ---
 
-_Reviewed: 2026-09-11T08:39:29Z_
+_Reviewed: 2026-09-11T08:50:41Z_
 _Reviewer: Codex (gsd-code-reviewer)_
 _Depth: standard_
