@@ -8,7 +8,11 @@ updated: 2026-09-11T14:53:30Z
 
 ## Current Test
 
-2
+number: 2
+name: Visually re-check the corrected person headers
+expected: |
+  All four wall avatars look circular; the first header's name, status, and badge fit cleanly inside the 80px row; the other three headers are undistorted; legacy retains circular 34px avatars and its familiar card shell.
+awaiting: user response
 
 ## Tests
 
