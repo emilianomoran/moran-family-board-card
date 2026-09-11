@@ -1,6 +1,11 @@
-# Family Board Card
+# Moran Family Board Card
 
 **Deutsch** · [English](README.en.md)
+
+Dies ist der Moran-gepflegte Fork von
+[`renespeaker/ha-family-board-card`](https://github.com/renespeaker/ha-family-board-card). Die
+englische README beschreibt zusätzlich die neue Zuordnung von Terminen aus gemeinsamen Kalendern
+zu Personenspalten.
 
 ![Family Board Card – Tagesansicht](docs/preview-day.png)
 
@@ -43,29 +48,30 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Status: **v0.25 – vollständige Familien-Tagesplanung: 5 Ansichten, Schreibzugriff, Auto-Layout (Trim/Fit/Full-Height), Hintergrund-Bänder, Badges, Kiosk-Modus, mobil optimiert, Karte und Editor vollständig lokalisiert.**
+> Fork-Status: **v0.25.1-moran.1 – Upstream v0.25 plus Zuordnung aus gemeinsamen
+> Kalendern.** Die Skylight-artige Operationsansicht und der Calendar-Bridge-Provider sind
+> weiterhin geplant.
 
-## Installation (HACS)
+## Installation (HACS Custom Repository)
 
-Die Karte ist Teil des offiziellen HACS-Stores:
-
-1. HACS öffnen → nach **Family Board Card** suchen → installieren.
-2. Die Lovelace-Resource wird im Storage-Mode automatisch als `/hacsfiles/ha-family-board-card/ha-family-board-card.js` registriert (im YAML-Mode manuell eintragen).
-3. Karte aufs Dashboard setzen: `type: custom:family-board-card` – oder einfach „Family Board Card“ im Karten-Picker auswählen.
+1. HACS öffnen → Drei-Punkte-Menü → **Benutzerdefinierte Repositories**.
+2. `https://github.com/emilianomoran/moran-family-board-card` als Kategorie **Dashboard** hinzufügen.
+3. **Moran Family Board Card** installieren.
+4. Karte mit `type: custom:moran-family-board-card` hinzufügen.
 
 ### Manuell (schneller Test ohne HACS)
 
-`dist/ha-family-board-card.js` nach `config/www/` kopieren und als Resource hinzufügen:
+`dist/moran-family-board-card.js` nach `config/www/` kopieren und als Resource hinzufügen:
 
 ```yaml
-url: /local/ha-family-board-card.js
+url: /local/moran-family-board-card.js
 type: module
 ```
 
 ## Konfiguration
 
 ```yaml
-type: custom:family-board-card
+type: custom:moran-family-board-card
 title: Familienplan  # optional, eigener Kartentitel
 view: day            # day | week
 time_grid: 30        # 15 | 30 | 60
@@ -162,7 +168,7 @@ Die Karte übernimmt automatisch Farben & Schrift des Themes. Für Feintuning gi
 Beispiel (card-mod):
 
 ```yaml
-type: custom:family-board-card
+type: custom:moran-family-board-card
 card_mod:
   style: |
     :host {
@@ -184,14 +190,14 @@ Noch eine Sprache? Ein Dictionary in [`src/localize.ts`](src/localize.ts) (Karte
 
 ```bash
 npm install
-npm run build        # baut dist/ha-family-board-card.js
+npm run build        # baut dist/moran-family-board-card.js
 npm run watch        # Rebuild bei Änderungen
 npm run lint         # tsc --noEmit (Typecheck)
 npm test             # Vitest (Event-Logik)
 npm run format       # Prettier
 ```
 
-Schneller Loop gegen die laufende HA-Instanz: `dist/ha-family-board-card.js` nach `config/www/` kopieren und die Seite hart neu laden.
+Schneller Loop gegen die laufende HA-Instanz: `dist/moran-family-board-card.js` nach `config/www/` kopieren und die Seite hart neu laden.
 
 Die fehleranfällige Event-Logik (Splitting über Mitternacht, Ganztags-Exklusivität, Zeitzonen, Überlappungs-Layout) liegt isoliert in [`src/events.ts`](src/events.ts) und ist über [`src/events.test.ts`](src/events.test.ts) abgedeckt.
 

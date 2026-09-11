@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moran Family Board development harness</title>
+    <style>
+      :root {
+        --primary-color: #1296ed;
+        --primary-text-color: #111827;
+        --secondary-text-color: #526071;
+        --secondary-background-color: #f6f8fb;
+        --divider-color: #dfe5ec;
+        --card-background-color: #ffffff;
+        --ha-card-border-radius: 0;
+        --error-color: #e84235;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        min-width: 1180px;
+        min-height: 0;
+        overflow: hidden;
+        background: #ffffff;
+        color: var(--primary-text-color);
+      }
+      #host-chrome {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--divider-color);
+        background: var(--secondary-background-color);
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #host-chrome[hidden] {
+        display: none;
+      }
+      main {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      #timezone-warning {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 100;
+        max-width: 520px;
+        padding: 12px 16px;
+        border: 2px solid #e84235;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #111827;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #timezone-warning[hidden] {
+        display: none;
+      }
+      moran-family-board-card {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+      }
+      ha-icon {
+        display: inline-flex;
+        width: 18px;
+        height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="host-chrome" hidden>Synthetic host chrome</header>
+    <main id="app"></main>
+    <aside id="timezone-warning" role="alert" hidden></aside>
+    <script type="module">
+      import "/dist/moran-family-board-card.js";
+
+      const EVIDENCE_TIME_ZONE = "America/Chicago";
+      const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
+      const query = new URLSearchParams(window.location.search);
+      const scenario = query.get("scenario") ?? "legacy";
+      if (scenario !== "legacy" && scenario !== "wall") {
+        throw new Error("Use scenario=legacy or scenario=wall.");
+      }
+
+      const chromeHeight = Number(query.get("chrome") ?? 0);
+      if (Number.isFinite(chromeHeight) && chromeHeight > 0) {
+        const hostChrome = document.querySelector("#host-chrome");
+        hostChrome.hidden = false;
+        hostChrome.style.height = `${chromeHeight}px`;
+        hostChrome.style.flexBasis = `${chromeHeight}px`;
+      }
+
+      const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const warning = document.querySelector("#timezone-warning");
+      if (detectedTimeZone !== EVIDENCE_TIME_ZONE) {
+        warning.hidden = false;
+        warning.textContent = `Harness stopped: expected ${EVIDENCE_TIME_ZONE}, detected ${detectedTimeZone}. Run npm run test:harness for deterministic evidence.`;
+        throw new Error(warning.textContent);
+      }
+
+      const timedEvent = (summary, startTime, endTime, location = "") => ({
+        summary,
+        location,
+        start: { dateTime: `2026-02-18T${startTime}:00-06:00` },
+        end: { dateTime: `2026-02-18T${endTime}:00-06:00` },
+      });
+
+      const calendarEvents = {
+        "calendar.fixture_family": [
+          {
+            summary: "Community Day",
+            start: { date: "2026-02-18" },
+            end: { date: "2026-02-19" },
+          },
+          timedEvent("Avery: School Drop-Off", "08:00", "09:00", "Community School"),
+          timedEvent("Jordan: Planning Session", "10:00", "11:30", "Community Center"),
+          timedEvent("Avery + Jordan: Family Appointment", "14:45", "16:15", "Civic Center"),
+          timedEvent("Neighborhood Potluck", "18:00", "19:00", "Community Hall"),
+        ],
+        "calendar.fixture_activities": [
+          timedEvent("Avery: Library Visit", "12:00", "13:00", "Public Library"),
+          timedEvent("Casey: Practice", "15:00", "16:30", "Recreation Center"),
+          timedEvent("Casey: Music Lesson", "15:30", "17:00", "Music Studio"),
+        ],
+      };
+
+      const states = {
+        "calendar.fixture_family": {
+          entity_id: "calendar.fixture_family",
+          state: "off",
+          attributes: { friendly_name: "Fixture Family", supported_features: 0 },
+        },
+        "calendar.fixture_activities": {
+          entity_id: "calendar.fixture_activities",
+          state: "off",
+          attributes: { friendly_name: "Fixture Activities", supported_features: 0 },
+        },
+        "person.fixture_avery": {
+          entity_id: "person.fixture_avery",
+          state: "home",
+          attributes: { friendly_name: "Avery" },
+        },
+        "person.fixture_jordan": {
+          entity_id: "person.fixture_jordan",
+          state: "not_home",
+          attributes: { friendly_name: "Jordan" },
+        },
+        "person.fixture_casey": {
+          entity_id: "person.fixture_casey",
+          state: "home",
+          attributes: { friendly_name: "Casey" },
+        },
+        "person.fixture_household": {
+          entity_id: "person.fixture_household",
+          state: "home",
+          attributes: { friendly_name: "Household" },
+        },
+        "sensor.fixture_avery_battery": {
+          entity_id: "sensor.fixture_avery_battery",
+          state: "82",
+          attributes: {
+            friendly_name: "Avery fixture battery",
+            icon: "mdi:battery",
+            unit_of_measurement: "%",
+          },
+        },
+      };
+
+      const hass = {
+        states,
+        locale: { language: "en-US", time_format: "12" },
+        config: { unit_system: { temperature: "°F" } },
+        callApi: async (_method, path) => {
+          const calendar = Object.keys(calendarEvents).find((entityId) => path.includes(entityId));
+          return calendar ? calendarEvents[calendar] : [];
+        },
+        callWS: async () => ({}),
+      };
+
+      const sharedCalendars = ["calendar.fixture_family", "calendar.fixture_activities"];
+      const card = document.createElement("moran-family-board-card");
+      card.nowProvider = () => new Date(FIXED_NOW.getTime());
+      const config = {
+        type: "custom:moran-family-board-card",
+        title: "Family Board",
+        view: "day",
+        views: ["day", "timeline", "week", "month", "agenda"],
+        start_hour: 7,
+        end_hour: 21,
+        trim_hours: false,
+        hour_height: 64,
+        show_now_line: true,
+        scroll_to_now: false,
+        refresh_interval: 0,
+        drag_drop: false,
+        persons: [
+          {
+            name: "Avery",
+            person: "person.fixture_avery",
+            calendar: sharedCalendars,
+            color: "#8fa8f5",
+            match_title_prefixes: ["Avery:", "Avery + Jordan:"],
+            strip_title_prefix: true,
+            badges: scenario === "wall" ? ["sensor.fixture_avery_battery"] : undefined,
+          },
+          {
+            name: "Jordan",
+            person: "person.fixture_jordan",
+            calendar: sharedCalendars,
+            color: "#62cfbe",
+            match_title_prefixes: ["Jordan:", "Avery + Jordan:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Casey",
+            person: "person.fixture_casey",
+            calendar: sharedCalendars,
+            color: "#f58eae",
+            match_title_prefixes: ["Casey:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Household",
+            person: "person.fixture_household",
+            calendar: sharedCalendars,
+            color: "#e5b85c",
+            unmatched: true,
+          },
+        ],
+      };
+      card.setConfig(scenario === "wall" ? { ...config, layout: "wall" } : config);
+      card.hass = hass;
+      document.querySelector("#app").append(card);
+
+      const nextRender = async () => {
+        await card.updateComplete;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      };
+
+      const writeCheckResult = (status, details) => {
+        const report = document.createElement("output");
+        report.id = "harness-check-result";
+        report.dataset.harnessCheck = status;
+        report.dataset.scenario = scenario;
+        report.textContent = details;
+        document.body.append(report);
+      };
+
+      const runInteractionChecks = async () => {
+        if (Intl.DateTimeFormat().resolvedOptions().timeZone !== EVIDENCE_TIME_ZONE) {
+          throw new Error(`Browser check did not use ${EVIDENCE_TIME_ZONE}.`);
+        }
+        if (window.innerWidth !== 1920 || window.innerHeight !== 1080) {
+          throw new Error(
+            `Browser check viewport is ${window.innerWidth}x${window.innerHeight}, expected 1920x1080.`,
+          );
+        }
+        await nextRender();
+        const root = card.shadowRoot;
+        if (!root) throw new Error("Card shadow root did not render.");
+
+        const personHeaders = [...root.querySelectorAll(".board .header-row .phead:not(.off)")];
+        const expectedAvatarSize = scenario === "wall" ? 40 : 34;
+        const geometryMarker = `avatar-geometry: 4x${expectedAvatarSize}x${expectedAvatarSize}`;
+        if (personHeaders.length !== 4) {
+          throw new Error(
+            `${scenario}: rendered ${personHeaders.length} visible Day person headers, expected 4.`,
+          );
+        }
+        for (const [index, personHeader] of personHeaders.entries()) {
+          const avatar = personHeader.querySelector(":scope > .avatar");
+          if (!avatar) {
+            throw new Error(`${scenario}: Day person header ${index + 1} has no avatar.`);
+          }
+          const { width, height } = avatar.getBoundingClientRect();
+          if (width === 0 || height === 0) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is not visible (${width}x${height}).`,
+            );
+          }
+          if (
+            Math.abs(width - height) > 0.5 ||
+            Math.abs(width - expectedAvatarSize) > 0.5 ||
+            Math.abs(height - expectedAvatarSize) > 0.5
+          ) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is ${width}x${height}, expected ${expectedAvatarSize}x${expectedAvatarSize}.`,
+            );
+          }
+        }
+
+        if (scenario === "legacy") {
+          if (root.querySelector(".moran-wall-shell")) {
+            throw new Error("Legacy scenario unexpectedly rendered the wall shell.");
+          }
+          if (!root.querySelector("ha-card")) {
+            throw new Error("Legacy scenario did not render the existing card root.");
+          }
+          return [geometryMarker, "legacy: existing card root"];
+        }
+
+        const wall = root.querySelector(".moran-wall-shell");
+        if (!wall) throw new Error("Wall scenario did not render the wall shell.");
+        if (chromeHeight > 0) {
+          const mainRect = document.querySelector("#app").getBoundingClientRect();
+          const wallRect = wall.getBoundingClientRect();
+          if (
+            document.documentElement.scrollHeight > window.innerHeight ||
+            wallRect.top < mainRect.top - 1 ||
+            wallRect.bottom > mainRect.bottom + 1
+          ) {
+            throw new Error(
+              "Wall shell overflowed the available host panel below synthetic chrome.",
+            );
+          }
+        }
+        const todayAction = wall.querySelector(".dayhead .nav-now");
+        if (
+          todayAction?.textContent.trim() !== "Today" ||
+          todayAction.getAttribute("aria-label") !== "Show today"
+        ) {
+          throw new Error("Wall Day current-date action is not labeled Today / Show today.");
+        }
+
+        for (const [index, header] of personHeaders.entries()) {
+          const { height } = header.getBoundingClientRect();
+          if (
+            Math.abs(height - 80) > 0.5 ||
+            header.scrollWidth > header.clientWidth + 1 ||
+            header.scrollHeight > header.clientHeight + 1
+          ) {
+            throw new Error(
+              `Wall Day person header ${index + 1} is not contained at 80px ` +
+                `(height=${height}, width=${header.clientWidth}/${header.scrollWidth}, ` +
+                `height=${header.clientHeight}/${header.scrollHeight}).`,
+            );
+          }
+        }
+
+        const badge = personHeaders[0].querySelector(":scope > .pbadges .pbadge");
+        const personHeader = badge?.closest(".phead");
+        if (!badge || !personHeader) {
+          throw new Error(
+            "Wall Day first person header did not render its optional fixture badge.",
+          );
+        }
+        if (!personHeaders.slice(1).some((header) => !header.querySelector(".pbadge"))) {
+          throw new Error("Wall Day did not render a person header without an optional badge.");
+        }
+        const badgeRect = badge.getBoundingClientRect();
+        if (badgeRect.width < 48 || badgeRect.height < 48) {
+          throw new Error(
+            `Wall Day first person badge is ${badgeRect.width}x${badgeRect.height}, expected at least 48x48.`,
+          );
+        }
+
+        const calls = { moreInfo: 0, togglePerson: 0 };
+        card._moreInfo = () => {
+          calls.moreInfo += 1;
+        };
+        card._togglePerson = () => {
+          calls.togglePerson += 1;
+        };
+        for (const key of ["Enter", " "]) {
+          const badgeEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeBadge = { ...calls };
+          badge.dispatchEvent(badgeEvent);
+          if (
+            !badgeEvent.defaultPrevented ||
+            calls.moreInfo !== beforeBadge.moreInfo + 1 ||
+            calls.togglePerson !== beforeBadge.togglePerson
+          ) {
+            throw new Error(
+              `Wall Day person badge did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+
+          const headerEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeHeader = { ...calls };
+          personHeader.dispatchEvent(headerEvent);
+          if (
+            !headerEvent.defaultPrevented ||
+            calls.togglePerson !== beforeHeader.togglePerson + 1 ||
+            calls.moreInfo !== beforeHeader.moreInfo
+          ) {
+            throw new Error(
+              `Wall Day person header did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+        }
+
+        const beforeBadgeClick = { ...calls };
+        badge.click();
+        if (
+          calls.moreInfo !== beforeBadgeClick.moreInfo + 1 ||
+          calls.togglePerson !== beforeBadgeClick.togglePerson
+        ) {
+          throw new Error("Wall Day person badge click also toggled its parent lane.");
+        }
+
+        const beforeHeaderClick = { ...calls };
+        personHeader.click();
+        if (
+          calls.togglePerson !== beforeHeaderClick.togglePerson + 1 ||
+          calls.moreInfo !== beforeHeaderClick.moreInfo
+        ) {
+          throw new Error("Wall Day person header click did not independently toggle its lane.");
+        }
+
+        const actionMethods = [
+          "_goToDate",
+          "_moreInfo",
+          "_openDayView",
+          "_openEvent",
+          "_showDayAgenda",
+          "_togglePerson",
+        ];
+        for (const method of actionMethods) {
+          if (typeof card[method] === "function") card[method] = () => {};
+        }
+
+        const results = [
+          geometryMarker,
+          `wall-header: 4x80 contained; badge: ${badgeRect.width}x${badgeRect.height}`,
+        ];
+        const viewButtons = [...wall.querySelectorAll('.switch button[role="tab"]')];
+        for (const viewButton of viewButtons) {
+          viewButton.click();
+          await nextRender();
+
+          const activeView = viewButton.textContent.trim();
+          const activeWall = root.querySelector(".moran-wall-shell");
+          const focusable = [
+            ...activeWall.querySelectorAll(
+              'button:not([disabled]), [role="button"][tabindex="0"], [role="tab"][tabindex="0"]',
+            ),
+          ];
+          if (focusable.length === 0) throw new Error(`${activeView}: no focusable targets found.`);
+
+          for (const target of focusable) {
+            const rect = target.getBoundingClientRect();
+            if (rect.width < 48 || rect.height < 48) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} is ${rect.width}x${rect.height}.`,
+              );
+            }
+
+            target.focus();
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            const focused = getComputedStyle(target);
+            if (
+              document.activeElement !== card ||
+              root.activeElement !== target ||
+              focused.outlineStyle === "none" ||
+              Number.parseFloat(focused.outlineWidth) < 2
+            ) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} has no computed focus outline ` +
+                  `(document=${document.activeElement?.localName}, shadow=${root.activeElement?.className}, ` +
+                  `style=${focused.outlineStyle}, width=${focused.outlineWidth}, ` +
+                  `focus=${target.matches(":focus")}, connected=${target.isConnected}, ` +
+                  `wall=${Boolean(target.closest(".moran-wall-shell"))}).`,
+              );
+            }
+
+            if (!(target instanceof HTMLButtonElement)) {
+              for (const key of ["Enter", " "]) {
+                const event = new KeyboardEvent("keydown", {
+                  key,
+                  bubbles: true,
+                  cancelable: true,
+                });
+                target.dispatchEvent(event);
+                if (!event.defaultPrevented) {
+                  throw new Error(
+                    `${activeView}: ${target.className || target.localName} did not handle ${key === " " ? "Space" : key}.`,
+                  );
+                }
+              }
+            }
+          }
+          results.push(`${activeView}: ${focusable.length} targets`);
+        }
+        return results;
+      };
+
+      if (query.has("checks")) {
+        runInteractionChecks()
+          .then((results) => writeCheckResult("pass", results.join("; ")))
+          .catch((error) => {
+            writeCheckResult("fail", error instanceof Error ? error.message : String(error));
+            console.error(error);
+          })
+          .finally(() => {
+            card.remove();
+            window.stop();
+          });
+      }
+    </script>
+  </body>
+</html>

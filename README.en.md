@@ -1,8 +1,15 @@
-# Family Board Card
+# Moran Family Board Card
 
 **English** · [Deutsch](README.md)
 
-![Family Board Card – day view](docs/preview-day.png)
+![Upstream Family Board Card – day view](docs/preview-day.png)
+
+This is the Moran-maintained fork of
+[`renespeaker/ha-family-board-card`](https://github.com/renespeaker/ha-family-board-card).
+It preserves the upstream calendar views while adding configurable event routing for households
+that keep events in shared managed calendars instead of one calendar per person.
+
+![Moran Family Board target concept](docs/concepts/moran-family-board-target-v1.png)
 
 A family calendar — a “who is where, when” board — for [Home Assistant](https://www.home-assistant.io/). People are columns across the top (with the avatar from their `person.*` entity), time runs down the left. The card shows at a glance which activities happen at the same time in different places — for up to 10 people.
 
@@ -20,6 +27,12 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Drag & drop** – in the day view, drag events to move them (time) and drag the bottom edge to change the duration; snaps to the time grid and writes straight back to the calendar – **only** for writable calendars and single events (no series).
 - **Manage events** – create/edit/delete right in the card, **but only** for calendars that support it (Local Calendar, CalDAV …). Read-only calendars (e.g. ICS subscriptions) are detected automatically and shown read-only. Recurring events: choose **“this event only / this and following”**.
 - **Several calendars per person** – e.g. work + private in one column (selectable in the editor).
+- **Shared-calendar routing** – route events into person lanes by title prefix, contained text, or
+  regular expression without creating duplicate calendars.
+- **Household fallback lane** – an `unmatched` lane receives events that no configured person rule
+  claimed.
+- **Clean lane titles** – optionally remove a matched person prefix while preserving a leading
+  semantic marker, so `⭐️ Avery: Concert` can display as `⭐️ Concert` inside Avery's lane.
 - **Robust event logic** – all-day events (exclusive end), events across midnight and multi-day events are split onto the correct days; time zones are respected.
 - **Multilingual & localized** – texts in English/German, weekday names and clock format (12/24 h) from the HA locale; relative days (“Today/Tomorrow”).
 - **Everyday polish** – past events dimmed, coloring by calendar, open a location straight in the maps app, hide noisy events by pattern.
@@ -43,30 +56,30 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Compact mode** – one switch (`compact`) for smaller fonts and tighter spacing instead of adjusting three sliders.
 - **People hidden on start** – `hidden: true` per person; the column starts collapsed and a click on the header brings it back.
 
-> Status: **v0.25 – complete family day planning: 5 views, write access, auto layout (trim/fit/full height), background bands, badges, kiosk mode, mobile optimized, fully localized card *and* editor.**
+> Fork status: **v0.25.1-moran.1 – upstream v0.25 plus shared-calendar person routing.** The
+> Skylight-style operations shell and Calendar Bridge provider remain planned work.
 
-## Installation (HACS)
+## Installation (HACS custom repository)
 
-The card is part of the official HACS store:
-
-1. Open HACS → search for **Family Board Card** → install.
-2. In storage mode the Lovelace resource is registered automatically as `/hacsfiles/ha-family-board-card/ha-family-board-card.js` (in YAML mode add it manually).
-3. Add the card to a dashboard: `type: custom:family-board-card` — or simply pick “Family Board Card” in the card picker.
+1. Open HACS → three-dot menu → **Custom repositories**.
+2. Add `https://github.com/emilianomoran/moran-family-board-card` as a **Dashboard** repository.
+3. Install **Moran Family Board Card**.
+4. Add `type: custom:moran-family-board-card` to a dashboard, or select the card in the picker.
 
 ### Manually (quick test without HACS)
 
-Copy `dist/ha-family-board-card.js` to `config/www/` and add it as a resource:
+Copy `dist/moran-family-board-card.js` to `config/www/` and add it as a resource:
 
 ```yaml
-url: /local/ha-family-board-card.js
+url: /local/moran-family-board-card.js
 type: module
 ```
 
 ## Configuration
 
 ```yaml
-type: custom:family-board-card
-title: Family board # optional, custom card title
+type: custom:moran-family-board-card
+title: Family Board # optional, custom card title
 view: day           # day | timeline | week | month | agenda
 time_grid: 30       # 15 | 30 | 60
 start_hour: 6
@@ -77,20 +90,74 @@ color_by: person      # person | location | calendar
 hour_height: 64       # pixels per hour (40–96), day view
 refresh_interval: 300 # seconds; 0 = off
 persons:
-  - name: Anna
-    person: person.anna     # avatar (entity_picture) + live status
-    calendar: calendar.anna # source of the events
+  - name: Avery
+    person: person.fixture_avery        # avatar (entity_picture) + live status
+    calendar: calendar.fixture_avery    # source of the events
     color: '#8B7CF6'        # optional, otherwise the default palette
-  - name: Ben
-    person: person.ben
+  - name: Jordan
+    person: person.fixture_jordan
     calendar:               # several calendars per person are possible
-      - calendar.ben_work
-      - calendar.ben_private
+      - calendar.fixture_jordan_work
+      - calendar.fixture_jordan_private
 ```
+
+To try the calendar-first full-panel proof, add `layout: wall`. Omitting `layout` keeps the
+existing card and all current behavior. Wall currently starts as a calendar-only Day proof; its
+other views remain functional but do not yet claim final wall styling.
+
+```yaml
+type: custom:moran-family-board-card
+layout: wall
+view: day
+persons:
+  - name: Avery
+    person: person.fixture_avery
+    calendar: calendar.fixture_family
+```
+
+### Shared managed calendars
+
+The same calendar can be assigned to several lanes. A lane with matching rules receives only the
+events it claims; an `unmatched` lane receives the remaining household-wide events.
+
+```yaml
+type: custom:moran-family-board-card
+persons:
+  - name: Person A
+    calendar:
+      - calendar.fixture_family
+      - calendar.fixture_activities
+    match_title_prefixes:
+      - "Person A:"
+    strip_title_prefix: true
+  - name: Person B
+    calendar:
+      - calendar.fixture_family
+      - calendar.fixture_activities
+    match_title_prefixes:
+      - "Person B:"
+      - "Person B + Person C:"
+    strip_title_prefix: true
+  - name: Household
+    calendar:
+      - calendar.fixture_family
+      - calendar.fixture_activities
+    unmatched: true
+```
+
+Prefix matching is case-insensitive and ignores leading symbols, so a rule such as `Person A:` also
+matches `⭐️ Person A: Concert`. Contains and regular-expression routing are available through
+`match_title_contains` and `match_title_regex`. Invalid regular expressions are ignored instead of
+breaking the calendar.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `persons` | list | – | 1–10 people with `name`, `person`, `calendar` (string **or list**), optionally `color`, `badges` (entities as chips) and `hidden` (starts collapsed) |
+| `persons` | list | – | 1–10 lanes with `name`, optional `person`, `calendar` (string **or list**), routing rules, `color`, `badges`, and `hidden` |
+| `match_title_prefixes` | list | – | Route titles beginning with one of these values; leading symbols and emoji are ignored |
+| `match_title_contains` | list | – | Route titles containing one of these case-insensitive values |
+| `match_title_regex` | list | – | Route titles matching any case-insensitive regular expression; invalid expressions are ignored |
+| `unmatched` | boolean | `false` | Use the lane as a fallback for events from its calendars that no normal lane claimed |
+| `strip_title_prefix` | boolean | `false` | Remove the matched configured prefix from the displayed event title |
 | `hide_empty_persons` | boolean | `false` | Week view: hide people without events in that week |
 | `show_focus` | boolean | `false` | “Now / next” bar per person above the views |
 | `drag_drop` | boolean | `true` | Move / resize events in the day view by dragging (writable single events only) |
@@ -98,6 +165,7 @@ persons:
 | `icon_patterns` | list | – | Custom icon rules, e.g. `["Grandma => 👵"]` |
 | `auto_return` | number | `0` | Kiosk: return to the start view / today after X minutes without a touch (0 = off) |
 | `title` | string | – | Custom card title (default: localized “Family board”) |
+| `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
 | `time_grid` | number | `30` | Time axis grid in minutes |
@@ -162,7 +230,7 @@ The card picks up the theme's colors and fonts automatically. For fine-tuning th
 Example (card-mod):
 
 ```yaml
-type: custom:family-board-card
+type: custom:moran-family-board-card
 card_mod:
   style: |
     :host {
@@ -184,14 +252,14 @@ Want another language? Add a dictionary to [`src/localize.ts`](src/localize.ts) 
 
 ```bash
 npm install
-npm run build        # builds dist/ha-family-board-card.js
+npm run build        # builds dist/moran-family-board-card.js
 npm run watch        # rebuild on change
 npm run lint         # tsc --noEmit (typecheck)
 npm test             # Vitest (event logic)
 npm run format       # Prettier
 ```
 
-Fast loop against a running HA instance: copy `dist/ha-family-board-card.js` to `config/www/` and hard-reload the page.
+Fast loop against a running HA instance: copy `dist/moran-family-board-card.js` to `config/www/` and hard-reload the page.
 
 The error-prone event logic (splitting across midnight, all-day exclusivity, time zones, overlap layout) lives isolated in [`src/events.ts`](src/events.ts) and is covered by [`src/events.test.ts`](src/events.test.ts).
 
@@ -214,4 +282,5 @@ In the day view, clicking an empty spot in a person's column opens the create di
 
 ## License
 
-MIT
+MIT. The original copyright and license from `renespeaker/ha-family-board-card` are preserved in
+[`LICENSE`](LICENSE).

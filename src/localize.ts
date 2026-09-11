@@ -7,6 +7,8 @@ type Dict = Record<string, string>;
 
 const EN: Dict = {
   board_title: "Family board",
+  wall_board_title: "Family Board",
+  wall_calendar_identity: "Calendar",
   day: "Day",
   week: "Week",
   month: "Month",
@@ -19,6 +21,7 @@ const EN: Dict = {
   prev_month: "Previous month",
   next_month: "Next month",
   today: "Today",
+  show_today: "Show today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",
   open_map: "Map",
@@ -58,6 +61,8 @@ const EN: Dict = {
 
 const DE: Dict = {
   board_title: "Familienplan",
+  wall_board_title: "Familienplan",
+  wall_calendar_identity: "Kalender",
   day: "Tag",
   week: "Woche",
   month: "Monat",
@@ -70,6 +75,7 @@ const DE: Dict = {
   prev_month: "Vorheriger Monat",
   next_month: "Nächster Monat",
   today: "Heute",
+  show_today: "Heute anzeigen",
   tomorrow: "Morgen",
   yesterday: "Gestern",
   open_map: "Karte",
@@ -168,8 +174,8 @@ export function weekdayNames(hass: any, style: "short" | "long", firstDayJs: num
 }
 
 /** Localized short countdown to a future date, e.g. "in 20 Min." / "in 2 hr.". */
-export function formatCountdown(hass: any, date: Date): string {
-  const diffMs = date.getTime() - Date.now();
+export function formatCountdown(hass: any, date: Date, now: Date = new Date()): string {
+  const diffMs = date.getTime() - now.getTime();
   if (diffMs <= 0) return "";
   const rtf = new Intl.RelativeTimeFormat(intlLocale(hass), { numeric: "always", style: "short" });
   const min = Math.round(diffMs / 60000);

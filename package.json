@@ -1,14 +1,23 @@
 {
-  "name": "ha-family-board-card",
-  "version": "0.25.0",
-  "description": "Family calendar / who-is-where board for Home Assistant",
+  "name": "moran-family-board-card",
+  "version": "0.25.1-moran.1",
+  "description": "Configurable family operations board for Home Assistant",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://github.com/emilianomoran/moran-family-board-card#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emilianomoran/moran-family-board-card.git"
+  },
+  "bugs": {
+    "url": "https://github.com/emilianomoran/moran-family-board-card/issues"
+  },
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:harness": "node dev/harness-check.mjs",
     "test:watch": "vitest",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
