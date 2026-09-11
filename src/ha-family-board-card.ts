@@ -1,11 +1,6 @@
 import { LitElement, html, css, nothing, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
-import type {
-  HomeAssistant,
-  LovelaceCard,
-  LovelaceCardConfig,
-  LovelaceCardEditor,
-} from "custom-card-helpers";
+import type { HomeAssistant, LovelaceCard, LovelaceCardEditor } from "custom-card-helpers";
 import {
   RawEvent,
   BoardEvent,
@@ -20,6 +15,14 @@ import {
   displayTitleForRoute,
 } from "./events";
 import {
+  ALL_VIEWS,
+  normalizeLayout,
+  type FamilyBoardConfig,
+  type FamilyBoardLayout,
+  type PersonConfig,
+  type ViewName,
+} from "./config";
+import {
   localize,
   formatTime,
   formatMinutes,
@@ -27,74 +30,6 @@ import {
   weekdayNames,
   formatWeekRange,
 } from "./localize";
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-type ViewName = "day" | "week" | "month" | "agenda" | "timeline";
-const ALL_VIEWS: ViewName[] = ["day", "timeline", "week", "month", "agenda"];
-
-export interface PersonConfig {
-  name?: string;
-  person?: string; // person.* entity -> avatar (entity_picture) + live status
-  calendar?: string | string[]; // calendar.* entity/entities -> events
-  color?: string; // optional override; default falls back to a palette
-  badges?: string[]; // extra entities shown as chips under the person header
-  hidden?: boolean; // start collapsed (person toggle can bring them back)
-  match_title_prefixes?: string[]; // route only matching title prefixes (leading symbols ignored)
-  match_title_contains?: string[]; // route titles containing any configured text
-  match_title_regex?: string[]; // route titles matching any case-insensitive regular expression
-  unmatched?: boolean; // fallback lane for events that no normal lane claimed
-  strip_title_prefix?: boolean; // remove a matched title prefix in this lane's display
-}
-
-export interface FamilyBoardConfig extends LovelaceCardConfig {
-  persons: PersonConfig[];
-  title?: string;
-  view?: ViewName;
-  views?: ViewName[]; // which views appear in the toggle. default: all
-  time_grid?: 15 | 30 | 60;
-  start_hour?: number;
-  end_hour?: number;
-  show_weekends?: boolean;
-  show_now_line?: boolean;
-  color_by?: "person" | "location" | "calendar";
-  dim_past?: boolean; // fade events that already ended. default true
-  hide_patterns?: string[]; // hide events whose title matches any pattern
-  show_patterns?: string[]; // allow-list: only show events whose title matches
-  replace_patterns?: string[]; // clean up titles: "search => replacement" (or "search" to strip)
-  filter_duplicates?: boolean; // drop identical events (title/start/end) per person + in agenda
-  calendars?: Record<
-    string,
-    { color?: string; label?: string; icon?: string; title_field?: string }
-  >; // per-calendar color/label/icon and which field supplies the title
-  tentative_patterns?: string[]; // mark events tentative when title matches
-  auto_icons?: boolean; // prefix events with a matching emoji by keyword. default false
-  icon_patterns?: string[]; // custom icon rules: "keyword => 🎂"
-  show_focus?: boolean; // show a "now / next" focus bar per person above the views
-  drag_drop?: boolean; // drag to move / resize events in the day view. default true
-  compact?: boolean; // denser spacing + smaller fonts in one switch
-  map_url?: string; // location link template, {location} is replaced (URL-encoded)
-  show_progress?: boolean; // progress bar on running events. default true
-  weather_entity?: string; // weather.* entity for the daily forecast
-  show_weather?: boolean; // show weather in headers. default true when entity set
-  refresh_interval?: number; // seconds; 0 disables. default 300
-  hour_height?: number; // px per hour in the day view. default 64
-  hour_width?: number; // px per hour in the timeline view. default 96
-  fit_height?: boolean; // shrink the day view so start..end fits without scroll
-  full_height?: boolean; // stretch the board to the bottom of the screen (wall tablet)
-  col_min_width?: number; // min px per person column before horizontal scroll. default 120
-  event_size?: number; // event title font size in px (editor slider -> --fb-event-size)
-  radius?: number; // corner radius of event blocks in px (-> --fb-radius)
-  past_opacity?: number; // opacity of past events in percent (-> --fb-past-opacity)
-  hide_empty_persons?: boolean; // week view: skip persons without events that week
-  auto_return?: number; // kiosk: minutes of inactivity before returning to the default view. 0=off
-  trim_hours?: boolean; // day view: cut empty edge hours so events get the full height. default true
-  background_hours?: number; // timed events >= this many hours become a faint band. default 3, 0=off
-  max_columns?: number; // max side-by-side columns per person/day. default 3
-  first_day?: "monday" | "sunday"; // week start. default monday
-  scroll_to_now?: boolean; // auto-scroll day view to current time. default true
-}
 
 /** A collapsed "+N more" marker for dense overlap clusters in the day view. */
 interface Overflow {
@@ -278,6 +213,7 @@ export function autoDetectPersons(hass: HomeAssistant): PersonConfig[] {
 export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: FamilyBoardConfig;
+  private _layout: FamilyBoardLayout = "default";
   @state() private _events: BoardEvent[] = [];
   @state() private _view: ViewName = "day";
   @state() private _day: number = (new Date().getDay() + 6) % 7;
@@ -342,6 +278,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       throw new Error("Bitte mindestens eine Person unter 'persons' konfigurieren.");
     }
     this._config = config;
+    this._layout = normalizeLayout(config.layout);
     const enabled = this._enabledViews;
     const wanted = config.view ?? "day";
     this._view = enabled.includes(wanted) ? wanted : enabled[0];

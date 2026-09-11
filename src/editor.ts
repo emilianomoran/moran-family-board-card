@@ -2,23 +2,15 @@ import { LitElement, html, css, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import { autoDetectPersons } from "./ha-family-board-card";
-import type { FamilyBoardConfig } from "./ha-family-board-card";
+import {
+  ALL_VIEWS,
+  normalizeLayout,
+  withLayout,
+  type FamilyBoardConfig,
+  type PersonConfig,
+} from "./config";
 import { langOf, localize } from "./localize";
 import { et } from "./editor-i18n";
-
-interface PersonConfig {
-  name?: string;
-  person?: string;
-  calendar?: string | string[];
-  color?: string;
-  badges?: string[];
-  hidden?: boolean;
-  match_title_prefixes?: string[];
-  match_title_contains?: string[];
-  match_title_regex?: string[];
-  unmatched?: boolean;
-  strip_title_prefix?: boolean;
-}
 
 /** Curated family palette for one-click color picking. */
 const PALETTE = [
@@ -35,8 +27,6 @@ const PALETTE = [
   "#9575cd",
   "#90a4ae",
 ];
-
-const VIEW_VALUES = ["day", "timeline", "week", "month", "agenda"];
 
 // One ha-form per person row, with entity pickers filtered by domain.
 const PERSON_SCHEMA = [
@@ -98,7 +88,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
 
   /** Localized view options for the dropdown / multi-select. */
   private _viewOptions() {
-    return VIEW_VALUES.map((v) => ({ value: v, label: localize(this.hass, v) }));
+    return ALL_VIEWS.map((v) => ({ value: v, label: localize(this.hass, v) }));
   }
 
   /** True when nothing meaningful is configured yet -> show the wizard. */
@@ -107,18 +97,35 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   }
 
   private get _settingsData() {
-    return { ...this._config, time_grid: String(this._config.time_grid ?? 30) };
+    return {
+      ...this._config,
+      layout: normalizeLayout(this._config.layout),
+      time_grid: String(this._config.time_grid ?? 30),
+    };
   }
 
   /** Grouped settings schema; irrelevant fields are hidden contextually. */
   private _schema(): unknown[] {
     const cfg = this._config;
-    const views = Array.isArray(cfg.views) && cfg.views.length ? cfg.views : VIEW_VALUES;
+    const views = Array.isArray(cfg.views) && cfg.views.length ? cfg.views : ALL_VIEWS;
     const hasDay = views.includes("day");
     const hasTimeline = views.includes("timeline");
     const hasWeek = views.includes("week");
 
-    const layout: unknown[] = [];
+    const layout: unknown[] = [
+      {
+        name: "layout",
+        selector: {
+          select: {
+            mode: "dropdown",
+            options: [
+              { value: "default", label: this._t("o_default") },
+              { value: "wall", label: this._t("o_wall") },
+            ],
+          },
+        },
+      },
+    ];
     if (hasDay || hasTimeline) {
       layout.push(
         { name: "start_hour", selector: { number: { min: 0, max: 23, mode: "box" } } },
@@ -276,14 +283,17 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   private _settingsChanged(ev: CustomEvent): void {
     ev.stopPropagation();
     const next = { ...ev.detail.value };
+    const layout = normalizeLayout(next.layout);
+    delete next.layout;
     if (typeof next.time_grid === "string") next.time_grid = Number(next.time_grid);
     // keep persons + calendars untouched by the settings form
-    this._emit({
+    const merged = {
       ...this._config,
       ...next,
       persons: this._persons,
       ...(this._config.calendars ? { calendars: this._config.calendars } : {}),
-    });
+    };
+    this._emit(withLayout(merged, layout));
   }
 
   /* ---- presets --------------------------------------------------- */

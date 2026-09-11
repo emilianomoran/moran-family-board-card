@@ -9,6 +9,7 @@ type Dict = Record<string, string>;
 const EN: Dict = {
   /* ---- field labels ---------------------------------------------- */
   l_title: "Card title",
+  l_layout: "Layout",
   l_refresh_interval: "Auto refresh (sec., 0 = off)",
   l_view: "Default view",
   l_views: "Available views (switcher)",
@@ -62,6 +63,8 @@ const EN: Dict = {
 
   /* ---- helper texts ---------------------------------------------- */
   h_hide_patterns: "Text patterns, e.g. “Recess” – matches are hidden",
+  h_layout:
+    "Wall fills the available panel with a calendar-first day layout. Default keeps the existing card.",
   h_show_patterns: "Allow list: only events whose title contains one of the patterns",
   h_replace_patterns: "e.g. “Homeroom => Lesson” (without => the text is removed)",
   h_tentative_patterns: "Matches are drawn dashed / translucent",
@@ -96,6 +99,8 @@ const EN: Dict = {
   o_calendar: "Calendar",
   o_monday: "Monday",
   o_sunday: "Sunday",
+  o_default: "Default",
+  o_wall: "Wall",
 
   /* ---- group titles ---------------------------------------------- */
   g_views: "🗓️ Views",
@@ -143,6 +148,7 @@ const EN: Dict = {
 
 const DE: Dict = {
   l_title: "Kartentitel",
+  l_layout: "Layout",
   l_refresh_interval: "Auto-Aktualisierung (Sek., 0 = aus)",
   l_view: "Standardansicht",
   l_views: "Verfügbare Ansichten (Umschalter)",
@@ -195,6 +201,8 @@ const DE: Dict = {
   l_map_url: "Karten-Link (Vorlage)",
 
   h_hide_patterns: "Textmuster, z. B. „Hofpause“ – Treffer werden ausgeblendet",
+  h_layout:
+    "Wand füllt das verfügbare Panel mit einer kalenderzentrierten Tagesansicht. Standard behält die bestehende Karte bei.",
   h_show_patterns: "Allow-Liste: nur Termine, deren Titel eines der Muster enthält",
   h_replace_patterns: "z. B. „Klassenverbund => Unterricht“ (ohne => wird der Text entfernt)",
   h_tentative_patterns: "Treffer werden gestrichelt/transparent dargestellt",
@@ -229,6 +237,8 @@ const DE: Dict = {
   o_calendar: "Kalender",
   o_monday: "Montag",
   o_sunday: "Sonntag",
+  o_default: "Standard",
+  o_wall: "Wand",
 
   g_views: "🗓️ Ansichten",
   g_layout: "📐 Layout & Größe",
