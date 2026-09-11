@@ -4,12 +4,13 @@
 
 ## Pattern Overview
 
-**Overall:** A Home Assistant-native Lit Web Component with a pure event-domain module and an independent configuration editor.
+**Overall:** A Home Assistant-native Lit Web Component with shared configuration, a narrow authenticated calendar adapter, a pure event-domain module, and an independent configuration editor.
 
 **Key characteristics:**
 - A single distributed ES module registers both the card and its editor.
 - Home Assistant supplies state, authentication, locale, API access, and theme tokens.
-- Calendar computations are partially isolated from DOM code for deterministic unit testing.
+- Configuration and calendar reads have focused typed seams, while calendar computations are
+  isolated from DOM code for deterministic unit testing.
 - All rendered views and most orchestration currently live in one card class.
 - The card has no database or server process of its own.
 
@@ -17,9 +18,21 @@
 
 **Home Assistant adapter and card shell:**
 - Location: `src/ha-family-board-card.ts`.
-- Purpose: configuration validation, lifecycle, API calls, capability detection, state management, interactions, view rendering, dialogs, and styles.
-- Depends on: Lit, `custom-card-helpers`, `src/events.ts`, and `src/localize.ts`.
+- Purpose: configuration validation, lifecycle, orchestration, capability detection, state management, interactions, view rendering, dialogs, and styles.
+- Depends on: Lit, `custom-card-helpers`, `src/config.ts`, `src/calendar-source.ts`, `src/events.ts`, and `src/localize.ts`.
 - Used by: Home Assistant dashboards and `dev/harness.html`.
+
+**Shared configuration:**
+- Location: `src/config.ts`.
+- Purpose: public card/editor configuration types, supported view values, exact layout normalization, and immutable layout serialization.
+- Depends on: Home Assistant's `LovelaceCardConfig` type only.
+- Used by: the card, visual editor, and `src/config.test.ts`.
+
+**Calendar source:**
+- Location: `src/calendar-source.ts`.
+- Purpose: construct one authenticated Home Assistant calendar GET and pass its payload or rejection through unchanged.
+- Depends on: the supplied Home Assistant client's `callApi` contract.
+- Used by: the card controller and `src/calendar-source.test.ts`.
 
 **Event domain:**
 - Location: `src/events.ts`.
@@ -36,7 +49,7 @@
 **Visual editor:**
 - Location: `src/editor.ts`.
 - Purpose: graphical configuration, auto-detection, presets, person/calendar metadata, and `config-changed` events.
-- Depends on: Lit, Home Assistant form elements, editor translations, and exported card types/helpers.
+- Depends on: Lit, Home Assistant form elements, `src/config.ts`, and editor translations.
 - Used by: Home Assistant's Lovelace card editor.
 
 **Build and distribution:**
@@ -50,7 +63,8 @@
 1. Home Assistant creates the custom element and calls `setConfig`.
 2. Home Assistant assigns the current `hass` object.
 3. The card computes a view date range and unique configured calendar set.
-4. `_fetchEvents` requests each available calendar once through `hass.callApi`.
+4. `_fetchEvents` delegates each unique calendar request to `readCalendarEvents`, which uses the
+   supplied authenticated `hass.callApi` client.
 5. `routeEventToPeople` maps each source event to zero, one, or multiple lanes.
 6. `parseRawEvent` and segmentation helpers create view-ready events.
 7. The selected day, timeline, week, month, or agenda renderer produces Lit templates.
@@ -83,11 +97,19 @@
 
 **`FamilyBoardConfig`:**
 - The public configuration contract for views, layout, filtering, display, calendars, and people.
-- Defined in `src/ha-family-board-card.ts` and consumed by the card/editor.
+- Defined once in `src/config.ts` and consumed by both the card and editor.
+
+**`normalizeLayout` / `withLayout`:**
+- Exact wall-mode opt-in and lossless editor serialization helpers.
+- Keep the raw Lovelace object unchanged unless a user explicitly chooses Wall or Default.
+
+**`readCalendarEvents`:**
+- Narrow authenticated calendar-read port that owns only method and URL construction.
+- Leaves fan-out, filtering, routing, parsing, deduplication, loading, and error state in the card.
 
 **`PersonConfig` / `EventRouteConfig`:**
 - Represent a visual lane and its calendar/routing rules.
-- Defined in `src/ha-family-board-card.ts` and `src/events.ts`.
+- Defined in `src/config.ts` and `src/events.ts`.
 
 **`RawEvent`, `BoardEvent`, `LaidOutEvent`:**
 - Successive representations for source occurrences, per-day display segments, and overlap geometry.

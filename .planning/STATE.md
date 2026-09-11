@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-09-11T07:30:47.834Z"
-last_activity: 2026-09-11 — Completed Plan 01-01 implementation-base ADR.
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-09-11T07:43:27.330Z"
+last_activity: 2026-09-11 — Completed Plan 01-02 shared configuration and calendar boundary.
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,29 +26,29 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 1 of 5 (Prove the Foundation)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-09-11 — Completed Plan 01-01 implementation-base ADR.
+Plan: 2 of 3 in current phase
+Status: Ready to execute
+Last activity: 2026-09-11 — Completed Plan 01-02 shared configuration and calendar boundary.
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 1
-- Average duration: 3 min
-- Total execution time: 3 min
+- Total plans completed: 2
+- Average duration: 6 min
+- Total execution time: 11 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Prove the Foundation | 1 | 3 min | 3 min |
+| 1. Prove the Foundation | 2 | 11 min | 6 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 3 min
+- Last 5 plans: 3 min, 8 min
 - Trend: Not established
 
 ## Accumulated Context
@@ -64,6 +64,7 @@ Full decisions are logged in PROJECT.md.
 - Keep wall mode opt-in through `layout: wall`; configurations without that exact value stay on the legacy path.
 - [Phase 01-prove-the-foundation]: Continue the Moran TypeScript/Lit fork as the implementation base; use tienou/family-calendar-card only as a source-pinned design reference. — The selected base already has tested person routing, the exact five-view model, strict typechecking, and a safer Home Assistant API boundary at lower migration cost.
 - [Phase 01-prove-the-foundation]: Require explicit MIT notice preservation and a documented source commit before accepting substantial copied code. — Behavioral learning is allowed, but provenance for substantial source reuse must remain reviewable and license-complete.
+- [Phase 01-prove-the-foundation]: Keep the calendar adapter limited to one authenticated GET while the controller retains fan-out, routing, parsing, deduplication, loading, and error semantics. — This preserves the existing behavior and Home Assistant authentication boundary while creating the minimum seam needed by wall mode.
 
 ### Pending Todos
 
@@ -84,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-11T07:30:47.830Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-09-11T07:43:27.327Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

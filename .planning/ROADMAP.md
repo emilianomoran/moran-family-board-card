@@ -30,7 +30,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 3. The same build renders an existing configuration with unchanged defaults when wall mode is absent.
 4. Card and editor compile against one shared definition for all v1 configuration added in this phase.
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 **Wave 1**
 
@@ -38,7 +38,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02: Extract shared config defaults and the minimum typed calendar boundary needed by wall mode.
+- [x] 01-02: Extract shared config defaults and the minimum typed calendar boundary needed by wall mode.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -151,7 +151,7 @@ These items must enter a new milestone or an approved roadmap insertion; they ar
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prove the Foundation | 1/3 | In Progress | - |
+| 1. Prove the Foundation | 2/3 | In Progress | - |
 | 2. Family-at-a-Glance Day | 0/3 | Not started | - |
 | 3. Planning Horizons and Responsive Layouts | 0/3 | Not started | - |
 | 4. Trustworthy Interaction and Resilience | 0/3 | Not started | - |

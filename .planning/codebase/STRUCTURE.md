@@ -23,9 +23,11 @@ moran-family-board-card/
 
 **`src/`:**
 - Contains all handwritten runtime TypeScript.
-- `src/ha-family-board-card.ts` is the main card, renderers, API adapter, dialogs, and CSS.
+- `src/ha-family-board-card.ts` is the main card, renderers, controller, dialogs, and CSS.
+- `src/config.ts` is the shared card/editor contract and lossless layout serializer.
+- `src/calendar-source.ts` is the narrow authenticated Home Assistant calendar-read adapter.
 - `src/events.ts` contains DOM-free event logic.
-- `src/events.test.ts` contains the current unit suite.
+- `src/*.test.ts` contains collocated config, calendar-source, and event-domain unit suites.
 - `src/editor.ts` and `src/editor-i18n.ts` implement graphical configuration.
 - `src/localize.ts` implements card localization and date/time formatting.
 
@@ -72,12 +74,16 @@ moran-family-board-card/
 - `hacs.json` — HACS metadata.
 
 **Core logic:**
+- `src/config.ts` — shared configuration types, view values, and layout helpers.
+- `src/calendar-source.ts` — single-calendar authenticated read boundary.
 - `src/events.ts` — routing, parsing, segmentation, overlap, drag calculations.
-- `src/ha-family-board-card.ts` — runtime adapter, views, interactions, mutations, styles.
+- `src/ha-family-board-card.ts` — runtime controller, views, interactions, mutations, styles.
 - `src/localize.ts` — localizable card copy and time/date formatting.
 
 **Testing:**
-- `src/events.test.ts` — collocated pure-logic tests.
+- `src/config.test.ts` — layout compatibility and lossless serialization tests.
+- `src/calendar-source.test.ts` — authenticated request-boundary tests.
+- `src/events.test.ts` — collocated event-domain tests.
 - `.github/workflows/ci.yml` — enforced repository checks.
 - `dev/harness.html` — manual browser smoke fixture.
 
@@ -107,8 +113,8 @@ moran-family-board-card/
 - Add user-facing strings to `src/localize.ts`.
 
 **Configuration/editor:**
-- Update the public config types in `src/ha-family-board-card.ts`.
-- Mirror person-facing types/schema in `src/editor.ts`.
+- Update the single public config contract and helpers in `src/config.ts`.
+- Import shared types and serializers into both the card and editor; do not redeclare them.
 - Add English/German editor copy to `src/editor-i18n.ts`.
 - Update `README.en.md` and, when practical, `README.md`.
 
