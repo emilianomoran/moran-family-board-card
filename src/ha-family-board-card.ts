@@ -22,6 +22,7 @@ import {
   type PersonConfig,
   type ViewName,
 } from "./config";
+import { readCalendarEvents } from "./calendar-source";
 import {
   localize,
   formatTime,
@@ -691,8 +692,6 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private async _fetchEvents(): Promise<void> {
     const { start, end } = this._fetchRange();
-    const startIso = start.toISOString();
-    const endIso = end.toISOString();
     const raws: RawEvent[] = [];
     let anyError = false;
     this._loading = true;
@@ -704,10 +703,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     await Promise.all(
       configuredCalendars.map(async (calendar) => {
         try {
-          const events = await this.hass.callApi<any[]>(
-            "GET",
-            `calendars/${calendar}?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}`,
-          );
+          const events = await readCalendarEvents(this.hass, calendar, { start, end });
           for (const event of events) {
             // Apply the calendar's alternate-title mapping before lane routing.
             // Institutional feeds often keep the useful subject in description.

@@ -34,9 +34,7 @@ describe("readCalendarEvents", () => {
     const callApi = vi.fn().mockRejectedValue(error);
     const hass = { callApi } as unknown as Pick<HomeAssistant, "callApi">;
 
-    await expect(
-      readCalendarEvents(hass, "calendar.fixture_primary", range),
-    ).rejects.toBe(error);
+    await expect(readCalendarEvents(hass, "calendar.fixture_primary", range)).rejects.toBe(error);
     expect(callApi).toHaveBeenCalledOnce();
   });
 });
