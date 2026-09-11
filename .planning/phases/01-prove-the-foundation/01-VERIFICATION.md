@@ -1,7 +1,7 @@
 ---
 phase: 01-prove-the-foundation
-verified: 2026-09-11T14:47:43Z
-status: human_needed
+verified: 2026-09-11T22:01:29Z
+status: passed
 score: 13/13 must-haves verified
 overrides_applied: 0
 re_verification:
@@ -11,17 +11,18 @@ re_verification:
     - "Wall Day person avatars now render as true 40x40 circles inside contained 80px headers, while legacy remains 34x34."
   gaps_remaining: []
   regressions: []
-human_verification:
+human_verification: []
+human_verification_completed:
   - test: "Open the compiled wall and legacy harness scenarios at 1920x1080 and visually re-check the corrected person headers."
-    expected: "All four wall avatars look circular; the first header's name, status, and badge fit cleanly inside the 80px row; the other three headers are undistorted; legacy retains circular 34px avatars and its familiar card shell."
-    why_human: "DOM geometry and overflow are deterministic and green, but perceived shape, clipping, and unchanged visual appearance still require one final human look."
+    result: pass
+    evidence: "Phase 1 UAT Test 2; user confirmed the corrected result is much better and asked to continue."
 ---
 
 # Phase 1: Prove the Foundation Verification Report
 
 **Phase Goal:** As a Home Assistant administrator, I want an opt-in wall-mode day slice built on a validated implementation base, so that I can evaluate the family calendar experience without changing legacy behavior.
-**Verified:** 2026-09-11T14:47:43Z
-**Status:** human_needed
+**Verified:** 2026-09-11T22:01:29Z
+**Status:** passed
 **Re-verification:** Yes — after Plan 01-04 closed the avatar-geometry UAT gap
 
 ## User Flow Coverage
@@ -32,7 +33,7 @@ User story: “As a Home Assistant administrator, I want an opt-in wall-mode day
 |------|----------|----------|--------|
 | Validate the base | The administrator can inspect a source-pinned continue/pivot decision. | `docs/adr/0001-implementation-base.md:1-116` contains both immutable commits, all eight matrix rows, the continue decision, provenance rules, consequences, and revisit criteria. The prior UAT source audit passed. | ✓ VERIFIED |
 | Enable wall mode | Exact `layout: wall` selects the wall surface and other values remain legacy. | `src/config.ts:74-84`, `src/config.test.ts:9-59`, and `src/ha-family-board-card.ts:284-293,1173-1196`; normalization and editor serialization tests pass. | ✓ VERIFIED |
-| Evaluate the day slice | The production bundle renders a deterministic full-panel Day calendar from Home Assistant-shaped data. | `dev/harness.html:95-254` imports only `dist`, injects the fixed clock, and supplies generic `hass.callApi` data; the fresh browser gate passed at 1920x1080 in America/Chicago. | ✓ CODE-COVERED; final corrected-header visual check pending |
+| Evaluate the day slice | The production bundle renders a deterministic full-panel Day calendar from Home Assistant-shaped data. | `dev/harness.html:95-254` imports only `dist`, injects the fixed clock, and supplies generic `hass.callApi` data; the fresh browser gate passed at 1920x1080 in America/Chicago, and UAT Test 2 accepted the corrected header appearance. | ✓ VERIFIED |
 | Compare legacy | Omitting `layout` retains the pre-wall root, shared renderer, and legacy avatar geometry. | `src/ha-family-board-card.ts:1173-1226`, `dev/harness.html:283-320`, and the fresh compiled-browser result `avatar-geometry: 4x34x34; legacy: existing card root`. Plan 01-04 did not change the shared card source. | ✓ VERIFIED |
 | Outcome | The administrator can safely compare wall and legacy without changing live Home Assistant. | The fixture is loopback-only and generic; privacy/live-path scans passed; no live Home Assistant path or API was accessed. | ✓ VERIFIED |
 
@@ -142,7 +143,7 @@ No `TBD`, `FIXME`, `XXX`, unresolved implementation placeholder, hollow renderer
 
 Portrait/tablet responsiveness, final day hierarchy, filters, now/next, dense-day behavior, other-view wall treatment, weather, comprehensive accessibility/error states, meals/lists, and live deployment remain explicitly assigned to Phases 2-5 or post-v1. They are not Phase 1 gaps.
 
-### Human Verification Required
+### Human Verification Completed
 
 #### 1. Corrected wall and legacy person-header appearance
 
@@ -150,15 +151,15 @@ Portrait/tablet responsiveness, final day hierarchy, filters, now/next, dense-da
 
 **Expected:** All four wall avatars look fully circular. Avery's avatar, name/status, and 48px badge fit cleanly within the 80px row; Jordan, Casey, and Household remain undistorted without badges. Legacy still shows circular 34px avatars and the familiar card shell.
 
-**Why human:** The deterministic browser gate proves exact dimensions and no client/scroll overflow, but perceived roundness, visual clipping, and unchanged appearance require one final human look.
+**Result:** PASS — the user accepted the corrected appearance in Phase 1 UAT Test 2.
 
 The previously passed ADR audit is not requested again.
 
 ### Gaps Summary
 
-No implementation blocker remains. Plan 01-04 closes the only diagnosed UAT gap with wall-scoped CSS and compiled-browser regression evidence, and no prior must-have regressed. Final acceptance remains `human_needed` for one narrow visual confirmation of the corrected headers.
+No implementation or acceptance gap remains. Plan 01-04 closes the diagnosed avatar issue with wall-scoped CSS and compiled-browser regression evidence; UAT Test 2 accepted the corrected result, and no prior must-have regressed.
 
 ---
 
-_Verified: 2026-09-11T14:47:43Z_
+_Verified: 2026-09-11T22:01:29Z_
 _Verifier: Codex (gsd-verifier)_

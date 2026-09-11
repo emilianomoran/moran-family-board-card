@@ -1,16 +1,16 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "I don't like how the avatars on the new one is not fully rounded."
 created: 2026-09-11T08:26:55-05:00
-updated: 2026-09-11T08:39:33-05:00
+updated: 2026-09-11T17:01:29-05:00
 ---
 
 ## Current Focus
 
-hypothesis: Confirmed — wall-only fixed header height causes the shared flex avatar to shrink vertically but not horizontally, so its 50% border radius produces an ellipse.
-test: Completed differential comparison of wall and legacy computed geometry.
-expecting: Satisfied: wall measured 40x19.5; legacy measured 34x34.
-next_action: Return this root-cause-only diagnosis to the UAT orchestrator; do not change implementation files.
+hypothesis: Resolved — the diagnosed wall-only flex shrink caused the ellipse.
+test: Completed differential comparison plus compiled wall/legacy geometry regression coverage and repeat visual UAT.
+expecting: Satisfied: wall now measures 40x40; legacy remains 34x34; the user accepted the corrected appearance.
+next_action: None; preserve the wall-scoped geometry and harness assertions as regression coverage.
 
 ## Symptoms
 
@@ -82,6 +82,6 @@ started: Discovered during Phase 01 UAT on 2026-09-11.
 ## Resolution
 
 root_cause: `src/wall-shell.ts` fixes `.moran-wall-shell .phead` at 80px high while the shared `.phead` remains a vertical flex container. Its `.avatar` child has equal declared width and height but retains the default `flex-shrink: 1` and no square-preserving minimum/aspect ratio. With wall mode's 40px avatar plus name, status, gaps, padding, and optional 48px touch badge competing for the fixed header height, Chrome resolves each avatar to 40px wide by 19.5px high. `border-radius: 50%` rounds that rectangle into an ellipse. Legacy does not set the fixed 80px height, so the same child stays 34x34.
-fix: Suggested direction only: make avatar geometry non-shrinkable and intrinsically square (for example, an explicit square flex basis/aspect ratio), then reconcile the wall person-header height/content arrangement so the name, status, and optional 48px badge fit without overflow. Keep this wall-scoped or otherwise prove legacy remains unchanged. Add a deterministic browser assertion that every visible wall avatar has equal rendered width and height, plus a legacy comparison.
-verification: Root cause reproduced and isolated with computed DOM measurements in the synthetic wall and legacy harnesses. No fix was applied because this session is diagnose-only.
-files_changed: []
+fix: Plan 01-04 added wall-scoped non-shrinking square avatar geometry, explicit header tracks for avatar/identity/optional badge, and scenario-specific DOMRect assertions in the compiled browser harness.
+verification: Automated checks report four 40x40 wall avatars inside contained 80px headers and four unchanged 34x34 legacy avatars. Phase 1 UAT Test 2 passed after the user reviewed the corrected appearance.
+files_changed: [src/wall-shell.ts, dev/harness.html, dev/harness-check.mjs, dist/moran-family-board-card.js]
