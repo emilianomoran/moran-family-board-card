@@ -1,23 +1,13 @@
 ---
 phase: 01-prove-the-foundation
-reviewed: 2026-09-11T08:50:41Z
+reviewed: 2026-09-11T14:37:55Z
 depth: standard
-files_reviewed: 14
+files_reviewed: 4
 files_reviewed_list:
-  - README.en.md
+  - src/wall-shell.ts
   - dev/harness.html
   - dev/harness-check.mjs
   - dist/moran-family-board-card.js
-  - docs/adr/0001-implementation-base.md
-  - src/calendar-source.test.ts
-  - src/calendar-source.ts
-  - src/config.test.ts
-  - src/config.ts
-  - src/editor-i18n.ts
-  - src/editor.ts
-  - src/ha-family-board-card.ts
-  - src/localize.ts
-  - src/wall-shell.ts
 findings:
   critical: 0
   warning: 0
@@ -26,41 +16,38 @@ findings:
 status: clean
 ---
 
-# Phase 01: Code Review Report
+# Phase 01 Plan 01-04: Code Review Report
 
-**Reviewed:** 2026-09-11T08:50:41Z
+**Reviewed:** 2026-09-11T14:37:55Z
 **Depth:** standard
-**Files Reviewed:** 14
+**Files Reviewed:** 4
 **Status:** clean
 
 ## Narrative Findings (AI reviewer)
 
 All reviewed files meet quality standards. No actionable correctness, security, or robustness
-issues remain in the Phase 1 implementation scope.
+issues were found in the Plan 01-04 change set.
 
-The previously identified findings are resolved in the current source, compiled distribution, and
-browser evidence path:
+The avatar correction is rooted beneath `.moran-wall-shell`; the shared card source and legacy
+styles are unchanged. Visible wall Day headers now use bounded avatar, identity, and optional-badge
+tracks. The compiled-browser fixture covers both badge and no-badge headers, verifies every wall
+avatar at 40×40px, verifies every legacy avatar at the unchanged 34×34px baseline, and rejects
+an 80px wall header with horizontal or vertical overflow. The existing 48px target, visible-focus,
+pointer, Enter, and Space checks remain active.
 
-- Wall-mode native and ARIA button/tab targets meet the 48×48px minimum and receive a computed
-  2px visible focus outline.
-- The wall Day current-date action has visible text `Today` and the accessible label `Show today`.
-- The browser harness explicitly overrides and verifies `America/Chicago` before accepting evidence.
-- The wall shell remains within a constrained host panel beneath 64px of synthetic host chrome.
-- A nested person badge handles pointer, Enter, and Space independently; each badge action opens
-  more-info without toggling its parent person lane, while direct parent activation still toggles it.
+`npm run format:check`, `npm run lint`, all 39 Vitest tests, `npm run build`, and
+`npm run test:harness` passed. Headless Chrome reported four contained 80px wall headers, a
+57.90625×48px fixture badge, all five wall-view interaction checks, and the legacy-root smoke
+check at 1920×1080 in `America/Chicago`. Rebuilding left the tracked generated bundle clean,
+confirming source/distribution parity; dependency manifests and `src/ha-family-board-card.ts`
+remain unchanged across the reviewed range.
 
-`npm run format:check`, `npm run lint`, all 39 Vitest tests, `npm run test:harness`, and
-`npm run build` passed. The harness passed Day, Timeline, Week, Month, and Agenda target/focus checks
-at 1920×1080 in `America/Chicago`, plus the legacy-shell smoke check. Rebuilding produced the same
-tracked distribution digest (`424851b98e440aa2e3e99a3f81ea2ef20eeeaac78e031372a9b3193bd7487dda`),
-and the generated bundle remained clean against Git.
-
-The explicit privacy scan found no credential values, private household identifiers, or live Home
-Assistant paths in the reviewed implementation/evidence set. `git diff --check` passed, and the
-verification run introduced no source or distribution change.
+The privacy scan found no credential values, private household identifiers, or live Home Assistant
+paths in the implementation, harness, or generated bundle. `git diff --check` passed, and the
+review introduced no implementation or distribution changes.
 
 ---
 
-_Reviewed: 2026-09-11T08:50:41Z_
+_Reviewed: 2026-09-11T14:37:55Z_
 _Reviewer: Codex (gsd-code-reviewer)_
 _Depth: standard_
