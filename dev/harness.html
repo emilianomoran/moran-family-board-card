@@ -81,7 +81,8 @@
       const warning = document.querySelector("#timezone-warning");
       if (detectedTimeZone !== EVIDENCE_TIME_ZONE) {
         warning.hidden = false;
-        warning.textContent = `Evidence timezone mismatch: expected ${EVIDENCE_TIME_ZONE}, detected ${detectedTimeZone}.`;
+        warning.textContent = `Harness stopped: expected ${EVIDENCE_TIME_ZONE}, detected ${detectedTimeZone}. Run npm run test:harness for deterministic evidence.`;
+        throw new Error(warning.textContent);
       }
 
       const timedEvent = (summary, startTime, endTime, location = "") => ({
@@ -223,6 +224,14 @@
       };
 
       const runInteractionChecks = async () => {
+        if (Intl.DateTimeFormat().resolvedOptions().timeZone !== EVIDENCE_TIME_ZONE) {
+          throw new Error(`Browser check did not use ${EVIDENCE_TIME_ZONE}.`);
+        }
+        if (window.innerWidth !== 1920 || window.innerHeight !== 1080) {
+          throw new Error(
+            `Browser check viewport is ${window.innerWidth}x${window.innerHeight}, expected 1920x1080.`,
+          );
+        }
         await nextRender();
         const root = card.shadowRoot;
         if (!root) throw new Error("Card shadow root did not render.");
