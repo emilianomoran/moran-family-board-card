@@ -47,6 +47,12 @@ created: 2026-09-11
 | T-01-13 | Tampering | Fixed-time seam | mitigate | The non-persisted provider defaults to system time, returns cloned dates, and is absent from public dashboard configuration. | closed |
 | T-01-14 | Tampering | Distribution artifact | mitigate | Formatting, typecheck, 39 unit tests, all-view browser harness, build, and exact bundle-digest checks passed. | closed |
 | T-01-SC (01-03) | Tampering | Package supply chain | accept | Dependencies and lockfile remain unchanged; the only manifest delta is the reviewed test:harness script invoking a repository-local Node file. | closed |
+| T-01-15 | Tampering | Wall Day avatar geometry | mitigate | Wall-scoped non-shrinking square geometry is isolated in `wall-shell.ts`; compiled-browser evidence proves four 40×40 wall avatars while legacy remains four 34×34 avatars. | closed |
+| T-01-16 | Denial of Service | Fixed-height wall person header | mitigate | Bounded grid tracks, text ellipsis, absent-badge collapse, and collapsed-lane handling keep all four 80px headers contained while preserving the 48px badge target. | closed |
+| T-01-17 | Repudiation | Browser geometry evidence | mitigate | The harness records DOMRect-derived wall and legacy geometry, and the runner requires scenario-specific evidence markers before reporting success. | closed |
+| T-01-18 | Information Disclosure | Gap-closure fixtures, logs, bundle, and summary | mitigate | The required credential/private-identifier denylist passed across both source files, both harness files, generated bundle, and `01-04-SUMMARY.md`; the implementation-only live-path assertion also passed. | closed |
+| T-01-19 | Tampering | Gap-closure distribution artifact | mitigate | A fresh Rollup build preceded browser verification, the resulting bundle digest was stable, and the working tree remained clean. | closed |
+| T-01-SC (01-04) | Tampering | Package supply chain | accept | Package manifests and lockfile remained unchanged throughout the wall-only CSS and harness correction; no package was installed. | closed |
 
 ---
 
@@ -57,6 +63,7 @@ created: 2026-09-11
 | AR-01 | T-01-SC (01-01) | Documentation-only work introduced no package or dependency exposure. | Phase threat model | 2026-09-11 |
 | AR-02 | T-01-SC (01-02) | The implementation reused the locked dependency graph and unchanged lockfile. | Phase threat model | 2026-09-11 |
 | AR-03 | T-01-SC (01-03) | A local harness script was added without changing dependencies; build and lockfile integrity were verified. | Phase threat model | 2026-09-11 |
+| AR-04 | T-01-SC (01-04) | The gap closure reused the locked dependency graph; package manifests and lockfile remained unchanged and no package was installed. | Phase threat model | 2026-09-11 |
 
 ---
 
@@ -65,6 +72,7 @@ created: 2026-09-11
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
 | 2026-09-11 | 17 | 17 | 0 | GSD security auditor |
+| 2026-09-11 | 23 | 23 | 0 | GSD security auditor — Plan 01-04 refresh |
 
 ## Verification Evidence
 
@@ -75,6 +83,8 @@ created: 2026-09-11
 - A temporary Rollup rebuild matched the tracked distribution bundle.
 - Credential, private-identifier, live-path, screenshot metadata, and screenshot string scans passed.
 - No execution summary reported an unregistered threat flag.
+- The compiled harness proved four 40×40 wall avatars, four unchanged 34×34 legacy avatars, four contained 80px wall headers, and the preserved 48px optional badge target.
+- The refreshed Phase 1 scan covered 20 explicit privacy artifacts and 14 implementation live-path artifacts without accessing live Home Assistant.
 
 ---
 
