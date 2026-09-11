@@ -1270,13 +1270,17 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     `;
   }
 
-  private _weekNav() {
+  private _weekNav(showTodayAction = false) {
     const { monday } = this._weekBounds();
     return html`
       <div class="weeknav">
         <button class="nav" aria-label=${this._t("prev_week")} @click=${this._prevWeek}>‹</button>
-        <button class="nav-now" @click=${this._thisWeek}>
-          ${formatWeekRange(this.hass, monday)}
+        <button
+          class="nav-now"
+          aria-label=${showTodayAction ? this._t("show_today") : nothing}
+          @click=${this._thisWeek}
+        >
+          ${showTodayAction ? this._t("today") : formatWeekRange(this.hass, monday)}
         </button>
         <button class="nav" aria-label=${this._t("next_week")} @click=${this._nextWeek}>›</button>
       </div>
@@ -1327,7 +1331,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             ? html`<span class="spinner"></span>`
             : nothing}
         </span>
-        ${this._weekNav()}
+        ${this._weekNav(this._layout === "wall")}
       </div>
       ${this._renderDayTabs()}
       ${this._loadError ? html`<div class="banner">${this._t("load_error")}</div>` : nothing}

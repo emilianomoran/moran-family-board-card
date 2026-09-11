@@ -239,6 +239,13 @@
 
         const wall = root.querySelector(".moran-wall-shell");
         if (!wall) throw new Error("Wall scenario did not render the wall shell.");
+        const todayAction = wall.querySelector(".dayhead .nav-now");
+        if (
+          todayAction?.textContent.trim() !== "Today" ||
+          todayAction.getAttribute("aria-label") !== "Show today"
+        ) {
+          throw new Error("Wall Day current-date action is not labeled Today / Show today.");
+        }
 
         const actionMethods = [
           "_goToDate",
