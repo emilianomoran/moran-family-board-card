@@ -337,7 +337,7 @@ function e(e,t,i,a){var r,n=arguments.length,s=n<3?t:null===a?a=Object.getOwnPro
           role="button"
           tabindex="0"
           @click=${t=>{t.stopPropagation(),this._moreInfo(e)}}
-          @keydown=${t=>{"Enter"!==t.key&&" "!==t.key||(t.preventDefault(),this._moreInfo(e))}}
+          @keydown=${t=>{"Enter"!==t.key&&" "!==t.key||(t.preventDefault(),t.stopPropagation(),this._moreInfo(e))}}
         >
           ${i?j`<ha-icon .icon=${i}></ha-icon>`:K}
           <span>${t.state}${a}</span>

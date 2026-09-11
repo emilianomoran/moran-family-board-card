@@ -176,6 +176,15 @@
           state: "home",
           attributes: { friendly_name: "Household" },
         },
+        "sensor.fixture_avery_battery": {
+          entity_id: "sensor.fixture_avery_battery",
+          state: "82",
+          attributes: {
+            friendly_name: "Avery fixture battery",
+            icon: "mdi:battery",
+            unit_of_measurement: "%",
+          },
+        },
       };
 
       const hass = {
@@ -213,6 +222,7 @@
             color: "#8fa8f5",
             match_title_prefixes: ["Avery:", "Avery + Jordan:"],
             strip_title_prefix: true,
+            badges: scenario === "wall" ? ["sensor.fixture_avery_battery"] : undefined,
           },
           {
             name: "Jordan",
@@ -301,6 +311,73 @@
           todayAction.getAttribute("aria-label") !== "Show today"
         ) {
           throw new Error("Wall Day current-date action is not labeled Today / Show today.");
+        }
+
+        const badge = wall.querySelector(".pbadge");
+        const personHeader = badge?.closest(".phead");
+        if (!badge || !personHeader) {
+          throw new Error("Wall Day did not render the synthetic person badge and lane header.");
+        }
+
+        const calls = { moreInfo: 0, togglePerson: 0 };
+        card._moreInfo = () => {
+          calls.moreInfo += 1;
+        };
+        card._togglePerson = () => {
+          calls.togglePerson += 1;
+        };
+        for (const key of ["Enter", " "]) {
+          const badgeEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeBadge = { ...calls };
+          badge.dispatchEvent(badgeEvent);
+          if (
+            !badgeEvent.defaultPrevented ||
+            calls.moreInfo !== beforeBadge.moreInfo + 1 ||
+            calls.togglePerson !== beforeBadge.togglePerson
+          ) {
+            throw new Error(
+              `Wall Day person badge did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+
+          const headerEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeHeader = { ...calls };
+          personHeader.dispatchEvent(headerEvent);
+          if (
+            !headerEvent.defaultPrevented ||
+            calls.togglePerson !== beforeHeader.togglePerson + 1 ||
+            calls.moreInfo !== beforeHeader.moreInfo
+          ) {
+            throw new Error(
+              `Wall Day person header did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+        }
+
+        const beforeBadgeClick = { ...calls };
+        badge.click();
+        if (
+          calls.moreInfo !== beforeBadgeClick.moreInfo + 1 ||
+          calls.togglePerson !== beforeBadgeClick.togglePerson
+        ) {
+          throw new Error("Wall Day person badge click also toggled its parent lane.");
+        }
+
+        const beforeHeaderClick = { ...calls };
+        personHeader.click();
+        if (
+          calls.togglePerson !== beforeHeaderClick.togglePerson + 1 ||
+          calls.moreInfo !== beforeHeaderClick.moreInfo
+        ) {
+          throw new Error("Wall Day person header click did not independently toggle its lane.");
         }
 
         const actionMethods = [

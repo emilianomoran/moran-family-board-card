@@ -1115,6 +1115,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           @keydown=${(k: KeyboardEvent) => {
             if (k.key === "Enter" || k.key === " ") {
               k.preventDefault();
+              k.stopPropagation();
               this._moreInfo(id);
             }
           }}
