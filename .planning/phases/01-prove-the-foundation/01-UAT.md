@@ -1,14 +1,14 @@
 ---
-status: diagnosed
+status: testing
 phase: 01-prove-the-foundation
 source: [01-VERIFICATION.md]
 started: 2026-09-11T09:11:15.165Z
-updated: 2026-09-11T13:31:37.078Z
+updated: 2026-09-11T14:53:30Z
 ---
 
 ## Current Test
 
-[testing complete]
+2
 
 ## Tests
 
@@ -17,26 +17,24 @@ updated: 2026-09-11T13:31:37.078Z
 expected: Every comparison and the continue decision are supported by the cited immutable source, license, test, and migration evidence.
 result: pass
 
-### 2. Complete the 1920x1080 wall and legacy visual and interaction review
+### 2. Visually re-check the corrected person headers
 
-expected: Wall is one legible calendar-only full-panel canvas with no clipping or private data; legacy retains the pre-wall shell and working view/date interactions.
-result: issue
-reported: "I don't like how the avatars on the new one is not fully rounded. and there's a few other tweaks that I might want to do."
-severity: cosmetic
+expected: All four wall avatars look circular; the first header's name, status, and badge fit cleanly inside the 80px row; the other three headers are undistorted; legacy retains circular 34px avatars and its familiar card shell.
+result: pending
 
 ## Summary
 
 total: 2
 passed: 1
-issues: 1
-pending: 0
+issues: 0
+pending: 1
 skipped: 0
 blocked: 0
 
 ## Gaps
 
 - truth: "Wall-mode person avatars are fully rounded and visually consistent."
-  status: failed
+  status: resolved
   reason: "User reported: I don't like how the avatars on the new one is not fully rounded."
   severity: cosmetic
   test: 2
@@ -52,4 +50,5 @@ blocked: 0
     - "Make wall avatars non-shrinkable and intrinsically square."
     - "Reconcile wall person-header sizing so its visible content fits without overflow."
     - "Add deterministic wall avatar aspect-ratio coverage while preserving legacy geometry."
+  resolution: "Plan 01-04 added wall-scoped square avatar geometry, contained header layout, and compiled wall/legacy browser assertions. Automated re-verification passed; visual acceptance remains pending."
   debug_session: .planning/debug/wall-avatar-not-fully-round.md
