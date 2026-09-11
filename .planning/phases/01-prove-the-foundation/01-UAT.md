@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 01-prove-the-foundation
 source: [01-VERIFICATION.md]
 started: 2026-09-11T09:11:15.165Z
-updated: 2026-09-11T14:53:30Z
+updated: 2026-09-11T22:01:29Z
 ---
 
 ## Current Test
 
-number: 2
-name: Visually re-check the corrected person headers
-expected: |
-  All four wall avatars look circular; the first header's name, status, and badge fit cleanly inside the 80px row; the other three headers are undistorted; legacy retains circular 34px avatars and its familiar card shell.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -24,14 +20,14 @@ result: pass
 ### 2. Visually re-check the corrected person headers
 
 expected: All four wall avatars look circular; the first header's name, status, and badge fit cleanly inside the 80px row; the other three headers are undistorted; legacy retains circular 34px avatars and its familiar card shell.
-result: pending
+result: pass
 
 ## Summary
 
 total: 2
-passed: 1
+passed: 2
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -54,5 +50,5 @@ blocked: 0
     - "Make wall avatars non-shrinkable and intrinsically square."
     - "Reconcile wall person-header sizing so its visible content fits without overflow."
     - "Add deterministic wall avatar aspect-ratio coverage while preserving legacy geometry."
-  resolution: "Plan 01-04 added wall-scoped square avatar geometry, contained header layout, and compiled wall/legacy browser assertions. Automated re-verification passed; visual acceptance remains pending."
+  resolution: "Plan 01-04 added wall-scoped square avatar geometry, contained header layout, and compiled wall/legacy browser assertions. Automated re-verification passed, and the user accepted the corrected appearance in UAT Test 2."
   debug_session: .planning/debug/wall-avatar-not-fully-round.md
