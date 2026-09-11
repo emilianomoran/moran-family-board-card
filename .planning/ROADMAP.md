@@ -22,6 +22,7 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 **Mode:** mvp
 **Depends on:** Nothing
 **Requirements:** FOUND-01, FOUND-02, FOUND-03
+**Tracking:** [GitHub issue #2](https://github.com/emilianomoran/moran-family-board-card/issues/2)
 **Success Criteria** (what must be TRUE):
 
 1. A written ADR compares this fork and `tienou/family-calendar-card` from source and records a clear continue/pivot decision.
@@ -43,6 +44,7 @@ Plans:
 **Mode:** mvp
 **Depends on:** Phase 1
 **Requirements:** DATA-01, DATA-02, DATA-03, CAL-01, CAL-02, CAL-04, CAL-05, CAL-06
+**Tracking:** [GitHub issue #3](https://github.com/emilianomoran/moran-family-board-card/issues/3)
 **Success Criteria** (what must be TRUE):
 
 1. The wall day view clearly shows each visible person, all-day and timed events, shared ownership, a time axis, and the current-time marker at 1920x1080.
@@ -65,6 +67,7 @@ Plans:
 **Mode:** mvp
 **Depends on:** Phase 2
 **Requirements:** CAL-03, CAL-07, INT-01, RSP-01, RSP-02
+**Tracking:** [GitHub issue #4](https://github.com/emilianomoran/moran-family-board-card/issues/4)
 **Success Criteria** (what must be TRUE):
 
 1. Timeline, week, month, and agenda use the same person filters, event identity, shared-event treatment, and date navigation as day view.
@@ -87,6 +90,7 @@ Plans:
 **Mode:** mvp
 **Depends on:** Phase 3
 **Requirements:** INT-02, INT-03, ACC-01, ACC-02, ACC-03, REL-01, REL-02, REL-03
+**Tracking:** [GitHub issue #5](https://github.com/emilianomoran/moran-family-board-card/issues/5)
 **Success Criteria** (what must be TRUE):
 
 1. Event details expose all available calendar information and show only the create/update/delete actions supported by the target entity and event.
@@ -109,6 +113,7 @@ Plans:
 **Mode:** mvp
 **Depends on:** Phase 4
 **Requirements:** QA-01, QA-02, QA-03, DIST-01, DIST-02
+**Tracking:** [GitHub issue #6](https://github.com/emilianomoran/moran-family-board-card/issues/6)
 **Success Criteria** (what must be TRUE):
 
 1. Unit and browser suites cover the required event, editor, interaction, capability, failure, and responsive scenarios with deterministic time and generic data.
