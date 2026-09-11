@@ -30,11 +30,11 @@ This roadmap turns the existing fork into a dependable calendar-first family wal
 3. The same build renders an existing configuration with unchanged defaults when wall mode is absent.
 4. Card and editor compile against one shared definition for all v1 configuration added in this phase.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 01-01: Inspect the alternative base, run common scenarios, and record the implementation ADR.
+- [x] 01-01: Inspect the alternative base, run common scenarios, and record the implementation ADR.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -151,7 +151,7 @@ These items must enter a new milestone or an approved roadmap insertion; they ar
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prove the Foundation | 0/3 | Not started | - |
+| 1. Prove the Foundation | 1/3 | In Progress | - |
 | 2. Family-at-a-Glance Day | 0/3 | Not started | - |
 | 3. Planning Horizons and Responsive Layouts | 0/3 | Not started | - |
 | 4. Trustworthy Interaction and Resilience | 0/3 | Not started | - |

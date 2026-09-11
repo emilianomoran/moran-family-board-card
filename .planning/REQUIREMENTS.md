@@ -15,7 +15,7 @@
 
 ### Foundation
 
-- [ ] **FOUND-01**: The project records a source-level go/pivot decision comparing this fork with `tienou/family-calendar-card` across target features, shared-calendar routing, API use, tests, maintenance, license, and migration cost.
+- [x] **FOUND-01**: The project records a source-level go/pivot decision comparing this fork with `tienou/family-calendar-card` across target features, shared-calendar routing, API use, tests, maintenance, license, and migration cost.
 - [ ] **FOUND-02**: A user can enable the new experience with an explicit wall-layout configuration while an existing configuration without that option renders with unchanged defaults and behavior.
 - [ ] **FOUND-03**: The card and visual editor use one shared configuration type/default source for every setting introduced or changed by v1.
 
@@ -111,7 +111,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
 | DATA-01 | Phase 2 | Pending |
@@ -142,6 +142,7 @@
 | DIST-02 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 29 total
 - Mapped to phases: 29
 - Unmapped: 0 ✓

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute Phase 1
-stopped_at: Phase 1 planning complete
-last_updated: "2026-09-11T04:15:47.632Z"
-last_activity: 2026-09-11 — Completed and verified the three-plan Phase 1 execution package.
+status: executing
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-09-11T07:30:47.834Z"
+last_activity: 2026-09-11 — Completed Plan 01-01 implementation-base ADR.
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 15
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,29 +26,29 @@ See: .planning/PROJECT.md (updated 2026-09-11)
 ## Current Position
 
 Phase: 1 of 5 (Prove the Foundation)
-Plan: 0 of 3 in current phase
-Status: Ready to execute Phase 1
-Last activity: 2026-09-11 — Completed and verified the three-plan Phase 1 execution package.
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-09-11 — Completed Plan 01-01 implementation-base ADR.
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 3 min
+- Total execution time: 3 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1. Prove the Foundation | 1 | 3 min | 3 min |
 
 **Recent Trend:**
 
-- Last 5 plans: none
+- Last 5 plans: 3 min
 - Trend: Not established
 
 ## Accumulated Context
@@ -62,6 +62,8 @@ Full decisions are logged in PROJECT.md.
 - Use the dedicated Moran fork as the shared home for code and GSD planning.
 - Continue the Moran TypeScript/Lit fork; use `tienou/family-calendar-card` as a source-pinned design reference rather than the implementation base.
 - Keep wall mode opt-in through `layout: wall`; configurations without that exact value stay on the legacy path.
+- [Phase 01-prove-the-foundation]: Continue the Moran TypeScript/Lit fork as the implementation base; use tienou/family-calendar-card only as a source-pinned design reference. — The selected base already has tested person routing, the exact five-view model, strict typechecking, and a safer Home Assistant API boundary at lower migration cost.
+- [Phase 01-prove-the-foundation]: Require explicit MIT notice preservation and a documented source commit before accepting substantial copied code. — Behavioral learning is allowed, but provenance for substantial source reuse must remain reviewable and license-complete.
 
 ### Pending Todos
 
@@ -82,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-11T04:15:47.632Z
-Stopped at: Phase 1 planning complete
-Resume file: .planning/phases/01-prove-the-foundation/01-01-PLAN.md
+Last session: 2026-09-11T07:30:47.830Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
