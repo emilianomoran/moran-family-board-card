@@ -140,6 +140,13 @@
 | QA-03 | Phase 5 | Pending |
 | DIST-01 | Phase 5 | Pending |
 | DIST-02 | Phase 5 | Pending |
+| BRIDGE-01 | Future milestone | Deferred |
+| BRIDGE-02 | Future milestone | Deferred |
+| LOG-01 | Future milestone | Deferred |
+| TODO-01 | Future milestone | Deferred |
+| LIST-01 | Future milestone | Deferred |
+| MEAL-01 | Future milestone | Deferred |
+| IMPORT-01 | Future milestone | Deferred |
 
 **Coverage:**
 
@@ -149,4 +156,4 @@
 
 ---
 *Requirements defined: 2026-09-11*
-*Last updated: 2026-09-11 after Plan 01-02 execution*
+*Last updated: 2026-09-11 after Phase 1 completion*

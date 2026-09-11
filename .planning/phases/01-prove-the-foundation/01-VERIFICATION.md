@@ -5,7 +5,7 @@ status: passed
 score: 13/13 must-haves verified
 overrides_applied: 0
 re_verification:
-  previous_status: human_needed
+  previous_status: awaiting_human_review
   previous_score: 9/9
   gaps_closed:
     - "Wall Day person avatars now render as true 40x40 circles inside contained 80px headers, while legacy remains 34x34."

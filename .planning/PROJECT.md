@@ -19,10 +19,12 @@ At a glance, every family member can reliably understand who is doing what and w
 - ✓ The card supports a visual editor, weather, now/next information, kiosk return behavior, and capability-gated event actions — inherited codebase.
 - ✓ Shared calendar events can be routed to one or more configurable person lanes without duplicating source calendars — Moran fork foundation.
 - ✓ The renamed package, bundle, and custom element can coexist with the upstream Family Board Card — Moran fork foundation.
+- ✓ Exact `layout: wall` opts into a tested 1920×1080 calendar-only Day shell while omitted or unknown layout values preserve the legacy path — Phase 1.
+- ✓ Card and editor share one lossless configuration contract, and calendar reads remain behind the authenticated Home Assistant client — Phase 1.
 
 ### Active
 
-- [ ] Deliver an opt-in wall-calendar mode optimized for a 1920x1080 landscape display.
+- [ ] Refine the proven wall Day shell into the final family-at-a-glance experience at 1920x1080.
 - [ ] Make people, dates, current activity, next activity, and shared events understandable within seconds.
 - [ ] Preserve useful calendar views and make navigation comfortable on a touchscreen and tablet.
 - [ ] Keep existing configurations backward compatible while reducing the risk of the current monolithic renderer.
@@ -66,13 +68,14 @@ At a glance, every family member can reliably understand who is doing what and w
 | Build inside Home Assistant instead of a standalone React app | Home Assistant already owns authentication, calendars, dashboard hosting, themes, weather, and household entities | ✓ Good |
 | Track product planning beside implementation in this dedicated fork | Keeps requirements, decisions, code, and releases in one versioned repository | ✓ Good |
 | Make the calendar the v1 product | It carries the clearest daily value; meals and lists can follow without delaying validation | ✓ Good |
-| Keep wall mode opt-in | Protects upstream-compatible behavior and permits side-by-side evaluation | — Pending |
-| Compare the fork with `tienou/family-calendar-card` before structural investment | The newer project covers several formerly missing capabilities and may provide reusable patterns | — Pending |
+| Keep wall mode opt-in | Protects upstream-compatible behavior and permits side-by-side evaluation | ✓ Good |
+| Continue this fork and use `tienou/family-calendar-card` as a source-pinned design reference | This fork already has tested person routing, the five-view model, strict TypeScript, and the safer Home Assistant boundary at lower migration cost | ✓ Good |
 | Keep Calendar Bridge behind a future Home Assistant-side adapter | Direct browser access would weaken security and deployment reliability | ✓ Good |
+| Keep wall presentation and avatar geometry scoped beneath the opt-in shell | Prevents the new full-panel experience from changing legacy card behavior | ✓ Good |
 
 ## Evolution
 
 After each phase, move shipped and verified requirements from Active to Validated, record scope changes and decisions, and confirm that the Core Value still drives prioritization. After each milestone, review every exclusion before promoting deferred work.
 
 ---
-*Last updated: 2026-09-11 after GSD project initialization*
+*Last updated: 2026-09-11 after Phase 1*

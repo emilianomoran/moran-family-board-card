@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 01-04-PLAN.md; awaiting repeat visual UAT
-last_updated: "2026-09-11T14:34:02.867Z"
-last_activity: 2026-09-11 — Completed Plan 01-04 avatar geometry gap closure and automated evidence.
+status: ready_to_plan
+stopped_at: Phase 1 complete; ready to discuss or plan Phase 2
+last_updated: "2026-09-11T22:03:35Z"
+last_activity: 2026-09-11 — Phase 1 passed automated, security, and human verification; transitioned to Phase 2.
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
   completed_plans: 4
-  percent: 0
+  percent: 20
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-11)
 
 **Core value:** At a glance, every family member can reliably understand who is doing what and when.
-**Current focus:** Phase 1 — Prove the Foundation (gap closure complete; awaiting repeat UAT)
+**Current focus:** Phase 2 — Family-at-a-Glance Day
 
 ## Current Position
 
-Phase: 01 (prove-the-foundation) — AWAITING UAT
-Plan: 4 of 4 in current phase
-Status: Implementation complete — awaiting repeat visual UAT
-Last activity: 2026-09-11 — Completed Plan 01-04 avatar geometry gap closure and automated evidence.
+Phase: 02 (family-at-a-glance-day) — READY TO PLAN
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-11 — Phase 1 passed automated, security, and human verification; transitioned to Phase 2.
 
 Progress: [██░░░░░░░░] 20%
 
@@ -60,15 +60,11 @@ Progress: [██░░░░░░░░] 20%
 
 Full decisions are logged in PROJECT.md.
 
-- Build as a Home Assistant Lit custom card, not a standalone React application.
+- Build and track the product as a Home Assistant Lit custom card in the dedicated Moran fork, not a standalone React application.
 - Keep calendar as the v1 product; household operations are deferred.
-- Use the dedicated Moran fork as the shared home for code and GSD planning.
-- Continue the Moran TypeScript/Lit fork; use `tienou/family-calendar-card` as a source-pinned design reference rather than the implementation base.
-- Keep wall mode opt-in through `layout: wall`; configurations without that exact value stay on the legacy path.
-- [Phase 01-prove-the-foundation]: Continue the Moran TypeScript/Lit fork as the implementation base; use tienou/family-calendar-card only as a source-pinned design reference. — The selected base already has tested person routing, the exact five-view model, strict typechecking, and a safer Home Assistant API boundary at lower migration cost.
-- [Phase 01-prove-the-foundation]: Require explicit MIT notice preservation and a documented source commit before accepting substantial copied code. — Behavioral learning is allowed, but provenance for substantial source reuse must remain reviewable and license-complete.
-- [Phase 01-prove-the-foundation]: Keep the calendar adapter limited to one authenticated GET while the controller retains fan-out, routing, parsing, deduplication, loading, and error semantics. — This preserves the existing behavior and Home Assistant authentication boundary while creating the minimum seam needed by wall mode.
-- [Phase 01-prove-the-foundation]: Keep wall avatar geometry scoped beneath the opt-in shell. — This closes the UAT issue without changing the shared legacy avatar rule or other view sizing.
+- Continue the Moran TypeScript/Lit fork; use `tienou/family-calendar-card` as a source-pinned design reference with explicit MIT provenance for substantial reuse.
+- Keep wall mode opt-in through exact `layout: wall` and its calendar adapter limited to the authenticated Home Assistant client; absent and unknown layouts stay legacy.
+- Keep wall presentation and avatar geometry scoped beneath the opt-in shell so Phase 2 can evolve without changing legacy styling.
 
 ### Pending Todos
 
@@ -89,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-11T14:33:27.163Z
-Stopped at: Completed 01-04-PLAN.md; awaiting repeat visual UAT
-Resume file: .planning/phases/01-prove-the-foundation/01-UAT.md
+Last session: 2026-09-11T22:03:35Z
+Stopped at: Phase 1 complete; ready to discuss or plan Phase 2
+Resume file: None
