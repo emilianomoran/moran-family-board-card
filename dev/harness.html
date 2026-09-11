@@ -280,6 +280,36 @@
         const root = card.shadowRoot;
         if (!root) throw new Error("Card shadow root did not render.");
 
+        const personHeaders = [...root.querySelectorAll(".board .header-row .phead:not(.off)")];
+        const expectedAvatarSize = scenario === "wall" ? 40 : 34;
+        const geometryMarker = `avatar-geometry: 4x${expectedAvatarSize}x${expectedAvatarSize}`;
+        if (personHeaders.length !== 4) {
+          throw new Error(
+            `${scenario}: rendered ${personHeaders.length} visible Day person headers, expected 4.`,
+          );
+        }
+        for (const [index, personHeader] of personHeaders.entries()) {
+          const avatar = personHeader.querySelector(":scope > .avatar");
+          if (!avatar) {
+            throw new Error(`${scenario}: Day person header ${index + 1} has no avatar.`);
+          }
+          const { width, height } = avatar.getBoundingClientRect();
+          if (width === 0 || height === 0) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is not visible (${width}x${height}).`,
+            );
+          }
+          if (
+            Math.abs(width - height) > 0.5 ||
+            Math.abs(width - expectedAvatarSize) > 0.5 ||
+            Math.abs(height - expectedAvatarSize) > 0.5
+          ) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is ${width}x${height}, expected ${expectedAvatarSize}x${expectedAvatarSize}.`,
+            );
+          }
+        }
+
         if (scenario === "legacy") {
           if (root.querySelector(".moran-wall-shell")) {
             throw new Error("Legacy scenario unexpectedly rendered the wall shell.");
@@ -287,7 +317,7 @@
           if (!root.querySelector("ha-card")) {
             throw new Error("Legacy scenario did not render the existing card root.");
           }
-          return ["legacy: existing card root"];
+          return [geometryMarker, "legacy: existing card root"];
         }
 
         const wall = root.querySelector(".moran-wall-shell");
@@ -313,10 +343,36 @@
           throw new Error("Wall Day current-date action is not labeled Today / Show today.");
         }
 
-        const badge = wall.querySelector(".pbadge");
+        for (const [index, header] of personHeaders.entries()) {
+          const { height } = header.getBoundingClientRect();
+          if (
+            Math.abs(height - 80) > 0.5 ||
+            header.scrollWidth > header.clientWidth + 1 ||
+            header.scrollHeight > header.clientHeight + 1
+          ) {
+            throw new Error(
+              `Wall Day person header ${index + 1} is not contained at 80px ` +
+                `(height=${height}, width=${header.clientWidth}/${header.scrollWidth}, ` +
+                `height=${header.clientHeight}/${header.scrollHeight}).`,
+            );
+          }
+        }
+
+        const badge = personHeaders[0].querySelector(":scope > .pbadges .pbadge");
         const personHeader = badge?.closest(".phead");
         if (!badge || !personHeader) {
-          throw new Error("Wall Day did not render the synthetic person badge and lane header.");
+          throw new Error(
+            "Wall Day first person header did not render its optional fixture badge.",
+          );
+        }
+        if (!personHeaders.slice(1).some((header) => !header.querySelector(".pbadge"))) {
+          throw new Error("Wall Day did not render a person header without an optional badge.");
+        }
+        const badgeRect = badge.getBoundingClientRect();
+        if (badgeRect.width < 48 || badgeRect.height < 48) {
+          throw new Error(
+            `Wall Day first person badge is ${badgeRect.width}x${badgeRect.height}, expected at least 48x48.`,
+          );
         }
 
         const calls = { moreInfo: 0, togglePerson: 0 };
@@ -392,7 +448,10 @@
           if (typeof card[method] === "function") card[method] = () => {};
         }
 
-        const results = [];
+        const results = [
+          geometryMarker,
+          `wall-header: 4x80 contained; badge: ${badgeRect.width}x${badgeRect.height}`,
+        ];
         const viewButtons = [...wall.querySelectorAll('.switch button[role="tab"]')];
         for (const viewButton of viewButtons) {
           viewButton.click();

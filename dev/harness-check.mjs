@@ -109,12 +109,22 @@ class CdpClient {
 }
 
 const scenarios = [
-  { name: "wall", checks: "interactions", chromeHeight: 64 },
-  { name: "legacy", checks: "smoke", chromeHeight: 0 },
+  {
+    name: "wall",
+    checks: "interactions",
+    chromeHeight: 64,
+    expectedGeometryMarker: "avatar-geometry: 4x40x40",
+  },
+  {
+    name: "legacy",
+    checks: "smoke",
+    chromeHeight: 0,
+    expectedGeometryMarker: "avatar-geometry: 4x34x34",
+  },
 ];
 
 try {
-  for (const { name, checks, chromeHeight } of scenarios) {
+  for (const { name, checks, chromeHeight, expectedGeometryMarker } of scenarios) {
     const targetResponse = await fetch(`http://127.0.0.1:${devToolsPort}/json/new?about:blank`, {
       method: "PUT",
     });
@@ -159,6 +169,11 @@ try {
     if (!result) throw new Error(`${name} browser check timed out.`);
     if (result.status !== "pass") {
       throw new Error(`${name} browser check failed: ${result.details}`);
+    }
+    if (!result.details.includes(expectedGeometryMarker)) {
+      throw new Error(
+        `${name} browser check did not report expected geometry marker: ${expectedGeometryMarker}`,
+      );
     }
     console.log(`${name}: 1920x1080 America/Chicago browser check passed (${result.details})`);
   }
