@@ -24,6 +24,7 @@ moran-family-board-card/
 **`src/`:**
 - Contains all handwritten runtime TypeScript.
 - `src/ha-family-board-card.ts` is the main card, renderers, controller, dialogs, and CSS.
+- `src/wall-shell.ts` is the presentation-only opt-in wall composition and scoped styling.
 - `src/config.ts` is the shared card/editor contract and lossless layout serializer.
 - `src/calendar-source.ts` is the narrow authenticated Home Assistant calendar-read adapter.
 - `src/events.ts` contains DOM-free event logic.
