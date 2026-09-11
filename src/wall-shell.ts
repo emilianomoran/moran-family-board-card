@@ -231,13 +231,63 @@ export const wallShellStyles = css`
     min-width: 240px;
     height: 80px;
     padding: 8px 16px;
-    gap: 4px;
   }
 
-  .moran-wall-shell .pname {
+  .moran-wall-shell .phead:not(.off) {
+    display: grid;
+    grid-template-columns: var(--fb-avatar-size) minmax(0, 1fr) auto;
+    grid-template-rows: repeat(2, minmax(0, auto));
+    align-content: center;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 0;
+  }
+
+  .moran-wall-shell .phead > .avatar {
+    width: var(--fb-avatar-size);
+    height: var(--fb-avatar-size);
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+  }
+
+  .moran-wall-shell .phead:not(.off) > .avatar {
+    grid-column: 1;
+    grid-row: 1 / -1;
+  }
+
+  .moran-wall-shell .phead:not(.off) > .pname,
+  .moran-wall-shell .phead:not(.off) > .pstatus {
+    grid-column: 2;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .moran-wall-shell .phead:not(.off) > .pname {
+    grid-row: 1;
+    align-self: end;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.25;
+  }
+
+  .moran-wall-shell .phead:not(.off) > .pstatus {
+    grid-row: 2;
+    align-self: start;
+  }
+
+  .moran-wall-shell .phead:not(.off) > .pbadges {
+    grid-column: 3;
+    grid-row: 1 / -1;
+    flex-wrap: nowrap;
+    margin-top: 0;
+  }
+
+  .moran-wall-shell .phead.off {
+    justify-content: center;
+    padding-inline: 0;
   }
 
   .moran-wall-shell .pstatus,
