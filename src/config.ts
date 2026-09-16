@@ -47,6 +47,7 @@ export interface FamilyBoardConfig extends LovelaceCardConfig {
   auto_icons?: boolean;
   icon_patterns?: string[];
   show_focus?: boolean;
+  read_only?: boolean;
   drag_drop?: boolean;
   compact?: boolean;
   map_url?: string;

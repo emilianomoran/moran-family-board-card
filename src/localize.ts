@@ -53,10 +53,16 @@ const EN: Dict = {
   delete_failed: "Deleting failed.",
   default_title: "Event",
   load_error: "Calendar could not be loaded.",
+  loading_calendars: "Loading calendars…",
+  refreshing_calendars: "Refreshing calendars…",
+  retry: "Retry",
+  partial_load: "Some calendars could not be loaded. Showing available events.",
+  incomplete_events: "Some calendars or events could not be read. The schedule may be incomplete.",
   no_events: "No events.",
   more_events: "more events",
   focus_next: "next",
   focus_free: "free",
+  focus_unavailable: "schedule unavailable",
 };
 
 const DE: Dict = {
@@ -107,10 +113,18 @@ const DE: Dict = {
   delete_failed: "Löschen fehlgeschlagen.",
   default_title: "Termin",
   load_error: "Kalender konnte nicht geladen werden.",
+  loading_calendars: "Kalender werden geladen…",
+  refreshing_calendars: "Kalender werden aktualisiert…",
+  retry: "Erneut versuchen",
+  partial_load:
+    "Einige Kalender konnten nicht geladen werden. Verfügbare Termine werden angezeigt.",
+  incomplete_events:
+    "Einige Kalender oder Termine konnten nicht gelesen werden. Der Plan ist möglicherweise unvollständig.",
   no_events: "Keine Termine.",
   more_events: "weitere Termine",
   focus_next: "als Nächstes",
   focus_free: "frei",
+  focus_unavailable: "Plan nicht verfügbar",
 };
 
 const TABLE: Record<string, Dict> = { en: EN, de: DE };
@@ -159,6 +173,22 @@ export function formatMinutes(hass: any, min: number): string {
   return formatTime(hass, d);
 }
 
+/** Compact hour tick for the wall axis, honoring Home Assistant's clock preference. */
+export function formatHourLabel(hass: any, hour: number): string {
+  const date = new Date(2020, 0, 1, hour, 0, 0, 0);
+  return new Intl.DateTimeFormat(
+    intlLocale(hass),
+    use12h(hass)
+      ? { hour: "numeric", hourCycle: "h12" }
+      : { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+  ).format(date);
+}
+
+/** Short, localized calendar date for a compact wall heading. */
+export function formatShortDate(hass: any, date: Date): string {
+  return new Intl.DateTimeFormat(intlLocale(hass), { month: "short", day: "numeric" }).format(date);
+}
+
 /**
  * Localized weekday names ordered by the given week start.
  * `style`: "short" | "long". `firstDayJs`: 0=Sunday, 1=Monday (default).
@@ -187,7 +217,7 @@ export function formatCountdown(hass: any, date: Date, now: Date = new Date()): 
 
 /** Localized "1 Jan – 7 Jan" style range for a week. */
 export function formatWeekRange(hass: any, monday: Date): string {
-  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
   const fmt = new Intl.DateTimeFormat(intlLocale(hass), { day: "numeric", month: "short" });
   return `${fmt.format(monday)} – ${fmt.format(sunday)}`;
 }

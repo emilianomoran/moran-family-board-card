@@ -56,8 +56,28 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Compact mode** – one switch (`compact`) for smaller fonts and tighter spacing instead of adjusting three sliders.
 - **People hidden on start** – `hidden: true` per person; the column starts collapsed and a click on the header brings it back.
 
-> Fork status: **v0.25.1-moran.1 – upstream v0.25 plus shared-calendar person routing.** The
-> Skylight-style operations shell and Calendar Bridge provider remain planned work.
+> Fork status: **v0.25.1-moran.2 – calendar reliability preview, based on upstream v0.25.**
+> The wall layout and read-only calendar integration are installed in a private Home Assistant
+> pilot. This is a development checkpoint, not a published HACS release. The card reads calendars
+> through Home Assistant; it does not connect directly to Calendar Bridge.
+
+### Calendar reliability preview
+
+- `read_only: true` keeps event details and navigation while blocking create, edit, delete,
+  and drag changes, including stale action handlers. It is a card behavior guard, not a
+  substitute for Home Assistant permissions.
+- Calendar failures and unavailable sources are visible; incomplete reads never mean
+  everyone is free. Healthy sources remain usable when another source fails.
+- Periodic refresh picks up changed or removed appointments. Focus, page restoration,
+  and connection recovery refresh automatically; overlapping requests share one read.
+  Responses from an old view, suspended page, or detached card cannot replace newer data.
+- All-day dates use exclusive ends, day segmentation follows local calendar dates across
+  daylight-saving changes, and shared appointments retain each intended person's copy.
+
+Run `npm run test:harness` after building for rendered checks with synthetic calendars,
+including connection recovery and phone-width scenarios. Physical iOS sleep/wake and
+provider-to-HA synchronization latency still require real-device validation. Mobile
+date paging and pinned-axis usability are separate follow-up work.
 
 ## Installation (HACS custom repository)
 
@@ -148,7 +168,31 @@ persons:
 Prefix matching is case-insensitive and ignores leading symbols, so a rule such as `Person A:` also
 matches `⭐️ Person A: Concert`. Contains and regular-expression routing are available through
 `match_title_contains` and `match_title_regex`. Invalid regular expressions are ignored instead of
-breaking the calendar.
+breaking the calendar. When no explicit rule already claims it, a joint title such as
+`Person A + Person B: Concert` also reaches both lanes when each lane has its own `Person A:` or
+`Person B:` prefix. Every named owner must resolve; otherwise the event goes to the configured
+`unmatched` lane.
+
+Each configured calendar is requested once per visible range and refresh. Missing or failed sources
+show a warning without hiding events from healthy sources; a source that appears later is loaded on
+the next Home Assistant state update. Every view shows loading and failure status with a Retry
+button after failure. Reads time out after 20 seconds; the default refresh interval also retries
+API failures every five minutes. Switching ranges clears the old range's events while loading;
+late responses cannot overwrite a newer selection. The minute clock follows Today across midnight
+and loads a new week when needed, while keeping an intentionally browsed date anchored.
+Malformed records are isolated from valid events in the same response. An incomplete-data warning
+remains visible until the feed recovers; a response containing only invalid records never appears
+as a healthy empty calendar. Impossible dates and reversed durations are rejected rather than
+silently shifted into a different appointment.
+All-day dates use Home Assistant's exclusive end-date convention, and local calendar-day
+boundaries stay correct across daylight-saving changes.
+With `filter_duplicates`, mirrored copies are collapsed within an owner lane, but a joint event
+still retains every owner and separate recurring occurrences remain distinct. The optional
+now/next bar does not claim a lane is "free" when its calendars are unavailable or the displayed
+range does not cover the current time.
+Title prefixes, replacements, and alternate display fields are presentation only: editing or
+moving an event preserves its original calendar title unless the user changes the title in the
+editor. Recurring instances require the edit dialog's recurrence scope and cannot be dragged.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -160,6 +204,7 @@ breaking the calendar.
 | `strip_title_prefix` | boolean | `false` | Remove the matched configured prefix from the displayed event title |
 | `hide_empty_persons` | boolean | `false` | Week view: hide people without events in that week |
 | `show_focus` | boolean | `false` | “Now / next” bar per person above the views |
+| `read_only` | boolean | `false` | Disable creating, editing, deleting, and dragging events in this card; details and navigation remain available. This is a card behavior setting, not an HA permission boundary. |
 | `drag_drop` | boolean | `true` | Move / resize events in the day view by dragging (writable single events only) |
 | `auto_icons` | boolean | `false` | Prepend an emoji per event based on keywords |
 | `icon_patterns` | list | – | Custom icon rules, e.g. `["Grandma => 👵"]` |
@@ -262,6 +307,8 @@ npm run format       # Prettier
 Fast loop against a running HA instance: copy `dist/moran-family-board-card.js` to `config/www/` and hard-reload the page.
 
 The error-prone event logic (splitting across midnight, all-day exclusivity, time zones, overlap layout) lives isolated in [`src/events.ts`](src/events.ts) and is covered by [`src/events.test.ts`](src/events.test.ts).
+
+For a local, read-only preview with actual Home Assistant calendar responses, build the card and run `npm run preview:live` with `HA_PREVIEW_URL`, `HA_PREVIEW_TOKEN`, `HA_PREVIEW_CALENDARS` (comma-separated entity IDs), and `HA_PREVIEW_PEOPLE` (comma-separated lane names) set only in the process environment. The page is served on `127.0.0.1:4174` by default. The browser receives event data and configured lane names, but never the Home Assistant token. The preview disables event writes and does not install the card in Home Assistant. Do not commit credentials or household-specific configuration to this repo.
 
 ## Creating / editing / deleting events
 

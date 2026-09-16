@@ -233,6 +233,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
       ]),
       group(this._t("g_looks"), "mdi:palette", [
         { name: "show_focus", selector: { boolean: {} } },
+        { name: "read_only", selector: { boolean: {} } },
         { name: "drag_drop", selector: { boolean: {} } },
         { name: "compact", selector: { boolean: {} } },
         { name: "auto_icons", selector: { boolean: {} } },

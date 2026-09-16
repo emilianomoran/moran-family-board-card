@@ -4,6 +4,18 @@
 
 export const DAY_MS = 86400000;
 
+/** Advance by calendar dates, not elapsed 24-hour blocks (which drift at DST). */
+export function addLocalDays(date: Date, days: number): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+/** Difference between local calendar dates, independent of timezone offsets. */
+export function localDayDifference(later: Date, earlier: Date): number {
+  const ordinal = (date: Date) =>
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS;
+  return ordinal(later) - ordinal(earlier);
+}
+
 /**
  * Optional routing rules for a board lane. These stay deliberately generic:
  * household-specific names and conventions belong in Lovelace configuration,
@@ -96,6 +108,29 @@ export function routeEventToPeople(
   });
   if (matched.length > 0) return matched;
 
+  // A title such as "Avery + Jordan: Appointment" can be assigned using the
+  // already-configured "Avery:" and "Jordan:" lane prefixes. Require every
+  // owner token to resolve, so a partly-known title is not misrouted.
+  const head = titleBody(title).match(/^([^:]+):/u)?.[1];
+  const owners = head?.split(/\s*\+\s*/u).map((owner) => owner.trim());
+  if (owners && owners.length > 1 && owners.every(Boolean)) {
+    const resolved = owners.map((owner) =>
+      people.flatMap((person, index) => {
+        if (person.unmatched || !isEligible(person)) return [];
+        const prefixes = values(person.match_title_prefixes);
+        return prefixes.some(
+          (prefix) =>
+            prefix.replace(/:\s*$/u, "").toLocaleLowerCase() === owner.toLocaleLowerCase(),
+        )
+          ? [index]
+          : [];
+      }),
+    );
+    if (resolved.every((indexes) => indexes.length > 0)) {
+      return [...new Set(resolved.flat())];
+    }
+  }
+
   return people.flatMap((person, index) => (person.unmatched && isEligible(person) ? [index] : []));
 }
 
@@ -153,6 +188,7 @@ export interface RawEvent {
   recurrence_id?: string;
   rrule?: string;
   summary: string;
+  sourceSummary?: string; // unchanged source title, shared by copies in several lanes
   description?: string;
   location?: string;
   allDay: boolean;
@@ -160,6 +196,55 @@ export interface RawEvent {
   end: Date; // absolute end (exclusive)
   color: string;
   tentative?: boolean; // provisional event (dashed styling)
+}
+
+/** Stable occurrence identity across copies routed into several person lanes. */
+export function occurrenceKey(raw: RawEvent): string {
+  return JSON.stringify([
+    raw.calendar,
+    raw.uid || raw.sourceSummary || raw.summary,
+    raw.recurrence_id || raw.start.toISOString(),
+    raw.uid ? "" : raw.end.toISOString(),
+  ]);
+}
+
+/**
+ * Collapse duplicate copies only within one owner lane. The same occurrence
+ * routed to another owner is not a duplicate, and distinct recurring
+ * occurrences from one calendar must not disappear merely because their
+ * titles and times happen to match.
+ */
+export function dedupeRoutedEvents(raws: RawEvent[]): RawEvent[] {
+  const seenOccurrences = new Set<string>();
+  const seenFingerprints = new Map<string, Set<string>>();
+  return raws.filter((raw) => {
+    const occurrence = `${raw.personIdx}|${occurrenceKey(raw)}`;
+    if (seenOccurrences.has(occurrence)) return false;
+    const fingerprint = `${raw.personIdx}|${raw.summary}|${raw.start.getTime()}|${raw.end.getTime()}`;
+    const calendars = seenFingerprints.get(fingerprint);
+    if (calendars && [...calendars].some((calendar) => calendar !== raw.calendar)) return false;
+    seenOccurrences.add(occurrence);
+    if (calendars) calendars.add(raw.calendar);
+    else seenFingerprints.set(fingerprint, new Set([raw.calendar]));
+    return true;
+  });
+}
+
+/** Current and next timed appointments for one lane within the loaded range. */
+export function selectTimedActivity(
+  raws: RawEvent[],
+  personIdx: number,
+  now: Date,
+): { current?: RawEvent; next?: RawEvent } {
+  const time = now.getTime();
+  const mine = raws.filter((raw) => raw.personIdx === personIdx && !raw.allDay);
+  const current = mine
+    .filter((raw) => raw.start.getTime() <= time && time < raw.end.getTime())
+    .sort((a, b) => b.start.getTime() - a.start.getTime() || a.end.getTime() - b.end.getTime())[0];
+  const next = mine
+    .filter((raw) => raw.start.getTime() > time)
+    .sort((a, b) => a.start.getTime() - b.start.getTime() || a.end.getTime() - b.end.getTime())[0];
+  return { current, next };
 }
 
 /** A per-day display segment derived from a RawEvent. */
@@ -187,38 +272,91 @@ export interface LaidOutEvent extends BoardEvent {
   cluster: number; // id of the overlap cluster this event belongs to
 }
 
-/** Normalize a HA calendar API item into an absolute-time RawEvent. */
+const record = (value: unknown): Record<string, unknown> | undefined =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const optionalText = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined;
+
+const optionalIdentity = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim() ? value : undefined;
+
+/** Reject impossible dates rather than letting Date normalize them into another day. */
+function validCalendarDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function parseCalendarDateTime(value: unknown): Date | null {
+  if (typeof value !== "string") return null;
+  const parts = value.match(
+    /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/,
+  );
+  if (
+    !parts ||
+    !validCalendarDate(parts[1]) ||
+    Number(parts[2]) > 23 ||
+    Number(parts[3]) > 59 ||
+    Number(parts[4] ?? 0) > 59
+  )
+    return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+/** Normalize an untrusted HA calendar item; malformed records must not throw. */
 export function parseRawEvent(
-  ev: any,
+  input: unknown,
   personIdx: number,
   calendar: string,
   color: string,
 ): RawEvent | null {
-  const allDay = !ev?.start?.dateTime;
+  const ev = record(input);
+  const starts = record(ev?.start);
+  if (!ev || !starts) return null;
+  if (ev.summary != null && typeof ev.summary !== "string") return null;
+  if (
+    [ev.uid, ev.recurrence_id, ev.rrule].some((value) => value != null && typeof value !== "string")
+  )
+    return null;
+  const ends = record(ev.end);
+  if (ev.end != null && !ends) return null;
+  const allDay = starts.dateTime == null;
+  if (starts.date != null && starts.dateTime != null) return null;
   let start: Date;
   let end: Date;
   if (allDay) {
     // All-day: dates are timezone-naive; end is EXCLUSIVE.
-    if (!ev?.start?.date) return null;
-    start = new Date(`${ev.start.date}T00:00:00`);
-    end = ev.end?.date ? new Date(`${ev.end.date}T00:00:00`) : new Date(start.getTime() + DAY_MS);
+    if (!validCalendarDate(starts.date) || ends?.dateTime != null) return null;
+    if (ends?.date != null && !validCalendarDate(ends.date)) return null;
+    start = new Date(`${starts.date}T00:00:00`);
+    end = ends?.date != null ? new Date(`${ends.date}T00:00:00`) : addLocalDays(start, 1);
   } else {
-    start = new Date(ev.start.dateTime);
-    end = new Date(ev.end?.dateTime ?? ev.start.dateTime);
+    if (ends?.date != null) return null;
+    const parsedStart = parseCalendarDateTime(starts.dateTime);
+    const parsedEnd = parseCalendarDateTime(ends?.dateTime ?? starts.dateTime);
+    if (!parsedStart || !parsedEnd) return null;
+    start = parsedStart;
+    end = parsedEnd;
   }
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
-  if (end.getTime() <= start.getTime()) {
-    end = new Date(start.getTime() + (allDay ? DAY_MS : 60000));
-  }
+  if (end.getTime() < start.getTime() || (allDay && end.getTime() === start.getTime())) return null;
+  // Point appointments still need a visible segment; an explicit reversed range is invalid.
+  if (end.getTime() === start.getTime()) end = new Date(start.getTime() + 60000);
+  const summary = optionalText(ev.summary) || "Termin";
   return {
     personIdx,
     calendar,
-    uid: ev.uid,
-    recurrence_id: ev.recurrence_id,
-    rrule: ev.rrule,
-    summary: ev.summary || "Termin",
-    description: ev.description,
-    location: ev.location,
+    uid: optionalIdentity(ev.uid),
+    recurrence_id: optionalIdentity(ev.recurrence_id),
+    rrule: optionalIdentity(ev.rrule),
+    summary,
+    sourceSummary: summary,
+    description: optionalText(ev.description),
+    location: optionalText(ev.location),
     allDay,
     start,
     end,
@@ -245,19 +383,23 @@ export function splitAcrossDays(raw: RawEvent, gridStart: Date, numDays: number)
   // "day X of Y" for events that span multiple calendar days
   const firstDay = new Date(raw.start);
   firstDay.setHours(0, 0, 0, 0);
-  const totalParts = Math.max(1, Math.ceil((raw.end.getTime() - firstDay.getTime()) / DAY_MS));
+  const lastTouchedDay = new Date(raw.end.getTime() - 1);
+  const totalParts = Math.max(1, localDayDifference(lastTouchedDay, firstDay) + 1);
   for (let d = 0; d < numDays; d++) {
-    const dayStart = new Date(gridStart.getTime() + d * DAY_MS);
-    const dayEnd = new Date(dayStart.getTime() + DAY_MS);
+    const dayStart = addLocalDays(gridStart, d);
+    const dayEnd = addLocalDays(gridStart, d + 1);
     const segStartMs = Math.max(raw.start.getTime(), dayStart.getTime());
     const segEndMs = Math.min(raw.end.getTime(), dayEnd.getTime());
     if (segEndMs <= segStartMs) continue;
-    const startMin = raw.allDay ? 0 : Math.round((segStartMs - dayStart.getTime()) / 60000);
-    const endMin = raw.allDay ? 1440 : Math.round((segEndMs - dayStart.getTime()) / 60000);
-    const part =
-      totalParts > 1
-        ? Math.round((dayStart.getTime() - firstDay.getTime()) / DAY_MS) + 1
-        : undefined;
+    const start = new Date(segStartMs);
+    const end = new Date(segEndMs);
+    const startMin = raw.allDay ? 0 : start.getHours() * 60 + start.getMinutes();
+    const endMin = raw.allDay
+      ? 1440
+      : segEndMs === dayEnd.getTime()
+        ? 1440
+        : end.getHours() * 60 + end.getMinutes();
+    const part = totalParts > 1 ? localDayDifference(dayStart, firstDay) + 1 : undefined;
     segs.push({
       part,
       parts: totalParts > 1 ? totalParts : undefined,

@@ -16,7 +16,7 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 - **Compatibility**: Existing non-wall configurations and all supported views must continue to work — the wall experience is opt-in until validated.
 - **Source of truth**: Calendar events remain owned by the connected external calendars — the card does not invent a second calendar database.
 - **Security**: No tokens, private household configuration, or direct Calendar Bridge credentials may enter dashboard config, fixtures, logs, or the repository.
-- **Live safety**: No files under `/Volumes/config` change during implementation. A live pilot requires targeted backup, two independent Sonnet plan reviews, a configuration check where applicable, and explicit verification; if Sonnet is unavailable, Emiliano must approve any substitute.
+- **Live safety**: Follow the Home Assistant workspace change protocol for live deployment: targeted backup, a configuration check where applicable, and verification. Independent reviews are optional. Local implementation and read-only validation proceed directly.
 - **Distribution**: The built `dist/moran-family-board-card.js` remains committed and HACS-compatible, and upstream attribution remains intact.
 - **Quality**: `npm run format:check`, `npm run lint`, `npm test`, and `npm run build` must pass for every release candidate.
 - **Privacy**: Public examples use generic people and entities only.
@@ -247,17 +247,12 @@ No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skill
 
 <!-- GSD:workflow-start source:GSD defaults -->
 
-## GSD Workflow Enforcement
+## Direct Development Workflow
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
-
-Use these entry points:
-
-- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd-debug` for investigation and bug fixing
-- `/gsd-execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+Emiliano retired the GSD workflow on 2026-09-15. Continue authorized implementation,
+debugging, and verification directly. Do not require GSD commands, phase gates, a
+particular reviewer model, or repeated confirmation for routine implementation.
+Existing `.planning/` files remain historical context, not execution requirements.
 <!-- GSD:workflow-end -->
 
 <!-- GSD:profile-start -->
@@ -267,21 +262,3 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
 > This section is managed by `generate-claude-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
-
-## Codex GSD Bridge
-
-The global GSD skills are installed under `~/.claude/skills/gsd-*` with their shared runtime in
-`~/.claude/gsd-core/`. They are not currently installed as Codex-native slash commands. In a Codex
-session, read the matching `SKILL.md` and execute its referenced workflow and `gsd-tools.cjs`
-commands directly.
-
-For this project, use this sequence:
-
-1. `gsd-discuss-phase` to resolve implementation choices and create phase context.
-2. `gsd-ui-phase` for phases with a user-interface contract, especially Phases 1-4.
-3. `gsd-plan-phase` to turn the approved phase context into executable plan files.
-4. `gsd-execute-phase`, `gsd-verify-work`, and `gsd-code-review` for implementation and evidence.
-5. `gsd-complete-milestone` only after every v1 requirement is verified.
-
-The initial codebase map and project roadmap already exist under `.planning/`. Start at Phase 1;
-do not rerun `gsd-new-project` unless the planning state is intentionally being rebuilt.

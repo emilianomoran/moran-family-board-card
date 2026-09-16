@@ -121,10 +121,67 @@ const scenarios = [
     chromeHeight: 0,
     expectedGeometryMarker: "avatar-geometry: 4x34x34",
   },
+  ...[800, 400, 320].map((width) => ({
+    name: "wall",
+    checks: "responsive",
+    chromeHeight: 64,
+    width,
+    expectedGeometryMarker: `responsive wall: ${width}px`,
+  })),
+  {
+    name: "wall",
+    checks: "responsive",
+    chromeHeight: 64,
+    panelWidth: 400,
+    expectedGeometryMarker: "responsive wall: 400px",
+  },
+  ...[644, 400].map((width) => ({
+    name: "wall",
+    checks: "pan",
+    chromeHeight: 64,
+    width,
+    expectedGeometryMarker: `pan: ${width}px`,
+  })),
+  ...["healthy", "partial", "missing", "error"].map((feed) => ({
+    name: "wall",
+    checks: "calendar",
+    feed,
+    chromeHeight: 64,
+    expectedGeometryMarker: `calendar health: ${feed}`,
+  })),
+  {
+    name: "wall",
+    checks: "lifecycle",
+    chromeHeight: 64,
+    expectedGeometryMarker: "calendar lifecycle:",
+  },
+  {
+    name: "wall",
+    checks: "integrity",
+    chromeHeight: 64,
+    expectedGeometryMarker: "calendar integrity:",
+  },
+  ...[1920, 390].map((width) => ({
+    name: "wall",
+    checks: "recovery",
+    chromeHeight: 64,
+    width,
+    expectedGeometryMarker: "calendar recovery:",
+  })),
 ];
 
 try {
-  for (const { name, checks, chromeHeight, expectedGeometryMarker } of scenarios) {
+  for (const {
+    name,
+    checks,
+    chromeHeight,
+    width = 1920,
+    panelWidth,
+    feed,
+    expectedGeometryMarker,
+  } of scenarios.filter((scenario) =>
+    process.env.HARNESS_ONLY ? scenario.checks === process.env.HARNESS_ONLY : true,
+  )) {
     const targetResponse = await fetch(`http://127.0.0.1:${devToolsPort}/json/new?about:blank`, {
       method: "PUT",
     });
@@ -143,14 +200,187 @@ try {
     await cdp.send("Runtime.enable");
     await cdp.send("Emulation.setTimezoneOverride", { timezoneId: "America/Chicago" });
     await cdp.send("Emulation.setDeviceMetricsOverride", {
-      width: 1920,
+      width,
       height: 1080,
       deviceScaleFactor: 1,
-      mobile: false,
+      mobile: checks === "pan",
     });
+    if (checks === "pan") {
+      await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 1 });
+    }
 
-    const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}`;
+    const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}${panelWidth ? `&panel=${panelWidth}` : ""}${feed ? `&feed=${feed}` : ""}`;
     await cdp.send("Page.navigate", { url });
+
+    if (checks === "pan") {
+      const evaluate = async (expression) =>
+        (
+          await cdp.send("Runtime.evaluate", {
+            expression,
+            returnByValue: true,
+          })
+        ).result.value;
+      const metrics = () =>
+        evaluate(`(() => {
+          const root = document.querySelector("moran-family-board-card")?.shadowRoot;
+          const board = root?.querySelector(".moran-wall-shell .board");
+          if (!board) return null;
+          const chip = board.querySelector(".allday-row .adchip");
+          const rect = board.getBoundingClientRect();
+          const chipRect = chip?.getBoundingClientRect();
+          return {
+            left: board.scrollLeft,
+            max: board.scrollWidth - board.clientWidth,
+            top: rect.top,
+            offCount: board.querySelectorAll(".header-row .phead.off").length,
+            dialogCount: root.querySelectorAll(".dialog").length,
+            chipX: chipRect ? chipRect.left + chipRect.width / 2 : null,
+            chipY: chipRect ? chipRect.top + chipRect.height / 2 : null,
+            visibleNames: [...board.querySelectorAll(".header-row .phead")]
+              .filter((header) => {
+                const bounds = header.getBoundingClientRect();
+                return bounds.right > rect.left && bounds.left < rect.right;
+              })
+              .map((header) => header.querySelector(".pname")?.textContent),
+          };
+        })()`);
+      let before;
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        before = await metrics();
+        if (before?.chipX != null) break;
+        await delay(100);
+      }
+      if (!before?.chipX || before.max < 200) {
+        throw new Error(
+          `${width}px board did not render an overflowed Day grid with all-day chip.`,
+        );
+      }
+      const startX = width - 60;
+      const headerY = before.top + 40;
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: startX, y: headerY, id: 1 }],
+      });
+      for (let step = 1; step <= 8; step += 1) {
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: startX - (250 * step) / 8, y: headerY, id: 1 }],
+        });
+        await delay(25);
+      }
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await delay(100);
+      const afterTouch = await metrics();
+      if (afterTouch.left < 100) {
+        throw new Error(`${width}px native touch swipe did not pan the Day board.`);
+      }
+      await evaluate(
+        'document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = 0',
+      );
+      const mouseDrag = async (x, y, distance) => {
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mousePressed",
+          x,
+          y,
+          button: "left",
+          clickCount: 1,
+        });
+        for (let step = 1; step <= 8; step += 1) {
+          await cdp.send("Input.dispatchMouseEvent", {
+            type: "mouseMoved",
+            x: x - (distance * step) / 8,
+            y,
+            button: "left",
+            buttons: 1,
+          });
+          await delay(25);
+        }
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mouseReleased",
+          x: x - distance,
+          y,
+          button: "left",
+          clickCount: 1,
+        });
+        await delay(100);
+      };
+      await mouseDrag(startX, headerY, 250);
+      const afterHeaderDrag = await metrics();
+      if (afterHeaderDrag.left < 100 || afterHeaderDrag.offCount !== 0) {
+        throw new Error(
+          `${width}px mouse drag over a person header failed to pan cleanly (scrollLeft=${afterHeaderDrag.left}, off=${afterHeaderDrag.offCount}).`,
+        );
+      }
+      await evaluate(
+        `document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = ${before.max}`,
+      );
+      const chipAtEnd = await metrics();
+      if (!chipAtEnd.visibleNames.includes("Household")) {
+        throw new Error(
+          `${width}px maximum Day-board pan did not reveal the fourth person header.`,
+        );
+      }
+      const chipTravel = Math.min(120, width - chipAtEnd.chipX - 20);
+      if (chipTravel < 60) {
+        throw new Error(`${width}px all-day chip did not enter the visible board at maximum pan.`);
+      }
+      await mouseDrag(chipAtEnd.chipX, chipAtEnd.chipY, -chipTravel);
+      const afterChipDrag = await metrics();
+      if (afterChipDrag.left > before.max - 50 || afterChipDrag.dialogCount !== 0) {
+        throw new Error(
+          `${width}px mouse drag over an all-day chip failed to pan cleanly (scrollLeft=${afterChipDrag.left}/${before.max}, dialogs=${afterChipDrag.dialogCount}).`,
+        );
+      }
+      const mouseClick = async (x, y) => {
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mousePressed",
+          x,
+          y,
+          button: "left",
+          clickCount: 1,
+        });
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mouseReleased",
+          x,
+          y,
+          button: "left",
+          clickCount: 1,
+        });
+        await delay(50);
+      };
+      await evaluate(
+        'document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = 0',
+      );
+      await mouseClick(200, headerY);
+      if ((await metrics()).offCount !== 1) {
+        throw new Error(`${width}px ordinary person-header click stopped working after panning.`);
+      }
+      await mouseClick(96, headerY);
+      if ((await metrics()).offCount !== 0) {
+        throw new Error(`${width}px ordinary person-header click did not restore its lane.`);
+      }
+      await evaluate(
+        `document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = ${before.max}`,
+      );
+      const chipForClick = await metrics();
+      await mouseClick(chipForClick.chipX, chipForClick.chipY);
+      if ((await metrics()).dialogCount !== 1) {
+        throw new Error(`${width}px ordinary all-day chip click stopped working after panning.`);
+      }
+      const result = {
+        status: "pass",
+        details: `pan: ${width}px touch ${afterTouch.left}px; header drag ${afterHeaderDrag.left}px; all-day drag ${afterChipDrag.left}px`,
+      };
+      webSocket.close();
+      await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
+      if (!result.details.includes(expectedGeometryMarker)) {
+        throw new Error(`${name} pan check did not report ${expectedGeometryMarker}`);
+      }
+      console.log(
+        `${name}: ${width}x1080 America/Chicago browser check passed (${result.details})`,
+      );
+      continue;
+    }
 
     let result;
     for (let attempt = 0; attempt < 100; attempt += 1) {
@@ -166,16 +396,18 @@ try {
 
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
-    if (!result) throw new Error(`${name} browser check timed out.`);
+    if (!result) throw new Error(`${name} ${width}px browser check timed out.`);
     if (result.status !== "pass") {
-      throw new Error(`${name} browser check failed: ${result.details}`);
+      throw new Error(`${name} ${width}px browser check failed: ${result.details}`);
     }
     if (!result.details.includes(expectedGeometryMarker)) {
       throw new Error(
         `${name} browser check did not report expected geometry marker: ${expectedGeometryMarker}`,
       );
     }
-    console.log(`${name}: 1920x1080 America/Chicago browser check passed (${result.details})`);
+    console.log(
+      `${name}: ${width}x1080${panelWidth ? ` in ${panelWidth}px panel` : ""} America/Chicago browser check passed (${result.details})`,
+    );
   }
 } finally {
   server.close();

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Moran Family Board development harness</title>
+    <link rel="icon" href="data:," />
     <style>
       :root {
         --primary-color: #1296ed;
@@ -35,7 +36,7 @@
         display: flex;
         flex-direction: column;
         margin: 0;
-        min-width: 1180px;
+        min-width: 0;
         min-height: 0;
         overflow: hidden;
         background: #ffffff;
@@ -93,12 +94,14 @@
     <main id="app"></main>
     <aside id="timezone-warning" role="alert" hidden></aside>
     <script type="module">
-      import "/dist/moran-family-board-card.js";
+      // Keep the development preview aligned with the latest compiled card after a refresh.
+      await import(`/dist/moran-family-board-card.js?preview=${Date.now()}`);
 
       const EVIDENCE_TIME_ZONE = "America/Chicago";
       const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
       const query = new URLSearchParams(window.location.search);
       const scenario = query.get("scenario") ?? "legacy";
+      let feed = query.get("feed") ?? "healthy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
       }
@@ -144,6 +147,12 @@
           timedEvent("Casey: Music Lesson", "15:30", "17:00", "Music Studio"),
         ],
       };
+      if (query.get("checks") === "calendar") {
+        calendarEvents["calendar.fixture_family"].push(
+          timedEvent("Jordan: Quick Check", "16:00", "16:45"),
+          timedEvent("Jordan: Overlap Review", "16:00", "17:00"),
+        );
+      }
 
       const states = {
         "calendar.fixture_family": {
@@ -186,13 +195,32 @@
           },
         },
       };
+      if (feed === "missing") delete states["calendar.fixture_activities"];
 
+      const calendarCalls = { family: 0, activities: 0 };
+      const calendarRanges = [];
       const hass = {
         states,
         locale: { language: "en-US", time_format: "12" },
         config: { unit_system: { temperature: "°F" } },
         callApi: async (_method, path) => {
           const calendar = Object.keys(calendarEvents).find((entityId) => path.includes(entityId));
+          if (calendar) {
+            const range = new URL(path, "http://fixture.invalid/");
+            calendarRanges.push({
+              calendar,
+              start: range.searchParams.get("start"),
+              end: range.searchParams.get("end"),
+            });
+          }
+          if (calendar === "calendar.fixture_family") calendarCalls.family += 1;
+          if (calendar === "calendar.fixture_activities") calendarCalls.activities += 1;
+          if (
+            (feed === "partial" && path.includes("calendar.fixture_activities")) ||
+            feed === "error"
+          ) {
+            throw new Error("Fixture calendar request failed");
+          }
           return calendar ? calendarEvents[calendar] : [];
         },
         callWS: async () => ({}),
@@ -200,6 +228,10 @@
 
       const sharedCalendars = ["calendar.fixture_family", "calendar.fixture_activities"];
       const card = document.createElement("moran-family-board-card");
+      const panelWidth = Number(query.get("panel") ?? 0);
+      if (Number.isFinite(panelWidth) && panelWidth > 0) {
+        document.querySelector("#app").style.width = `${panelWidth}px`;
+      }
       card.nowProvider = () => new Date(FIXED_NOW.getTime());
       const config = {
         type: "custom:moran-family-board-card",
@@ -214,13 +246,16 @@
         scroll_to_now: false,
         refresh_interval: 0,
         drag_drop: false,
+        filter_duplicates: query.get("checks") === "calendar",
+        show_focus: query.get("checks") === "calendar",
         persons: [
           {
             name: "Avery",
             person: "person.fixture_avery",
             calendar: sharedCalendars,
             color: "#8fa8f5",
-            match_title_prefixes: ["Avery:", "Avery + Jordan:"],
+            match_title_prefixes:
+              query.get("checks") === "calendar" ? ["Avery:"] : ["Avery:", "Avery + Jordan:"],
             strip_title_prefix: true,
             badges: scenario === "wall" ? ["sensor.fixture_avery_battery"] : undefined,
           },
@@ -229,7 +264,8 @@
             person: "person.fixture_jordan",
             calendar: sharedCalendars,
             color: "#62cfbe",
-            match_title_prefixes: ["Jordan:", "Avery + Jordan:"],
+            match_title_prefixes:
+              query.get("checks") === "calendar" ? ["Jordan:"] : ["Jordan:", "Avery + Jordan:"],
             strip_title_prefix: true,
           },
           {
@@ -265,6 +301,208 @@
         report.dataset.scenario = scenario;
         report.textContent = details;
         document.body.append(report);
+      };
+
+      const runCalendarHealthChecks = async () => {
+        const checkedFeed = feed;
+        for (let attempt = 0; attempt < 100; attempt += 1) {
+          await nextRender();
+          if (!card._loading && card._calendarResults.length === 2) break;
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        const expected = {
+          healthy: {
+            statuses: ["ok", "ok"],
+            raws: 11,
+            partial: false,
+            error: false,
+            calls: [1, 1],
+          },
+          partial: {
+            statuses: ["ok", "error"],
+            raws: 8,
+            partial: true,
+            error: false,
+            calls: [1, 1],
+          },
+          missing: {
+            statuses: ["ok", "missing"],
+            raws: 8,
+            partial: true,
+            error: false,
+            calls: [1, 0],
+          },
+          error: {
+            statuses: ["error", "error"],
+            raws: 0,
+            partial: false,
+            error: true,
+            calls: [1, 1],
+          },
+        }[feed];
+        if (!expected) throw new Error(`Unknown fixture feed: ${feed}`);
+        const statuses = card._calendarResults.map((result) => result.status);
+        if (
+          card._loading ||
+          statuses.join(",") !== expected.statuses.join(",") ||
+          [calendarCalls.family, calendarCalls.activities].join(",") !== expected.calls.join(",") ||
+          card._raw.length !== expected.raws ||
+          card._partialLoad !== expected.partial ||
+          card._loadError !== expected.error
+        ) {
+          throw new Error(`Calendar health ${feed} did not preserve source and event status.`);
+        }
+        const banner = card.shadowRoot
+          ?.querySelector(".banner .status-message")
+          ?.textContent?.trim();
+        const expectedBanner = expected.partial
+          ? "Some calendars could not be loaded. Showing available events."
+          : expected.error
+            ? "Calendar could not be loaded."
+            : undefined;
+        if (banner !== expectedBanner) {
+          throw new Error(`Calendar health ${feed} rendered an incorrect status banner.`);
+        }
+        const caseyActivity = card._focusFor(2);
+        if (
+          (feed === "healthy" && caseyActivity.current?.sourceSummary !== "Casey: Music Lesson") ||
+          (feed !== "healthy" && (caseyActivity.current || card._focusComplete(2)))
+        ) {
+          throw new Error(`Calendar health ${feed} selected an incorrect current activity.`);
+        }
+        if (feed !== "healthy") {
+          const caseyChip = card.shadowRoot.querySelectorAll(".focus .fchip")[2];
+          if (!caseyChip?.querySelector(".ffree")?.textContent.includes("schedule unavailable")) {
+            throw new Error(`Calendar health ${feed} falsely reported an empty lane as free.`);
+          }
+        }
+        card.requestUpdate();
+        await nextRender();
+        if (
+          [calendarCalls.family, calendarCalls.activities].join(",") !== expected.calls.join(",")
+        ) {
+          throw new Error(`Calendar health ${feed} refetched an unchanged visible range.`);
+        }
+        // The joint source event must appear in both owner lanes even though
+        // this check configured only the two individual prefixes.
+        if (feed !== "error") {
+          const shortEvent = [...card.shadowRoot.querySelectorAll(".board .event")].find((event) =>
+            event.textContent.includes("Quick Check"),
+          );
+          const shortTitle = shortEvent?.querySelector(".etitle")?.getBoundingClientRect();
+          const shortBounds = shortEvent?.getBoundingClientRect();
+          if (
+            !shortEvent?.classList.contains("wall-short") ||
+            !shortTitle ||
+            !shortBounds ||
+            shortTitle.height < 14 ||
+            shortTitle.top < shortBounds.top ||
+            shortTitle.bottom > shortBounds.bottom + 1
+          ) {
+            throw new Error("A 45-minute wall event collapsed or clipped its title.");
+          }
+          const overlap = [...card.shadowRoot.querySelectorAll(".board .event")].find((event) =>
+            event.textContent.includes("Overlap Review"),
+          );
+          const overlapTitle = overlap?.querySelector(".etitle")?.getBoundingClientRect();
+          const overlapBounds = overlap?.getBoundingClientRect();
+          if (
+            !overlapTitle ||
+            !overlapBounds ||
+            overlapTitle.height < 18 ||
+            overlapTitle.bottom > overlapBounds.bottom + 1
+          ) {
+            throw new Error("An overlapped hour-long wall event collapsed its title.");
+          }
+          const joint = card._raw.filter((raw) => raw.sourceSummary?.includes("Avery + Jordan:"));
+          if (
+            joint.length !== 2 ||
+            joint
+              .map((raw) => raw.personIdx)
+              .sort()
+              .join(",") !== "0,1"
+          ) {
+            throw new Error("Joint event did not reach both configured owner lanes.");
+          }
+          card._view = "agenda";
+          await nextRender();
+          const agendaCopies = [...card.shadowRoot.querySelectorAll(".agenda-row")].filter((row) =>
+            row.textContent.includes("Avery + Jordan: Family Appointment"),
+          );
+          if (agendaCopies.length !== 2) {
+            throw new Error("Agenda duplicate filtering lost a joint owner.");
+          }
+          card._view = "day";
+          await nextRender();
+        }
+        if (feed === "healthy") {
+          const before = calendarRanges.length;
+          card._view = "week";
+          await nextRender();
+          card.shadowRoot.querySelector('button[aria-label="Next week"]').click();
+          for (
+            let attempt = 0;
+            attempt < 100 && (calendarRanges.length < before + 2 || card._loading);
+            attempt++
+          ) {
+            await nextRender();
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (card._loading || calendarRanges.length !== before + 2 || card._weekOffset !== 1) {
+            throw new Error("Next week did not request both calendars for its new date range.");
+          }
+          const oldStart = new Date(calendarRanges[before - 1].start);
+          const nextStart = new Date(calendarRanges[before + 1].start);
+          if (Math.round((nextStart - oldStart) / 86400000) !== 7) {
+            throw new Error("Next week did not advance the calendar API range by seven dates.");
+          }
+          card._view = "month";
+          for (
+            let attempt = 0;
+            attempt < 100 && (calendarRanges.length < before + 4 || card._loading);
+            attempt++
+          ) {
+            await nextRender();
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (card._loading || calendarRanges.length !== before + 4) {
+            throw new Error("Month view did not request its wider calendar API range.");
+          }
+        }
+        if (feed !== "healthy") {
+          const initialFeed = feed;
+          feed = "healthy";
+          if (initialFeed === "missing") {
+            states["calendar.fixture_activities"] = {
+              entity_id: "calendar.fixture_activities",
+              state: "off",
+              attributes: { friendly_name: "Fixture Activities", supported_features: 0 },
+            };
+            card.hass = { ...hass, states: { ...states } };
+          } else {
+            await card._refetch();
+          }
+          for (let attempt = 0; attempt < 100; attempt += 1) {
+            await nextRender();
+            if (
+              !card._loading &&
+              card._calendarResults.map((result) => result.status).join(",") === "ok,ok"
+            ) {
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (
+            card._loading ||
+            card._raw.length !== 11 ||
+            card._partialLoad ||
+            card._loadError ||
+            card.shadowRoot.querySelector(".banner")
+          ) {
+            throw new Error(`Calendar health ${initialFeed} did not recover to a complete feed.`);
+          }
+        }
+        return [`calendar health: ${checkedFeed}; recovered: ${feed}`];
       };
 
       const runInteractionChecks = async () => {
@@ -341,6 +579,31 @@
           todayAction.getAttribute("aria-label") !== "Show today"
         ) {
           throw new Error("Wall Day current-date action is not labeled Today / Show today.");
+        }
+        if (wall.querySelector(".dayhead .dayname")?.textContent.trim() !== "Today: Feb 18") {
+          throw new Error("Wall Day heading does not include today's short date.");
+        }
+        const dateTabs = [...wall.querySelectorAll(":scope > .tabs [role='tab']")];
+        if (
+          dateTabs.length !== 7 ||
+          dateTabs.some(
+            (tab) =>
+              !tab.querySelector(".wall-day-weekday") || !tab.querySelector(".wall-day-number"),
+          ) ||
+          dateTabs.find((tab) => tab.classList.contains("on"))?.getAttribute("aria-current") !==
+            "date"
+        ) {
+          throw new Error("Wall Day date strip is missing a date or current-day selection.");
+        }
+        const axisLabels = [...wall.querySelectorAll(".board .axis .hour")].map((hour) =>
+          hour.textContent.trim(),
+        );
+        if (
+          axisLabels[0] !== "7 AM" ||
+          !axisLabels.includes("12 PM") ||
+          !axisLabels.includes("3 PM")
+        ) {
+          throw new Error("Wall Day hour axis does not follow the 12-hour locale preference.");
         }
 
         for (const [index, header] of personHeaders.entries()) {
@@ -513,8 +776,134 @@
         return results;
       };
 
-      if (query.has("checks")) {
-        runInteractionChecks()
+      const runResponsiveChecks = async () => {
+        await nextRender();
+        const root = card.shadowRoot;
+        const wall = root?.querySelector(".moran-wall-shell");
+        const header = wall?.querySelector(".moran-wall-header");
+        const viewSwitcher = header?.querySelector(".switch");
+        const dayhead = wall?.querySelector(".dayhead");
+        const weeknav = dayhead?.querySelector(".weeknav");
+        if (!wall || !header || !viewSwitcher || !dayhead || !weeknav) {
+          throw new Error("Responsive wall Day view is missing a navigation surface.");
+        }
+
+        const viewportWidth = document.documentElement.clientWidth;
+        const cardWidth = wall.getBoundingClientRect().width;
+        const expectedCardWidth = panelWidth > 0 ? panelWidth : viewportWidth;
+        if (Math.abs(cardWidth - expectedCardWidth) > 1) {
+          throw new Error(
+            `Wall shell is ${cardWidth}px wide, expected ${expectedCardWidth}px in this panel.`,
+          );
+        }
+        if (document.documentElement.scrollWidth > viewportWidth + 1) {
+          throw new Error(
+            `Page scrolls horizontally at ${viewportWidth}px (${document.documentElement.scrollWidth}px).`,
+          );
+        }
+        const contained = (element, label, container = wall) => {
+          const rect = element.getBoundingClientRect();
+          const outer = container.getBoundingClientRect();
+          if (
+            rect.width < 1 ||
+            rect.left < outer.left - 1 ||
+            rect.right > outer.right + 1 ||
+            rect.left < -1 ||
+            rect.right > viewportWidth + 1
+          ) {
+            throw new Error(
+              `${label} is clipped at ${viewportWidth}px (x=${rect.left.toFixed(1)}–${rect.right.toFixed(1)}, container=${outer.left.toFixed(1)}–${outer.right.toFixed(1)}).`,
+            );
+          }
+        };
+        contained(wall, "Wall shell");
+        contained(header, "Wall header");
+        contained(viewSwitcher, "View switcher", header);
+        contained(weeknav, "Date navigation", dayhead);
+        for (const button of viewSwitcher.querySelectorAll("button")) {
+          contained(button, `${button.textContent.trim()} view tab`, viewSwitcher);
+          const rect = button.getBoundingClientRect();
+          if (rect.width < 48 || rect.height < 48) {
+            throw new Error(`${button.textContent.trim()} view tab is smaller than 48px.`);
+          }
+        }
+        for (const button of weeknav.querySelectorAll("button")) {
+          contained(button, "Date navigation button", weeknav);
+          const rect = button.getBoundingClientRect();
+          if (rect.width < 48 || rect.height < 48) {
+            throw new Error("Date navigation button is smaller than 48px.");
+          }
+        }
+        const dayTabs = wall.querySelector(":scope > .tabs");
+        const dayButtons = [...(dayTabs?.querySelectorAll("button") ?? [])];
+        if (!dayTabs || dayButtons.length !== 7) {
+          throw new Error("Wall Day view did not render seven weekday tabs.");
+        }
+        contained(dayTabs, "Weekday tab row");
+        const tabsRect = dayTabs.getBoundingClientRect();
+        if (dayTabs.scrollHeight > dayTabs.clientHeight + 1) {
+          throw new Error("Weekday tabs wrap below their fixed-height row.");
+        }
+        if (expectedCardWidth < 400 && dayTabs.scrollWidth <= dayTabs.clientWidth + 1) {
+          throw new Error("Weekday row cannot scroll at narrow card widths.");
+        }
+        for (const button of dayButtons) {
+          const rect = button.getBoundingClientRect();
+          if (
+            rect.top < tabsRect.top - 1 ||
+            rect.bottom > tabsRect.bottom + 1 ||
+            rect.width < 48 ||
+            rect.height < 48
+          ) {
+            throw new Error(
+              `${button.textContent.trim()} weekday tab escapes its row or is smaller than 48px.`,
+            );
+          }
+          if (dayTabs.scrollWidth > dayTabs.clientWidth + 1) {
+            button.scrollIntoView({ block: "nearest", inline: "nearest" });
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+          }
+          contained(button, `${button.textContent.trim()} weekday tab`, dayTabs);
+        }
+        dayButtons[6].click();
+        await nextRender();
+        if (dayButtons[6].getAttribute("aria-selected") !== "true") {
+          throw new Error("Selecting the last date did not update the date strip.");
+        }
+        dayhead.querySelector(".nav-now").click();
+        await nextRender();
+        const selectedDay = dayTabs.querySelector("[role='tab'][aria-selected='true']");
+        if (!selectedDay || selectedDay.getAttribute("aria-current") !== "date") {
+          throw new Error("Today navigation did not restore the selected current date.");
+        }
+        contained(selectedDay, "Selected date after Today navigation", dayTabs);
+        dayTabs.scrollLeft = 0;
+        const board = wall.querySelector(".board");
+        if (!board || board.clientWidth > viewportWidth + 1) {
+          throw new Error("Day grid did not stay inside its own scrollable panel.");
+        }
+        return [`responsive wall: ${expectedCardWidth}px menu and date controls contained`];
+      };
+
+      if (query.has("checks") && query.get("checks") !== "pan") {
+        (query.get("checks") === "calendar"
+          ? runCalendarHealthChecks()
+          : query.get("checks") === "recovery"
+            ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
+                runCalendarRecoveryChecks(card, hass, nextRender),
+              )
+            : query.get("checks") === "integrity"
+              ? import("./calendar-integrity-check.mjs").then(({ runCalendarIntegrityChecks }) =>
+                  runCalendarIntegrityChecks(card, hass, nextRender),
+                )
+              : query.get("checks") === "lifecycle"
+                ? import("./calendar-lifecycle-check.mjs").then(({ runCalendarLifecycleChecks }) =>
+                    runCalendarLifecycleChecks(card, hass, nextRender),
+                  )
+                : query.get("checks") === "responsive"
+                  ? runResponsiveChecks()
+                  : runInteractionChecks()
+        )
           .then((results) => writeCheckResult("pass", results.join("; ")))
           .catch((error) => {
             writeCheckResult("fail", error instanceof Error ? error.message : String(error));

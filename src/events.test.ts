@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { afterAll, beforeAll, describe, it, expect } from "vitest";
+declare const process: { env: Record<string, string | undefined> };
 import {
   parseRawEvent,
   splitIntoSegments,
@@ -8,6 +9,11 @@ import {
   eventMatchesRoute,
   displayTitleForRoute,
   routeEventToPeople,
+  occurrenceKey,
+  dedupeRoutedEvents,
+  selectTimedActivity,
+  addLocalDays,
+  localDayDifference,
   DAY_MS,
   BoardEvent,
 } from "./events";
@@ -36,6 +42,79 @@ const seg = (
   continuesBefore: false,
   continuesAfter: false,
   ...extra,
+});
+
+describe("local calendar dates across daylight saving", () => {
+  const previousTimezone = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = "America/Chicago";
+  });
+  afterAll(() => {
+    if (previousTimezone === undefined) delete process.env.TZ;
+    else process.env.TZ = previousTimezone;
+  });
+
+  it("advances local days rather than elapsed 24-hour blocks", () => {
+    const marchSecond = new Date(2026, 2, 2);
+    expect(addLocalDays(marchSecond, 7).getDate()).toBe(9);
+    expect(localDayDifference(new Date(2026, 2, 9), marchSecond)).toBe(7);
+    const fallSunday = new Date(2026, 10, 1);
+    expect(addLocalDays(fallSunday, 1).getDate()).toBe(2);
+  });
+
+  it("does not pull next Monday's spring event into Sunday's grid", () => {
+    const raw = parseRawEvent(
+      {
+        start: { dateTime: "2026-03-09T00:30:00-05:00" },
+        end: { dateTime: "2026-03-09T01:30:00-05:00" },
+      },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(splitAcrossDays(raw, new Date(2026, 2, 2), 7)).toEqual([]);
+  });
+
+  it("retains late Sunday fall events and their wall-clock grid times", () => {
+    const raw = parseRawEvent(
+      {
+        start: { dateTime: "2026-11-01T23:30:00-06:00" },
+        end: { dateTime: "2026-11-02T00:30:00-06:00" },
+      },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(splitAcrossDays(raw, new Date(2026, 9, 26), 7)).toMatchObject([
+      { day: 6, startMin: 1410, endMin: 1440, continuesAfter: true },
+    ]);
+    const spring = parseRawEvent(
+      {
+        start: { dateTime: "2026-03-08T03:30:00-05:00" },
+        end: { dateTime: "2026-03-08T04:30:00-05:00" },
+      },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(splitAcrossDays(spring, new Date(2026, 2, 2), 7)).toMatchObject([
+      { day: 6, startMin: 210, endMin: 270 },
+    ]);
+  });
+
+  it("gives an all-day event one local day even when that day is 23 hours", () => {
+    const raw = parseRawEvent(
+      { start: { date: "2026-03-08" }, summary: "Fixture day" },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(raw.end.getDate()).toBe(9);
+    expect(raw.end.getTime() - raw.start.getTime()).toBe(23 * 60 * 60000);
+    expect(splitAcrossDays(raw, new Date(2026, 2, 2), 7)).toMatchObject([
+      { day: 6, allDay: true, startMin: 0, endMin: 1440 },
+    ]);
+  });
 });
 
 describe("parseRawEvent", () => {
@@ -84,6 +163,53 @@ describe("parseRawEvent", () => {
     ).toBeNull();
   });
 
+  it.each([
+    null,
+    [],
+    "not an event",
+    { start: 100 },
+    { start: { dateTime: 1700000000 } },
+    { start: { date: "2026-02-30" } },
+    { start: { date: "2026-02-29" } },
+    { start: { dateTime: "2026-02-30T09:00:00Z" } },
+    { start: { dateTime: "2026-02-18T24:00:00Z" } },
+    { start: { dateTime: "2026-02-18T09:60:00Z" } },
+    { start: { date: "2026-02-18", dateTime: "2026-02-18T09:00:00Z" } },
+    { start: { date: "2026-02-18" }, end: { dateTime: "2026-02-19T09:00:00Z" } },
+    { start: { dateTime: "2026-02-18T09:00:00Z" }, end: { date: "2026-02-19" } },
+    { start: { date: "2026-02-18" }, end: { date: "2026-02-17" } },
+    { start: { dateTime: "2026-02-18T09:00:00Z" }, end: { dateTime: "2026-02-18T08:00:00Z" } },
+    { start: { date: "2026-02-18" }, summary: { text: "Unexpected title" } },
+    { start: { date: "2026-02-18" }, recurrence_id: 123 },
+  ])("rejects malformed shape, date or identity without inventing an appointment: %j", (input) => {
+    expect(parseRawEvent(input, 0, "calendar.fixture", "#abc")).toBeNull();
+  });
+
+  it("keeps valid leap dates and ignores unusable optional description/location fields", () => {
+    const event = parseRawEvent(
+      { start: { date: "2024-02-29" }, description: {}, location: 123 },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(event.start.getMonth()).toBe(1);
+    expect(event.start.getDate()).toBe(29);
+    expect(event.end.getMonth()).toBe(2);
+    expect(event.end.getDate()).toBe(1);
+    expect(event.description).toBeUndefined();
+    expect(event.location).toBeUndefined();
+  });
+
+  it("preserves supported start-only and zero-duration timed appointments", () => {
+    const event = parseRawEvent(
+      { start: { dateTime: "2026-02-18T09:00:00Z" } },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    expect(event.end.getTime() - event.start.getTime()).toBe(60000);
+  });
+
   it("passes through recurrence info (rrule / recurrence_id)", () => {
     const r = parseRawEvent(
       {
@@ -98,6 +224,153 @@ describe("parseRawEvent", () => {
     )!;
     expect(r.rrule).toBe("FREQ=WEEKLY");
     expect(r.recurrence_id).toBe("2024-01-01T10:00:00");
+  });
+
+  it("keeps recurring instances distinct even when they share a UID", () => {
+    const first = parseRawEvent(
+      {
+        uid: "fixture-series",
+        recurrence_id: "2026-09-14T10:00:00",
+        summary: "Fixture recurring appointment",
+        start: { dateTime: "2026-09-14T10:00:00Z" },
+        end: { dateTime: "2026-09-14T11:00:00Z" },
+      },
+      0,
+      "calendar.fixture",
+      "#abc",
+    )!;
+    const second = parseRawEvent(
+      {
+        uid: "fixture-series",
+        recurrence_id: "2026-09-21T10:00:00",
+        summary: "Fixture recurring appointment",
+        start: { dateTime: "2026-09-21T10:00:00Z" },
+        end: { dateTime: "2026-09-21T11:00:00Z" },
+      },
+      1,
+      "calendar.fixture",
+      "#def",
+    )!;
+    expect(occurrenceKey(first)).not.toBe(occurrenceKey(second));
+    const sharedCopy = { ...first, personIdx: 1, summary: "Appointment" };
+    expect(occurrenceKey(sharedCopy)).toBe(occurrenceKey(first));
+  });
+});
+
+describe("occurrence-safe selection", () => {
+  it("does not collapse different appointments or recurrence dates when IDs are empty", () => {
+    const make = (summary: string, uid = "", start = "2026-02-18T10:00:00Z") =>
+      parseRawEvent(
+        {
+          summary,
+          uid,
+          recurrence_id: "",
+          start: { dateTime: start },
+          end: { dateTime: "2026-02-18T12:00:00Z" },
+        },
+        0,
+        "calendar.fixture",
+        "#abc",
+      )!;
+    const first = make("First appointment");
+    const second = make("Second appointment", "   ");
+    expect(first.uid).toBeUndefined();
+    expect(second.uid).toBeUndefined();
+    expect(dedupeRoutedEvents([first, second])).toHaveLength(2);
+    const recurring = [
+      make("Repeat", "fixture-series"),
+      make("Repeat", "fixture-series", "2026-02-18T11:00:00Z"),
+    ];
+    expect(dedupeRoutedEvents(recurring)).toHaveLength(2);
+  });
+
+  const fixture = (
+    personIdx: number,
+    calendar: string,
+    uid: string,
+    start = "2026-09-14T15:00:00Z",
+    end = "2026-09-14T16:00:00Z",
+    recurrenceId?: string,
+  ) =>
+    parseRawEvent(
+      {
+        uid,
+        recurrence_id: recurrenceId,
+        summary: "Fixture appointment",
+        start: { dateTime: start },
+        end: { dateTime: end },
+      },
+      personIdx,
+      calendar,
+      "#abc",
+    )!;
+
+  it("keeps both routed owners and collapses only repeat copies in one lane", () => {
+    const first = fixture(0, "calendar.fixture_family", "shared-uid");
+    const secondOwner = fixture(1, "calendar.fixture_family", "shared-uid");
+    const repeat = { ...first };
+    expect(dedupeRoutedEvents([first, secondOwner, repeat])).toEqual([first, secondOwner]);
+  });
+
+  it("collapses a mirrored calendar copy without deleting distinct source events", () => {
+    const primary = fixture(0, "calendar.fixture_family", "uid-one");
+    const mirror = fixture(0, "calendar.fixture_activities", "uid-mirror");
+    const separate = fixture(0, "calendar.fixture_family", "uid-two");
+    expect(dedupeRoutedEvents([primary, mirror, separate])).toEqual([primary, separate]);
+  });
+
+  it("does not collapse two recurrence instances with the same rendered title and time", () => {
+    const first = fixture(0, "calendar.fixture_family", "series", undefined, undefined, "first");
+    const second = fixture(0, "calendar.fixture_family", "series", undefined, undefined, "second");
+    expect(dedupeRoutedEvents([first, second])).toEqual([first, second]);
+  });
+
+  it("selects the most recently started active appointment and nearest future appointment", () => {
+    const long = fixture(
+      0,
+      "calendar.fixture_family",
+      "long",
+      "2026-09-14T13:00:00Z",
+      "2026-09-14T17:00:00Z",
+    );
+    const specific = fixture(
+      0,
+      "calendar.fixture_family",
+      "specific",
+      "2026-09-14T14:30:00Z",
+      "2026-09-14T16:00:00Z",
+    );
+    const soon = fixture(
+      0,
+      "calendar.fixture_family",
+      "soon",
+      "2026-09-14T15:30:00Z",
+      "2026-09-14T16:30:00Z",
+    );
+    const later = fixture(
+      0,
+      "calendar.fixture_family",
+      "later",
+      "2026-09-14T18:00:00Z",
+      "2026-09-14T19:00:00Z",
+    );
+    const otherOwner = fixture(1, "calendar.fixture_family", "other");
+    const allDay = parseRawEvent(
+      { summary: "Fixture day", start: { date: "2026-09-14" }, end: { date: "2026-09-15" } },
+      0,
+      "calendar.fixture_family",
+      "#abc",
+    )!;
+    const activity = selectTimedActivity(
+      [later, allDay, otherOwner, long, soon, specific],
+      0,
+      new Date("2026-09-14T15:00:00Z"),
+    );
+    expect(activity).toEqual({ current: specific, next: soon });
+    expect(selectTimedActivity([specific], 0, new Date("2026-09-14T16:00:00Z"))).toEqual({
+      current: undefined,
+      next: undefined,
+    });
   });
 });
 
@@ -126,6 +399,26 @@ describe("event routing", () => {
     expect(
       routeEventToPeople("Avery + Jordan: Field Day", "calendar.fixture_activities", people),
     ).toEqual([0, 1]);
+  });
+
+  it("infers a complete joint owner prefix from configured single-owner prefixes", () => {
+    const people = [
+      { calendar: sharedCalendars, match_title_prefixes: ["Avery:"] },
+      { calendar: sharedCalendars, match_title_prefixes: ["Jordan:"] },
+      { calendar: sharedCalendars, unmatched: true },
+    ];
+    expect(
+      routeEventToPeople("Avery + Jordan: Field Day", "calendar.fixture_family", people),
+    ).toEqual([0, 1]);
+    expect(
+      routeEventToPeople("⭐️ Jordan + Avery: Trip", "calendar.fixture_activities", people),
+    ).toEqual([1, 0]);
+    expect(routeEventToPeople("Avery + Unknown: Trip", "calendar.fixture_family", people)).toEqual([
+      2,
+    ]);
+    expect(routeEventToPeople("Avery + Jordan: Trip", "calendar.fixture_other", people)).toEqual(
+      [],
+    );
   });
 
   it("uses the unmatched lane only when no normal lane claims an event", () => {
