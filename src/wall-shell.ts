@@ -163,42 +163,50 @@ export const wallShellStyles = css`
 
   .moran-wall-shell > .tabs {
     display: flex;
-    flex: 0 0 56px;
+    flex: 0 0 80px;
     flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
     width: 100%;
-    min-height: 56px;
+    min-height: 80px;
     margin: 0;
-    padding: 4px 16px;
+    padding: 0;
     border-bottom: 1px solid var(--moran-wall-divider);
     border-radius: 0;
     background: var(--moran-wall-canvas);
     overflow-x: auto;
     overflow-y: hidden;
     overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
   }
 
   .moran-wall-shell > .tabs button {
     display: flex;
-    flex: 0 0 64px;
+    flex: 1 0 64px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
-    height: 48px;
-    padding: 1px 4px;
-    border-radius: 10px;
+    gap: 4px;
+    min-width: 64px;
+    height: 100%;
+    padding: 6px 4px;
+    border-inline-end: 1px solid var(--moran-wall-divider);
+    border-radius: 0;
+    scroll-snap-align: start;
     font-variant-numeric: tabular-nums;
   }
 
+  .moran-wall-shell > .tabs button:last-child {
+    border-inline-end: 0;
+  }
+
   .moran-wall-shell > .tabs button.on {
-    background: transparent;
+    background: color-mix(in srgb, var(--moran-wall-accent) 12%, var(--moran-wall-canvas));
     color: var(--moran-wall-text);
-    box-shadow: none;
+    box-shadow: inset 0 -3px 0 var(--moran-wall-accent);
   }
 
   .moran-wall-shell > .tabs button.today:not(.on) {
@@ -207,30 +215,31 @@ export const wallShellStyles = css`
 
   .moran-wall-shell .wall-day-weekday {
     color: var(--moran-wall-muted);
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1;
+    text-transform: uppercase;
   }
 
   .moran-wall-shell .wall-day-number {
     display: grid;
-    width: 29px;
-    height: 29px;
+    width: 40px;
+    height: 40px;
     place-items: center;
     border-radius: 50%;
     color: var(--moran-wall-text);
-    font-size: 17px;
+    font-size: 24px;
     font-weight: 700;
     line-height: 1;
   }
 
-  .moran-wall-shell > .tabs button.on .wall-day-number {
+  .moran-wall-shell > .tabs button.today .wall-day-number {
     background: var(--moran-wall-accent);
     color: #ffffff;
   }
 
-  .moran-wall-shell > .tabs button.today:not(.on) .wall-day-number {
-    box-shadow: inset 0 0 0 1.5px var(--moran-wall-accent);
+  .moran-wall-shell > .tabs button.on .wall-day-weekday,
+  .moran-wall-shell > .tabs button.today .wall-day-weekday {
     color: var(--moran-wall-accent);
   }
 
@@ -259,6 +268,58 @@ export const wallShellStyles = css`
   .moran-wall-shell .fnow small,
   .moran-wall-shell .fnext small {
     font-weight: 400;
+  }
+
+  .moran-wall-shell .fbody {
+    flex: 1;
+  }
+
+  .moran-wall-shell .fchip {
+    min-width: 220px;
+    align-items: flex-start;
+  }
+
+  .moran-wall-shell .fheading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 5px;
+  }
+
+  .moran-wall-shell .fname,
+  .moran-wall-shell .ffree {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell .fseparator {
+    color: var(--secondary-text-color);
+  }
+
+  .moran-wall-shell .fnow,
+  .moran-wall-shell .fnext {
+    display: block;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .moran-wall-shell .fsummary {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .moran-wall-shell .fdot {
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  .moran-wall-shell .fnow small,
+  .moran-wall-shell .fnext small {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .moran-wall-shell > .board {
@@ -522,15 +583,6 @@ export const wallShellStyles = css`
     .moran-wall-shell .switch button {
       flex: 1 1 auto;
     }
-
-    .moran-wall-shell > .tabs {
-      justify-content: flex-start;
-      padding-inline: 12px;
-    }
-
-    .moran-wall-shell > .tabs button {
-      flex-basis: 64px;
-    }
   }
 
   @container (max-width: 400px) {
@@ -558,6 +610,12 @@ export const wallShellStyles = css`
     outline-style: solid !important;
     outline-width: 2px !important;
     outline-offset: 2px !important;
+  }
+
+  .moran-wall-shell > .tabs > button:focus,
+  .moran-wall-shell > .tabs > button:focus-visible,
+  .moran-wall-shell > .tabs > button:focus-within {
+    outline-offset: -3px !important;
   }
 
   @media (prefers-reduced-motion: reduce) {

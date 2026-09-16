@@ -3,6 +3,8 @@
 /*  and weekday names are derived from the HA locale via Intl.         */
 /* ------------------------------------------------------------------ */
 
+import { localDayDifference } from "./events";
+
 type Dict = Record<string, string>;
 
 const EN: Dict = {
@@ -61,8 +63,13 @@ const EN: Dict = {
   no_events: "No events.",
   more_events: "more events",
   focus_next: "next",
+  focus_until: "until",
   focus_free: "free",
   focus_unavailable: "schedule unavailable",
+  status_free_now: "Free now",
+  status_busy_now: "Busy now",
+  status_now: "Now",
+  status_next: "Next",
 };
 
 const DE: Dict = {
@@ -123,8 +130,13 @@ const DE: Dict = {
   no_events: "Keine Termine.",
   more_events: "weitere Termine",
   focus_next: "als Nächstes",
+  focus_until: "bis",
   focus_free: "frei",
   focus_unavailable: "Plan nicht verfügbar",
+  status_free_now: "Jetzt frei",
+  status_busy_now: "Jetzt beschäftigt",
+  status_now: "Jetzt",
+  status_next: "Als Nächstes",
 };
 
 const TABLE: Record<string, Dict> = { en: EN, de: DE };
@@ -187,6 +199,27 @@ export function formatHourLabel(hass: any, hour: number): string {
 /** Short, localized calendar date for a compact wall heading. */
 export function formatShortDate(hass: any, date: Date): string {
   return new Intl.DateTimeFormat(intlLocale(hass), { month: "short", day: "numeric" }).format(date);
+}
+
+/** Explicit calendar day and compact clock time for Status tiles, not a countdown. */
+export function formatStatusDateTime(hass: any, date: Date, now: Date = new Date()): string {
+  const days = localDayDifference(date, now);
+  const day =
+    days === 0 || days === 1
+      ? localize(hass, days === 0 ? "today" : "tomorrow")
+      : new Intl.DateTimeFormat(intlLocale(hass), {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          ...(date.getFullYear() !== now.getFullYear() ? { year: "numeric" as const } : {}),
+        }).format(date);
+  const twelveHour = use12h(hass);
+  const time = new Intl.DateTimeFormat(intlLocale(hass), {
+    hour: twelveHour ? "numeric" : "2-digit",
+    ...(!twelveHour || date.getMinutes() !== 0 ? { minute: "2-digit" as const } : {}),
+    hourCycle: twelveHour ? "h12" : "h23",
+  }).format(date);
+  return `${day}, ${time}`;
 }
 
 /**

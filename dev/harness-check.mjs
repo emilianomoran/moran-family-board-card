@@ -111,6 +111,20 @@ class CdpClient {
 const scenarios = [
   ...[1920, 746, 390].map((width) => ({
     name: "wall",
+    checks: "status",
+    chromeHeight: 64,
+    width,
+    expectedGeometryMarker: "calendar status tiles:",
+  })),
+  {
+    name: "legacy",
+    checks: "status",
+    chromeHeight: 0,
+    width: 390,
+    expectedGeometryMarker: "calendar status tiles:",
+  },
+  ...[1920, 746, 390].map((width) => ({
+    name: "wall",
     checks: "alignment",
     chromeHeight: 64,
     width,
@@ -128,7 +142,7 @@ const scenarios = [
     chromeHeight: 0,
     expectedGeometryMarker: "avatar-geometry: 4x34x34",
   },
-  ...[800, 400, 320].map((width) => ({
+  ...[1920, 800, 749, 400, 390, 320].map((width) => ({
     name: "wall",
     checks: "responsive",
     chromeHeight: 64,

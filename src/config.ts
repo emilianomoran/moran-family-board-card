@@ -70,6 +70,8 @@ export interface FamilyBoardConfig extends LovelaceCardConfig {
   max_columns?: number;
   first_day?: "monday" | "sunday";
   scroll_to_now?: boolean;
+  remember_preferences?: boolean;
+  preferences_key?: string;
 }
 
 /** Only the exact public opt-in selects wall mode. */

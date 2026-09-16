@@ -19,9 +19,9 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Basic presentation | Circular avatars, dated Day heading, locale-aware 12/24-hour axis, reachable narrow controls, and person-grid scrolling implemented. |
 | Lane alignment | Headers, all-day rows, and timed columns share sizing on resize and hide/show; `0.25.1-moran.3` deployed. |
 | Full-day range | Pilot uses hours 0–24, no trimming, and initial scroll to now. Config-only change; package defaults remain 6–22. |
-| Status tiles | Existing current/next behavior remains; accepted terminology and diagnosed limitations are documented below. |
+| Status tiles | Installed pilot retains current-or-next behavior; accepted availability/dated-next presentation implemented and tested in the local prototype only. |
 
-Current application checkpoint: `42495b0f572dc7ddf226bff432f075168f43ffe1`, version
+Installed application checkpoint: `42495b0f572dc7ddf226bff432f075168f43ffe1`, version
 `0.25.1-moran.3`, on `feature/moran-foundation`. The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -55,7 +55,7 @@ The tiles describe actual clock time, not the selected date. Their candidate eve
 from the range already loaded for the active view: one displayed week for non-Month views,
 or the visible month grid for Month. If that range does not cover now, status is unavailable.
 
-| Display | Current selection rule |
+| Display | Installed pilot behavior (`0.25.1-moran.3`) |
 |---|---|
 | Current event | A timed event satisfies `start <= now < end`. If several overlap, choose the latest start, then the earliest end. |
 | Next event | No current event takes display precedence, so show the earliest future timed event in the loaded range. No same-day or soon cutoff exists. |
@@ -68,22 +68,90 @@ which future events are considered; the lookahead is not independent of the cale
 
 The future-event countdown was confirmed to extend outside its clipped line in the actual
 pilot: 159px of content inside a 112px text area. The title remained visible while almost
-all of the time qualifier disappeared. The cause was diagnosed; no fix or redesign has
-been applied.
+all of the time qualifier disappeared. The local prototype now fixes this, but the installed
+HA bundle has not been updated.
+
+### Accepted wall presentation implemented locally, 2026-09-16
+
+- Header: person name and **Free now**, **Busy now**, or **schedule unavailable**.
+- A current timed event shows its title and end date/time. The next event has its own
+  title and Today/Tomorrow/weekday-date plus time, even when a current event exists.
+- Free now means no current timed event plus healthy, current-time-covered lane sources.
+  A future appointment no longer prevents Free now. It is not a presence guarantee.
+- Loading, missing current-time coverage, and incomplete sources cannot establish Free now.
+  Known current/future events can still display from a healthy source during partial failure.
+- Timed-only selection, overlap tie-breaking, and view-dependent lookahead remain unchanged.
+  No next event in this range is not a promise that the person has no later appointments.
+- Long titles truncate; timing gets a separate wrapping line and stays visible. Full title
+  text remains in the DOM and hover title. Wall tiles scroll horizontally when needed.
+- HA 12/24-hour preferences and English/German strings are supported. Date comparisons use
+  calendar days (including DST and year boundaries), not rounded countdown durations.
+- Legacy layout retains the existing current-or-next presentation.
+
+The sample-data review URL is
+`http://127.0.0.1:4173/dev/harness.html?scenario=wall&status=1`. Its fixed sample date is
+intentional. This is a local prototype checkpoint, not an HA deployment or release.
+
+Verification: TypeScript, formatting, build, 84 unit tests, and the complete 23-scenario
+browser suite passed. Four new synthetic
+Status-tile browser cases cover wall widths 1920/746/390 and legacy 390: current and future
+events, empty/all-day-only schedules, long titles, hide/show, 12/24-hour display, loading,
+partial-source recovery, exact appointment start/end boundaries, and navigating away
+from/returning to now. In-app review verified
+nonblank rendering, no error overlay, clean warning/error logs, hide/show, and horizontal
+tile scrolling at 390×844. Physical iPhone/Safari and deployment remain unverified.
+
+Reproduce with `npm run format:check`, `npm run lint`, `npm test`, `npm run build`, and
+`npm run test:harness`; use `HARNESS_ONLY=status npm run test:harness` for the focused cases.
+The standalone Browser plugin/skill was not available; existing repository browser tests
+and Codex in-app browser controls supplied the automated and visible evidence.
 
 Implementation references: `selectTimedActivity` in [events.ts](../src/events.ts),
 `_focusFor`, `_focusComplete`, and `_renderFocus` in
-[ha-family-board-card.ts](../src/ha-family-board-card.ts), and `formatCountdown` in
+[ha-family-board-card.ts](../src/ha-family-board-card.ts), and `formatStatusDateTime` in
 [localize.ts](../src/localize.ts).
 
 ## Next work and open decisions
 
+### Date-strip correction verified locally, 2026-09-16
+
+The supplied Fantastical screenshots now inform full-width, equal-size date cells with
+vertical dividers, 24px date numbers, uppercase weekday labels, and an 80px-high strip.
+The selected cell has a tinted background and underline; today keeps its circular marker
+when another date is selected. Narrow panels retain a 64px minimum cell width and native
+horizontal cell snapping. Scrolling the strip does not select a date.
+
+Reference comparison: separated full-width dates replace the compressed centered cluster;
+today and selection are distinct; the person-lane grid, theme colors, and current scope
+remain intentional differences from Fantastical. No weather icons, private screenshot
+contents, or new seven-day event grid were introduced.
+
+The frontend testing pass found the date focus ring needed an inset override for all
+existing focus states; it is now contained at the strip edges. Tests cover full-width
+distribution, dividers, label size, snap offsets, date/heading synchronization, week
+navigation, Today, Sunday-first ordering, and weekday-only configuration. The full suite
+passed: 84 unit tests, 26 browser scenarios, TypeScript, formatting, build, and whitespace.
+Date-specific widths are 1920, 800, 749, 400, 390, and 320, plus a 400px embedded panel.
+Visible in-app checks covered the reported desktop layout and an effective 391×844 CSS
+viewport (the browser's existing zoom was preserved), selecting Sunday and returning to
+Today. Page identity, meaningful content, absence of an error overlay, screenshots, and
+warning/error logs passed. Run `HARNESS_ONLY=responsive npm run test:harness` for these
+focused checks. This remains local-only; physical-device and HA-deployment checks are open.
+
+Status-tile presentation is implemented locally, 2026-09-16, with date/time and rendered
+regression checks and a rebuilt sample-data prototype. Live HA remains on the checkpoint
+above. Earlier local Today/recenter and
+browser-local view/filter preference work is preserved; it is not yet release-verified.
+Preferences are scoped to HA user/card/browser, reset when lane definitions change, and
+store only the selected view and hidden lane indices, never events or credentials.
+
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
-| Today recenters on current time | Recommended; not implemented or accepted as a new work batch | Explicit Today action should return to the current date and bring now into view, including on a previously visited day. Initial auto-scroll alone does not do this consistently. |
-| Remember hidden people and selected view | Recommended; not implemented or accepted as a new work batch | Survive refresh; decide scope per card/device/browser and behavior when configured people change. Do not retain private event payloads for this. |
-| Status tiles separate availability and next event | Recommended; terminology accepted, redesign not yet approved | Keep the date/time qualifier visible. Decide lookahead, all-day treatment, and overlap wording before claiming accurate availability. |
-| Fantastical-inspired date snapping | Accepted direction; interaction design and implementation pending | Keep the time axis fixed, date/content synchronized, and time context stable. Resolve person scrolling versus date paging without ambiguous gestures. |
+| Today recenters on current time | Local implementation in progress; not release-verified or deployed | Explicit Today action should return to the current date and bring now into view, including on a previously visited day. |
+| Remember hidden people and selected view | Local implementation in progress; not release-verified or deployed | Browser-local, HA-user/card-scoped; reset filters when lane definitions change. Do not retain private event payloads. |
+| Status tiles separate availability and next event | Accepted and locally verified 2026-09-16; not deployed | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
+| Fantastical-style separated date cells | Accepted and locally verified 2026-09-16; not deployed | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
+| Fantastical-inspired event-page date snapping | Accepted direction; interaction design and implementation pending | Strip snapping is implemented, not date-page swiping. Keep the time axis fixed, date/content synchronized, and time context stable; resolve person scrolling versus date paging. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Verification pending | Confirm ordinary source changes and cancellations reach HA and the card. Synthetic changes and snapshot parity do not measure real propagation. No live appointment mutation is authorized merely for testing. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |

@@ -100,6 +100,8 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     return {
       ...this._config,
       layout: normalizeLayout(this._config.layout),
+      remember_preferences:
+        this._config.remember_preferences ?? normalizeLayout(this._config.layout) === "wall",
       time_grid: String(this._config.time_grid ?? 30),
     };
   }
@@ -173,6 +175,8 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
         selector: { number: { min: 0, max: 60, step: 1, mode: "box", unit_of_measurement: "min" } },
       },
       { name: "scroll_to_now", selector: { boolean: {} } },
+      { name: "remember_preferences", selector: { boolean: {} } },
+      { name: "preferences_key", selector: { text: {} } },
       { name: "show_now_line", selector: { boolean: {} } },
       { name: "show_progress", selector: { boolean: {} } },
       { name: "weather_entity", selector: { entity: { filter: { domain: "weather" } } } },

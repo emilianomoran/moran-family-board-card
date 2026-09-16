@@ -154,6 +154,25 @@
         );
       }
 
+      // Opt-in, privacy-safe Status-tile review scenario; leave baseline fixtures stable.
+      if (query.get("status") === "1") {
+        calendarEvents["calendar.fixture_family"] = [
+          timedEvent("Jordan: Planning Session", "15:00", "16:30"),
+          timedEvent("Jordan: Pick-up", "17:00", "17:30"),
+          {
+            summary: "Avery: Project review",
+            start: { dateTime: "2026-02-19T09:00:00-06:00" },
+            end: { dateTime: "2026-02-19T10:00:00-06:00" },
+          },
+          {
+            summary: "Casey: Weekend workshop",
+            start: { dateTime: "2026-02-21T10:30:00-06:00" },
+            end: { dateTime: "2026-02-21T12:00:00-06:00" },
+          },
+        ];
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
       const states = {
         "calendar.fixture_family": {
           entity_id: "calendar.fixture_family",
@@ -247,7 +266,7 @@
         refresh_interval: 0,
         drag_drop: false,
         filter_duplicates: query.get("checks") === "calendar",
-        show_focus: query.get("checks") === "calendar",
+        show_focus: query.get("checks") === "calendar" || query.get("status") === "1",
         persons: [
           {
             name: "Avery",
@@ -841,6 +860,29 @@
         }
         contained(dayTabs, "Weekday tab row");
         const tabsRect = dayTabs.getBoundingClientRect();
+        const dateRects = dayButtons.map((button) => button.getBoundingClientRect());
+        if (
+          Math.max(...dateRects.map((rect) => rect.width)) -
+            Math.min(...dateRects.map((rect) => rect.width)) >
+          1
+        ) {
+          throw new Error("Date cells do not have equal widths.");
+        }
+        if (
+          expectedCardWidth >= 448 &&
+          (Math.abs(dateRects[0].left - tabsRect.left) > 1 ||
+            Math.abs(dateRects[6].right - tabsRect.right) > 1)
+        ) {
+          throw new Error("Date cells are clustered instead of filling the strip.");
+        }
+        if (getComputedStyle(dayTabs).scrollSnapType !== "x mandatory") {
+          throw new Error("Narrow date strip lost its cell snap points.");
+        }
+        const todayButton = dayButtons.find((button) => button.hasAttribute("aria-current"));
+        const todayMarker = getComputedStyle(
+          todayButton.querySelector(".wall-day-number"),
+        ).backgroundColor;
+        if (todayMarker === "rgba(0, 0, 0, 0)") throw new Error("Today marker is not visible.");
         if (dayTabs.scrollHeight > dayTabs.clientHeight + 1) {
           throw new Error("Weekday tabs wrap below their fixed-height row.");
         }
@@ -849,6 +891,18 @@
         }
         for (const button of dayButtons) {
           const rect = button.getBoundingClientRect();
+          const styles = getComputedStyle(button);
+          if (rect.height < 72 || rect.width < 64 || styles.borderRadius !== "0px") {
+            throw new Error("Date controls regressed to compressed pill tabs.");
+          }
+          if (button !== dayButtons[6] && styles.borderInlineEndWidth !== "1px") {
+            throw new Error("Date cell divider is missing.");
+          }
+          if (
+            parseFloat(getComputedStyle(button.querySelector(".wall-day-number")).fontSize) < 24
+          ) {
+            throw new Error("Date numbers regressed to compact text.");
+          }
           if (
             rect.top < tabsRect.top - 1 ||
             rect.bottom > tabsRect.bottom + 1 ||
@@ -870,6 +924,42 @@
         if (dayButtons[6].getAttribute("aria-selected") !== "true") {
           throw new Error("Selecting the last date did not update the date strip.");
         }
+        if (
+          getComputedStyle(dayButtons[6]).backgroundColor ===
+          getComputedStyle(dayButtons[0]).backgroundColor
+        ) {
+          throw new Error("Selected date does not highlight the whole cell.");
+        }
+        if (
+          getComputedStyle(todayButton.querySelector(".wall-day-number")).backgroundColor !==
+          todayMarker
+        ) {
+          throw new Error("Selecting another day moved or removed today's marker.");
+        }
+        dayButtons[6].focus();
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        if (
+          root.activeElement !== dayButtons[6] ||
+          parseFloat(getComputedStyle(dayButtons[6]).outlineOffset) >= 0
+        ) {
+          throw new Error(
+            `Date keyboard focus is clipped outside the strip (offset=${getComputedStyle(dayButtons[6]).outlineOffset}, focused=${root.activeElement === dayButtons[6]}).`,
+          );
+        }
+        if (!dayhead.querySelector(".dayname").textContent.includes("Feb 22")) {
+          throw new Error("Date cell selection did not update the calendar heading.");
+        }
+        const priorDate = dayButtons[6].getAttribute("aria-label");
+        weeknav.querySelector('button[aria-label="Next week"]').click();
+        await nextRender();
+        if (
+          dayButtons[6].getAttribute("aria-label") === priorDate ||
+          dayTabs.querySelector("[aria-current='date']")
+        ) {
+          throw new Error(
+            "Next week did not refresh date labels or remove the out-of-week Today marker.",
+          );
+        }
         dayhead.querySelector(".nav-now").click();
         await nextRender();
         const selectedDay = dayTabs.querySelector("[role='tab'][aria-selected='true']");
@@ -882,32 +972,69 @@
         if (!board || board.clientWidth > viewportWidth + 1) {
           throw new Error("Day grid did not stay inside its own scrollable panel.");
         }
+        if (dayTabs.scrollWidth > dayTabs.clientWidth + 1) {
+          const selection = selectedDay.getAttribute("aria-label");
+          dayTabs.scrollLeft = 37;
+          await nextRender();
+          const maxScroll = dayTabs.scrollWidth - dayTabs.clientWidth;
+          const snapPoints = [0, maxScroll, ...dayButtons.map((_, i) => i * 64)];
+          if (!snapPoints.some((point) => Math.abs(point - dayTabs.scrollLeft) <= 1)) {
+            throw new Error("Date strip stopped between cell snap points.");
+          }
+          if (
+            dayTabs.querySelector("[aria-selected='true']").getAttribute("aria-label") !== selection
+          ) {
+            throw new Error("Scrolling the date strip unexpectedly changed the selected date.");
+          }
+        }
+        card.setConfig({ ...card._config, first_day: "sunday", show_weekends: true });
+        await nextRender();
+        let configuredDates = [...root.querySelectorAll(".moran-wall-shell > .tabs button")];
+        if (!configuredDates[0].getAttribute("aria-label").startsWith("Sunday")) {
+          throw new Error("Date cells ignored Sunday-first configuration.");
+        }
+        card.setConfig({ ...card._config, show_weekends: false });
+        await nextRender();
+        configuredDates = [...root.querySelectorAll(".moran-wall-shell > .tabs button")];
+        const firstRect = configuredDates[0].getBoundingClientRect();
+        const lastRect = configuredDates.at(-1).getBoundingClientRect();
+        if (
+          configuredDates.length !== 5 ||
+          Math.abs(lastRect.right - firstRect.left - expectedCardWidth) > 1
+        ) {
+          throw new Error("Weekday-only date cells did not fill the strip.");
+        }
         return [`responsive wall: ${expectedCardWidth}px menu and date controls contained`];
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "alignment"
-          ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
-              runCalendarAlignmentChecks(card, hass, nextRender),
+        (query.get("checks") === "status"
+          ? import("./calendar-status-check.mjs").then(({ runCalendarStatusChecks }) =>
+              runCalendarStatusChecks(card, hass, nextRender),
             )
-          : query.get("checks") === "calendar"
-            ? runCalendarHealthChecks()
-            : query.get("checks") === "recovery"
-              ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
-                  runCalendarRecoveryChecks(card, hass, nextRender),
-                )
-              : query.get("checks") === "integrity"
-                ? import("./calendar-integrity-check.mjs").then(({ runCalendarIntegrityChecks }) =>
-                    runCalendarIntegrityChecks(card, hass, nextRender),
+          : query.get("checks") === "alignment"
+            ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
+                runCalendarAlignmentChecks(card, hass, nextRender),
+              )
+            : query.get("checks") === "calendar"
+              ? runCalendarHealthChecks()
+              : query.get("checks") === "recovery"
+                ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
+                    runCalendarRecoveryChecks(card, hass, nextRender),
                   )
-                : query.get("checks") === "lifecycle"
-                  ? import("./calendar-lifecycle-check.mjs").then(
-                      ({ runCalendarLifecycleChecks }) =>
-                        runCalendarLifecycleChecks(card, hass, nextRender),
+                : query.get("checks") === "integrity"
+                  ? import("./calendar-integrity-check.mjs").then(
+                      ({ runCalendarIntegrityChecks }) =>
+                        runCalendarIntegrityChecks(card, hass, nextRender),
                     )
-                  : query.get("checks") === "responsive"
-                    ? runResponsiveChecks()
-                    : runInteractionChecks()
+                  : query.get("checks") === "lifecycle"
+                    ? import("./calendar-lifecycle-check.mjs").then(
+                        ({ runCalendarLifecycleChecks }) =>
+                          runCalendarLifecycleChecks(card, hass, nextRender),
+                      )
+                    : query.get("checks") === "responsive"
+                      ? runResponsiveChecks()
+                      : runInteractionChecks()
         )
           .then((results) => writeCheckResult("pass", results.join("; ")))
           .catch((error) => {

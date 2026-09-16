@@ -26,6 +26,12 @@ const EN: Dict = {
   l_max_columns: "Max. columns per day",
   l_first_day: "Week starts on",
   l_scroll_to_now: "Auto-scroll to now",
+  l_remember_preferences: "Remember view and hidden people on this browser",
+  l_preferences_key: "Preferences ID (optional)",
+  h_remember_preferences:
+    "On by default in wall mode. Browser-local and per HA user; no events are saved. Changing lane definitions resets saved filters.",
+  h_preferences_key:
+    "Give otherwise identical cards on the same dashboard path different IDs to keep their preferences separate.",
   l_color_by: "Color by",
   l_show_weekends: "Show weekend",
   l_show_now_line: "Now line",
@@ -167,6 +173,12 @@ const DE: Dict = {
   l_max_columns: "Max. Spalten pro Tag",
   l_first_day: "Wochenstart",
   l_scroll_to_now: "Auto-Scroll zu jetzt",
+  l_remember_preferences: "Ansicht und ausgeblendete Personen in diesem Browser merken",
+  l_preferences_key: "Einstellungs-ID (optional)",
+  h_remember_preferences:
+    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Geänderte Personenspalten setzen Filter zurück.",
+  h_preferences_key:
+    "Unterschiedliche IDs trennen die Einstellungen identischer Karten auf demselben Dashboard-Pfad.",
   l_color_by: "Einfärben nach",
   l_show_weekends: "Wochenende anzeigen",
   l_show_now_line: "Jetzt-Linie",

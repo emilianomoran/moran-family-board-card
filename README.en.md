@@ -20,8 +20,10 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Week view** – weekdays as rows, people as columns, compact event chips.
 - **Month view** – classic month grid with colored events per person; clicking a day jumps into the day view.
 - **Agenda / list view** – chronological list of events grouped by day; ideal on a phone.
-- **Status tiles** (`show_focus`) show each visible person's current timed event or next
-  timed event in the loaded range. “Next” is not limited to today. See
+- **Status tiles** (`show_focus`) in wall mode separate **Free now / Busy now** from the
+  next timed appointment, with Today/Tomorrow/an explicit date and time kept visible.
+  Incomplete data never implies free. “Next” is limited to the loaded range, not to today;
+  all-day events do not mark someone busy. Legacy layout keeps current-or-next behavior. See
   [current rules and known limitations](docs/STATUS.md#status-tiles-current-rules-and-known-issue).
 - **Auto icons** – optionally every event gets a matching emoji by keyword (doctor → 🩺, sport → 🏃, birthday → 🎂, school → 🎒 …); custom rules possible. Titles that already contain an emoji stay untouched.
 - **Timeline view** – people as rows on the left, time running horizontally: events as bars on a timeline (Gantt style); overlapping events stack into sub-rows.
@@ -225,7 +227,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `unmatched` | boolean | `false` | Use the lane as a fallback for events from its calendars that no normal lane claimed |
 | `strip_title_prefix` | boolean | `false` | Remove the matched configured prefix from the displayed event title |
 | `hide_empty_persons` | boolean | `false` | Week view: hide people without events in that week |
-| `show_focus` | boolean | `false` | “Now / next” bar per person above the views |
+| `show_focus` | boolean | `false` | Status tiles above the views; wall mode separates current availability from the dated next appointment |
 | `read_only` | boolean | `false` | Disable creating, editing, deleting, and dragging events in this card; details and navigation remain available. This is a card behavior setting, not an HA permission boundary. |
 | `drag_drop` | boolean | `true` | Move / resize events in the day view by dragging (writable single events only) |
 | `auto_icons` | boolean | `false` | Prepend an emoji per event based on keywords |
@@ -235,6 +237,8 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
+| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Prototype: retain selected view and hidden people in this browser for the HA user/card. No calendar payloads are stored. Changing lane definitions or view defaults resets the saved preferences. |
+| `preferences_key` | string | title-based identity | Prototype: distinguish otherwise identical cards on the same dashboard path; not a credential or security boundary. |
 | `time_grid` | number | `30` | Time axis grid in minutes |
 | `start_hour` | number | `6` | First visible hour |
 | `end_hour` | number | `22` | Last visible hour |

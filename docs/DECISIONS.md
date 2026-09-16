@@ -94,10 +94,24 @@ when moving between days. Existing person-lane horizontal scrolling and future h
 date paging need distinct, unambiguous gestures; their exact arrangement remains open.
 This is an interaction reference, not a requirement to copy branding or every feature.
 
+**Date-strip refinement accepted 2026-09-16:** the user supplied four Fantastical screenshots
+and rejected the small, centered iOS-style date cluster. Use a full-width sequence of
+distinct, evenly sized date cells with vertical separators, larger weekday/date labels,
+and a full-cell selected highlight. Today's circular marker stays distinct from selection
+when browsing another day. On narrow panels, preserve usable cell sizes and horizontal
+access instead of compressing the labels.
+
+The reference's week-grid header informs the date control, not the data layout below it:
+Day view remains person columns. Weather icons, the month/list composition, and a full
+Fantastical-style day/week paging model are not part of this scoped correction. Native
+scroll snapping on the date strip can stabilize the strip without changing the selected
+day just because the user scrolls it; event-page swiping remains future work.
+
 Research boundary: the [official calendar-view guide](https://flexibits.com/fantastical-ios/help/calendar-views)
-was consulted for date/navigation context. The fixed-axis and snapping requirements come
-from the user's experience; exact current gesture behavior was not independently verified
-inside the Fantastical app.
+was consulted for date/navigation context. The supplied screenshots now provide visual
+evidence of day separation, today's marker, and selected-day treatment. Their private
+event contents and original images are not copied into this repo. Exact current gesture
+behavior was not independently verified inside the Fantastical app.
 
 ### D08. Show the full 24-hour schedule
 
@@ -121,17 +135,24 @@ The discussion exposed two issues: a future appointment can appear days before i
 and its timing qualifier can be clipped. The current rules and open design questions are
 recorded in [STATUS.md](STATUS.md#status-tiles-current-rules-and-known-issue).
 
-**Recommended, not yet accepted for implementation:** separate current availability from
-the next event, for example:
+**Accepted for implementation 2026-09-16:** the user approved separating current
+availability from the next event, for example:
 
 > Avery · Free now
 >
 > Next: Project review · Tomorrow, 9 AM
 
-No same-day or “soon” cutoff has been chosen. All-day semantics, overlapping-current-event
-presentation, and a consistent lookahead window also need explicit decisions when this
-work is taken up. The user asked for the existing logic; that question did not authorize
-changing it.
+The wall tiles will show “Free now” when there is no current timed event and all lane
+sources are healthy, or “Busy now” with the current appointment. A separate Next line
+will retain the appointment title and a readable Today/Tomorrow/date plus time, including
+while another appointment is in progress. Unavailable/loading data must never imply free.
+The date/time gets its own wrapping line so long titles cannot push it out of view.
+
+Implementation choices for this scoped pass: retain the existing loaded-range lookahead,
+timed-event-only selection, and overlap tie-breaker. No new soon cutoff or all-day busy
+policy is introduced. “Free now” describes the loaded timed schedule, not physical presence
+or guaranteed availability. Legacy layout retains its existing current-or-next behavior.
+An independent lookahead and richer all-day/overlap policies remain open follow-ups.
 
 ### D10. Keep this conversation's product record in this repo
 
@@ -157,8 +178,10 @@ repo. Product facts must not exist only in chat or private deployment notes.
 | Desktop scrolling in actual HA versus a laptop preview | User confirmed scrolling worked with enough space. Inspect the actual deployed HA surface when it is the reported target. |
 | Misalignment after person toggles and ordinary resize | Reproduced, fixed, regression-tested, and deployed in `0.25.1-moran.3`. |
 | Scrolling stopped at 10 PM | Full-day configuration accepted and deployed; D08 records the distinction from package defaults. |
-| Suggested next steps: Today recentering, remembered preferences, phone checks | Recommendations, not an accepted implementation batch. They remain open in STATUS.md. |
-| Meaning of “free” versus future events in Status tiles | Existing logic explained and countdown clipping confirmed. Terminology accepted; redesign remains a proposal. |
+| Suggested next steps: Today recentering, remembered preferences, phone checks | Continuation began local work on Today and browser-local preferences. These remain in-progress, not verified or deployed; physical-device checks remain open. |
+| Meaning of “free” versus future events in Status tiles | Existing logic explained and countdown clipping confirmed. Terminology and separate availability/dated-next presentation accepted on 2026-09-16. |
+| Restart the development server for prototype review | Local sample-data harness restarted at port 4173 on 2026-09-16; this does not update HA or claim live-calendar verification. |
+| Fantastical screenshot review of the date strip | Separate full-width date cells replace the compressed centered date cluster; D07 records the accepted presentation and its scope. |
 
 ## Evidence and date boundaries
 
@@ -169,5 +192,6 @@ repo. Product facts must not exist only in chat or private deployment notes.
 - Source checkpoint `42495b0f572dc7ddf226bff432f075168f43ffe1` records the alignment fix.
 - The 2026-09-16 full-day configuration and Status-tile diagnosis were verified in the
   authenticated HA pilot. Sensitive operational evidence remains in the private workspace.
-- The 2026-09-16 conversation established D07 through D10 and the unapproved next-step
-  proposals. Consolidation does not imply all earlier conversation happened on this date.
+- The 2026-09-16 conversation established D07 through D10; a later annotation explicitly
+  approved D09's availability/dated-next example. Consolidation does not imply all earlier
+  conversation happened on this date.

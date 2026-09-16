@@ -28,12 +28,14 @@ import {
 } from "./config";
 import { readCalendarBatch, type CalendarRange, type CalendarReadResult } from "./calendar-source";
 import { renderWallShell, wallShellStyles } from "./wall-shell";
+import { preferencesKey, readPreferences, writePreferences } from "./preferences";
 import {
   localize,
   formatTime,
   formatMinutes,
   formatHourLabel,
   formatShortDate,
+  formatStatusDateTime,
   formatCountdown,
   weekdayNames,
   formatWeekRange,
@@ -267,6 +269,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
   private _weatherKey = "";
   private _scrolledKey = "";
+  private _scrollToNowRequested = false;
+  private _scrollToNowFrame?: number;
+  private _preferencesKey?: string;
   private _restoreFocus?: HTMLElement;
   private _ro?: ResizeObserver;
   private _lastInteract = Date.now();
@@ -331,6 +336,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._day = this._todayIndex();
     // persons flagged `hidden` start collapsed (the header toggle brings them back)
     this._hiddenP = config.persons.map((p, i) => (p.hidden ? i : -1)).filter((i) => i >= 0);
+    this._preferencesKey = undefined;
+    this._scrolledKey = "";
+    this._restorePreferences();
     // simple size knobs -> CSS tokens (also overridable via theme/card-mod)
     const colMin = Number(config.col_min_width);
     if (Number.isFinite(colMin) && colMin >= 60) {
@@ -371,6 +379,48 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     return chosen.length ? chosen : [...ALL_VIEWS];
   }
 
+  private _restorePreferences(): void {
+    if (!this._config) return;
+    const key = preferencesKey(this._config, window.location.pathname, this.hass?.user?.id);
+    if (key === this._preferencesKey) return;
+    this._preferencesKey = key;
+    const wanted = this._config.view ?? "day";
+    this._view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
+    this._hiddenP = this._persons.flatMap((p, i) => (p.hidden ? [i] : []));
+    this._scrolledKey = "";
+    if (!key) return;
+    try {
+      const saved = readPreferences(
+        window.localStorage,
+        key,
+        this._enabledViews,
+        this._persons.length,
+      );
+      if (saved) {
+        this._view = saved.view;
+        this._hiddenP = saved.hidden;
+      }
+    } catch {
+      // Accessing localStorage itself can throw in a restricted browser.
+    }
+  }
+
+  private _savePreferences(): void {
+    if (!this._preferencesKey) return;
+    try {
+      writePreferences(window.localStorage, this._preferencesKey, this._view, this._hiddenP);
+    } catch {
+      // Preferences are optional; a storage failure must not break interactions.
+    }
+  }
+
+  private _selectView(view: ViewName): void {
+    if (!this._enabledViews.includes(view)) return;
+    if (this._view !== view) this._scrolledKey = "";
+    this._view = view;
+    this._savePreferences();
+  }
+
   /** JS weekday (0=Sun..6=Sat) of the configured week start. */
   private get _firstDayJs(): number {
     return this._config?.first_day === "sunday" ? 0 : 1;
@@ -408,6 +458,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
+    this._scrollToNowFrame = undefined;
     this._fetchGeneration += 1;
     this._fetchedKey = "";
     this._pendingFetch = undefined;
@@ -543,6 +595,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   protected updated(changed: PropertyValues): void {
+    if (changed.has("hass") || changed.has("_config")) this._restorePreferences();
     if (
       (changed.has("hass") ||
         changed.has("_browserOnline") ||
@@ -646,18 +699,45 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /** Scroll the day board so the current time is in view (once per view). */
   private _maybeScrollToNow(): void {
-    if (this._view !== "day" || this._config?.scroll_to_now === false) return;
+    if (this._view !== "day") return;
+    if (!this._scrollToNowRequested && this._config?.scroll_to_now === false) return;
     const day = this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0];
     if (!this._isRealToday(day)) return;
-    const key = `${this._weekOffset}|${this._day}|${this._config?.hour_height}`;
-    if (key === this._scrolledKey) return;
+    const key = `${this._now().toDateString()}|${day}|${this._pxPerMin}`;
+    if (!this._scrollToNowRequested && key === this._scrolledKey) return;
     const board = this.renderRoot?.querySelector(".board") as HTMLElement | null;
-    const now = this.renderRoot?.querySelector(".nowline") as HTMLElement | null;
-    if (!board || !now) return;
+    const body = board?.querySelector(".body") as HTMLElement | null;
+    if (!board || !body || !board.clientHeight) return;
     this._scrolledKey = key;
-    requestAnimationFrame(() => {
-      const target = now.offsetTop - board.clientHeight / 3;
-      board.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+    this._scrollToNowRequested = false;
+    if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
+    this._scrollToNowFrame = requestAnimationFrame(() => {
+      this._scrollToNowFrame = undefined;
+      if (
+        !this.isConnected ||
+        this._view !== "day" ||
+        !this._isRealToday(day) ||
+        board !== this.renderRoot.querySelector(".board")
+      )
+        return;
+      const { startMin, endMin } = this._dayWindow(day);
+      const now = this._now();
+      const minutes = Math.max(startMin, Math.min(endMin, now.getHours() * 60 + now.getMinutes()));
+      const sticky = [...board.querySelectorAll<HTMLElement>(".header-row, .allday-row")].reduce(
+        (height, row) => height + row.offsetHeight,
+        0,
+      );
+      const bodyTop =
+        body.getBoundingClientRect().top - board.getBoundingClientRect().top + board.scrollTop;
+      const target =
+        bodyTop +
+        (minutes - startMin) * this._pxPerMin -
+        sticky -
+        (board.clientHeight - sticky) / 3;
+      board.scrollTo({
+        top: Math.max(0, Math.min(board.scrollHeight - board.clientHeight, target)),
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
     });
   }
 
@@ -1098,6 +1178,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._hiddenP = this._isOff(idx)
       ? this._hiddenP.filter((i) => i !== idx)
       : [...this._hiddenP, idx];
+    this._savePreferences();
   }
   private _timedFor(day: number, idx: number): LaidOutEvent[] {
     if (this._isOff(idx)) return [];
@@ -1209,12 +1290,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   /** Jump to the agenda list for a given weekday so collapsed events stay reachable. */
   private _showDayAgenda(day: number): void {
     this._day = day;
-    if (this._enabledViews.includes("agenda")) this._view = "agenda";
+    this._selectView("agenda");
   }
   /** Jump from the week view into the day view of a given weekday. */
   private _openDayView(day: number): void {
     this._day = day;
-    if (this._enabledViews.includes("day")) this._view = "day";
+    this._selectView("day");
   }
   private _allDayFor(day: number, idx: number): BoardEvent[] {
     if (this._isOff(idx)) return [];
@@ -1314,6 +1395,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _thisWeek = () => {
     this._weekOffset = 0;
     this._day = this._todayIndex();
+    if (this._layout === "wall" && this._view === "day") {
+      this._scrollToNowRequested = true;
+      this.requestUpdate();
+    }
   };
   private _prevMonth = () => {
     this._monthOffset -= 1;
@@ -1335,7 +1420,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const weeks = localDayDifference(toWeekStart(date), toWeekStart(today)) / 7;
     this._weekOffset = weeks;
     this._day = (date.getDay() - this._firstDayJs + 7) % 7;
-    this._view = this._enabledViews.includes("day") ? "day" : this._view;
+    this._selectView("day");
   }
 
   /* ---- render -------------------------------------------------- */
@@ -1374,7 +1459,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                 role="tab"
                 aria-selected=${this._view === view}
                 class=${this._view === view ? "on" : ""}
-                @click=${() => (this._view = view)}
+                @click=${() => this._selectView(view)}
               >
                 ${this._t(view)}
               </button>`,
@@ -1423,7 +1508,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     );
   }
 
-  /** Current + next timed event for a person, view-independent (from _raw). */
+  /** Current + next timed event at clock time, within the active view's loaded range. */
   private _focusFor(idx: number): { current?: RawEvent; next?: RawEvent } {
     if (this._loading || !this._loadedRangeCoversNow()) return {};
     return selectTimedActivity(this._raw, idx, this._now());
@@ -1443,7 +1528,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     );
   }
 
-  /** "Jetzt / als Nächstes" glance bar — one chip per (visible) person. */
+  /** Status tiles — one tile per visible person. Legacy keeps current-or-next behavior. */
   private _renderFocus() {
     return html`
       <div class="focus">
@@ -1457,21 +1542,61 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             <div class="fchip" title=${this._personName(p, i)}>
               ${this._avatar(p, i)}
               <div class="fbody">
-                <span class="fname">${this._personName(p, i)}</span>
-                ${current
-                  ? html`<span class="fnow">
-                      <span class="fdot" style="background:${c}"></span>${icon(current)}
-                      ${current.summary}
-                      <small>bis ${formatTime(this.hass, current.end)}</small>
-                    </span>`
-                  : next
-                    ? html`<span class="fnext">
-                        ${this._t("focus_next")}: ${icon(next)} ${next.summary}
-                        <small>${formatCountdown(this.hass, next.start, this._now())}</small>
-                      </span>`
-                    : html`<span class="ffree">
-                        ${this._t(complete ? "focus_free" : "focus_unavailable")}
-                      </span>`}
+                ${this._layout === "wall"
+                  ? html`
+                      <div class="fheading">
+                        <span class="fname">${this._personName(p, i)}</span>
+                        <span class="fseparator" aria-hidden="true">·</span>
+                        <span class="ffree"
+                          >${this._t(
+                            current
+                              ? "status_busy_now"
+                              : complete
+                                ? "status_free_now"
+                                : "focus_unavailable",
+                          )}</span
+                        >
+                      </div>
+                      ${current
+                        ? html`<span class="fnow" title=${current.summary}>
+                            <span class="fsummary"
+                              >${this._t("status_now")}: ${icon(current)} ${current.summary}</span
+                            >
+                            <small
+                              >${this._t("focus_until")}
+                              ${formatStatusDateTime(this.hass, current.end, this._now())}</small
+                            >
+                          </span>`
+                        : nothing}
+                      ${next
+                        ? html`<span class="fnext" title=${next.summary}>
+                            <span class="fsummary"
+                              >${this._t("status_next")}: ${icon(next)} ${next.summary}</span
+                            >
+                            <small
+                              >${formatStatusDateTime(this.hass, next.start, this._now())}</small
+                            >
+                          </span>`
+                        : nothing}
+                    `
+                  : html` <span class="fname">${this._personName(p, i)}</span>
+                      ${current
+                        ? html`<span class="fnow">
+                            <span class="fdot" style="background:${c}"></span>${icon(current)}
+                            ${current.summary}
+                            <small
+                              >${this._t("focus_until")}
+                              ${formatTime(this.hass, current.end)}</small
+                            >
+                          </span>`
+                        : next
+                          ? html`<span class="fnext">
+                              ${this._t("focus_next")}: ${icon(next)} ${next.summary}
+                              <small>${formatCountdown(this.hass, next.start, this._now())}</small>
+                            </span>`
+                          : html`<span class="ffree">
+                              ${this._t(complete ? "focus_free" : "focus_unavailable")}
+                            </span>`}`}
               </div>
             </div>
           `;
