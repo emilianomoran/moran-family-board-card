@@ -2,6 +2,9 @@
 
 **English** · [Deutsch](README.md)
 
+[Project documentation](docs/README.md) · [Decisions and discussions](docs/DECISIONS.md) ·
+[Current status and next work](docs/STATUS.md) · [Implementation ADR](docs/adr/0001-implementation-base.md)
+
 ![Upstream Family Board Card – day view](docs/preview-day.png)
 
 This is the Moran-maintained fork of
@@ -17,7 +20,9 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Week view** – weekdays as rows, people as columns, compact event chips.
 - **Month view** – classic month grid with colored events per person; clicking a day jumps into the day view.
 - **Agenda / list view** – chronological list of events grouped by day; ideal on a phone.
-- **“Now / next” bar** – optional highlight row above the views: per person, what is running right now (with a pulsing dot) or what is coming next (incl. countdown) – made for the wall tablet.
+- **Status tiles** (`show_focus`) show each visible person's current timed event or next
+  timed event in the loaded range. “Next” is not limited to today. See
+  [current rules and known limitations](docs/STATUS.md#status-tiles-current-rules-and-known-issue).
 - **Auto icons** – optionally every event gets a matching emoji by keyword (doctor → 🩺, sport → 🏃, birthday → 🎂, school → 🎒 …); custom rules possible. Titles that already contain an emoji stay untouched.
 - **Timeline view** – people as rows on the left, time running horizontally: events as bars on a timeline (Gantt style); overlapping events stack into sub-rows.
 - **Pick your views** – choose in the editor which switchers (day/timeline/week/month/agenda) appear.
@@ -80,7 +85,21 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 Run `npm run test:harness` after building for rendered checks with synthetic calendars,
 including connection recovery and phone-width scenarios. Physical iOS sleep/wake and
 provider-to-HA synchronization latency still require real-device validation. Mobile
-date paging and pinned-axis usability are separate follow-up work.
+date paging and the broader Fantastical-inspired interaction pass remain follow-up work;
+the Day grid already keeps its left time axis pinned during person-lane scrolling.
+
+The private pilot now uses a full 24-hour range with initial scroll to now. To use the
+same display behavior, add these options to an otherwise configured card:
+
+```yaml
+start_hour: 0
+end_hour: 24
+trim_hours: false
+scroll_to_now: true
+```
+
+This does not change the package's 6–22 defaults or make the Today action always recenter
+an already visited date. [STATUS.md](docs/STATUS.md) tracks that open behavior separately.
 
 ## Installation (HACS custom repository)
 

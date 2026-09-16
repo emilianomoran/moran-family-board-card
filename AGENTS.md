@@ -1,3 +1,23 @@
+# Current product documentation
+
+Start with [docs/README.md](docs/README.md), [docs/DECISIONS.md](docs/DECISIONS.md),
+and [docs/STATUS.md](docs/STATUS.md). They own the current product record.
+
+- Record material conversation outcomes, decisions, corrections, and open proposals in
+  this repo during the same work session. Do not leave product facts only in chat or
+  the private Home Assistant workspace.
+- Distinguish user decisions from agent recommendations, implemented from planned work,
+  and local commits from pushed changes or releases. Use absolute dates and evidence.
+- Use **Status tiles** for the top per-person current/next chips. Keep existing config
+  names compatible unless a migration is explicitly in scope.
+- Keep transcripts, private appointments, household configuration, credentials,
+  private screenshots, and deployment backups out of the public repo. Use generic
+  examples and sanitized outcomes. Private HA operational records stay in their workspace.
+- Update owning docs and add links rather than maintaining conflicting product summaries.
+  Retain superseded decisions as marked history. Documentation is not an approval gate.
+- `.planning/` and old concept/fork plans are historical. Their GSD phases, reviewer-model
+  requirements, and gates do not override the direct workflow or current docs.
+
 <!-- GSD:project-start source:PROJECT.md -->
 
 ## Project

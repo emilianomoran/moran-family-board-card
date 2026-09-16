@@ -16,6 +16,10 @@ progress:
 
 # Project State
 
+Historical GSD snapshot from 2026-09-11. GSD was retired on 2026-09-15.
+[Current status](../docs/STATUS.md) and [decisions](../docs/DECISIONS.md) supersede
+the phase progress and pending-work sections below. Do not resume work from this snapshot.
+
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-09-11)
@@ -72,7 +76,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 5 live deployment requires two independent Sonnet plan reviews; substitution requires Emiliano's explicit approval.
+- The original Phase 5 reviewer-model requirement was retired. Current live safety rules
+  require targeted backups and verification, not mandatory independent review gates.
 - The existing main component is roughly 3,800 lines and must not absorb all new wall behavior.
 
 ## Deferred Items

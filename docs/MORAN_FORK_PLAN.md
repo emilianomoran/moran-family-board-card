@@ -1,6 +1,9 @@
 # Moran Family Board fork plan
 
-Status: implementation plan for `feature/moran-foundation`; no Home Assistant deployment.
+Status: historical foundation plan. A read-only HA pilot is now installed; this plan's
+milestones are not the current execution order. Updated 2026-09-16.
+Use [DECISIONS.md](DECISIONS.md) for scope and [STATUS.md](STATUS.md) for delivery state.
+Meals/lists and a Bridge mutation adapter remain deferred, not prerequisites.
 
 ## Objective
 
@@ -13,7 +16,8 @@ The longer-term product direction is the wall-board concept in
 
 - Apple/iCloud managed calendars remain the event source of truth.
 - Home Assistant remains the initial display and household-entity layer.
-- Calendar Bridge remains the eventual mutation path for update/delete and recurring-event safety.
+- Calendar Bridge was proposed as a later mutation path for update/delete and recurring-event
+  safety. The active pilot remains read-only; no mutation adapter has been selected for implementation.
 - Person ownership is derived from configurable event-title rules. The fork must not require new per-person calendars.
 - Household-specific names, entity IDs, addresses, and credentials stay out of this public repository.
 - The upstream MIT license and attribution remain intact.
@@ -55,16 +59,21 @@ The longer-term product direction is the wall-board concept in
 - Key annotations to stable event-occurrence identity rather than title and start time.
 - Add visible unassigned and conflict states without relying on color alone.
 
-## Verification gates
+## Technical checks
 
 - `npm run format:check`
 - `npm run lint`
 - `npm test`
 - `npm run build`
 - Browser verification of every enabled view and editor configuration.
-- Direct comparison of the rendered wall board with the target concept.
-- No live files under `/Volumes/config` are changed until the Home Assistant change protocol, backup, and required independent reviews are complete.
+- Compare rendered behavior with current accepted requirements; the older full operations
+  concept is not the calendar pilot's acceptance target.
+- Live changes follow the Home Assistant safety protocol, with targeted backups and
+  verification. The user retired GSD and mandatory independent-review gates on 2026-09-15.
 
 ## Known baseline risk
 
-The untouched upstream dependency tree currently reports eight npm audit advisories, including one critical advisory. Dependency remediation is a separate reviewed change; no force-upgrade will be mixed into the feature foundation.
+The initial upstream audit reported eight advisories, including one critical advisory.
+This historical count was not revalidated by the documentation update. Check the current
+dependency tree before treating it as current evidence; do not mix force-upgrades into
+unrelated feature work.

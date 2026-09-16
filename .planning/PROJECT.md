@@ -1,5 +1,9 @@
 # Moran Family Board Card
 
+Historical project brief, last substantively updated after the 2026-09-11 foundation.
+[Current decisions](../docs/DECISIONS.md) and [delivery status](../docs/STATUS.md)
+supersede the active checklist and phased workflow below. GSD was retired on 2026-09-15.
+
 ## What This Is
 
 Moran Family Board Card is a Home Assistant-native, calendar-first family wall display. It extends an existing Lit custom card so a household can understand who is doing what and when from one shared screen, while keeping Home Assistant and the existing calendar systems as the data and automation layer.
@@ -56,7 +60,10 @@ At a glance, every family member can reliably understand who is doing what and w
 - **Compatibility**: Existing non-wall configurations and all supported views must continue to work — the wall experience is opt-in until validated.
 - **Source of truth**: Calendar events remain owned by the connected external calendars — the card does not invent a second calendar database.
 - **Security**: No tokens, private household configuration, or direct Calendar Bridge credentials may enter dashboard config, fixtures, logs, or the repository.
-- **Live safety**: No files under `/Volumes/config` change during implementation. A live pilot requires targeted backup, two independent Sonnet plan reviews, a configuration check where applicable, and explicit verification; if Sonnet is unavailable, Emiliano must approve any substitute.
+- **Live safety**: Authorized live changes require targeted backups, a configuration check
+  where applicable, and explicit verification. The earlier reviewer-model requirement was
+  retired; the read-only pilot is now deployed. See the current status rather than the
+  historical no-deployment checklist above.
 - **Distribution**: The built `dist/moran-family-board-card.js` remains committed and HACS-compatible, and upstream attribution remains intact.
 - **Quality**: `npm run format:check`, `npm run lint`, `npm test`, and `npm run build` must pass for every release candidate.
 - **Privacy**: Public examples use generic people and entities only.

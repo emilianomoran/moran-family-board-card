@@ -1,6 +1,10 @@
 # Moran Family Board target design
 
-Status: target specification derived from the approved family-board direction and the generated concept at [`docs/concepts/moran-family-board-target-v1.png`](./concepts/moran-family-board-target-v1.png).
+Status: historical visual exploration, superseded as the active delivery specification by
+the calendar-first decisions in [DECISIONS.md](DECISIONS.md). Updated 2026-09-16.
+The generated [concept](./concepts/moran-family-board-target-v1.png) remains a reference,
+not proof that the operations rail, portrait defaults, or final visual design are approved
+for the current release. See [STATUS.md](STATUS.md) for implemented and deferred work.
 
 ## Primary surface
 

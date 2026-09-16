@@ -44,16 +44,16 @@ mutable default branch or on either project's README.
 | Migration cost | The existing [`FamilyBoardConfig` and `PersonConfig`](https://github.com/emilianomoran/moran-family-board-card/blob/1f71865f70345cbf0acfc02ea0f33769fa8f9598/src/ha-family-board-card.ts#L37-L97), editor, TypeScript build, tests, bundle name, and custom-element identity remain in place; the foundation needs only an optional layout key and focused seams. | The alternative is a JavaScript/Parcel/Luxon project per [`package.json`](https://github.com/tienou/family-calendar-card/blob/ee9d8f4df11ea65d175e00dc3835611549ffe9b4/package.json), and its [`editor calendar model`](https://github.com/tienou/family-calendar-card/blob/ee9d8f4df11ea65d175e00dc3835611549ffe9b4/src/editor.js#L107-L154) configures calendars rather than routed person lanes. | Pivoting requires porting the core person model, five-view behavior, editor, tests, TypeScript contracts, build, and distribution identity, with substantial regression risk. |
 | Five-view roadmap fit | [`ALL_VIEWS`](https://github.com/emilianomoran/moran-family-board-card/blob/1f71865f70345cbf0acfc02ea0f33769fa8f9598/src/ha-family-board-card.ts#L34-L35) is exactly day, timeline, week, month, and agenda, and [`render()`](https://github.com/emilianomoran/moran-family-board-card/blob/1f71865f70345cbf0acfc02ea0f33769fa8f9598/src/ha-family-board-card.ts#L1255-L1264) reaches each dedicated renderer. | [`getStubConfig`](https://github.com/tienou/family-calendar-card/blob/ee9d8f4df11ea65d175e00dc3835611549ffe9b4/src/card.js#L203-L220) and [`_applyViewSettings`](https://github.com/tienou/family-calendar-card/blob/ee9d8f4df11ea65d175e00dc3835611549ffe9b4/src/card.js#L1187-L1219) expose Today, Tomorrow, Week, Biweek, and Month; pinned source searches found no timeline or standalone agenda renderer. | The Moran candidate fits the required view contract without translating or dropping views. |
 
-## Decision and Gate
+## Decision and current workflow
 
 Continue development in this repository. Treat `tienou/family-calendar-card` as a source-pinned
 design reference for wall composition, touch navigation, calendar filtering, and responsive
 density—not as the implementation base.
 
-Plans 01-02 and 01-03 may proceed only while this outcome remains **continue**. If a source
-recheck invalidates the conclusion, UI work stops until `.planning/PROJECT.md`,
-`.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, and GitHub issue #2 all record the pivot and
-its migration consequences.
+The implementation-base decision remains accepted. On 2026-09-15, the user retired GSD;
+the original phase-plan and issue-update gates no longer control execution. A future
+architectural pivot still needs an explicit decision and migration rationale in the
+[current product record](../DECISIONS.md), not a second untracked implementation.
 
 ## Provenance and Reuse Policy
 

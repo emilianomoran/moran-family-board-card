@@ -2,6 +2,9 @@
 
 **Deutsch** · [English](README.en.md)
 
+[Projektdokumentation](docs/README.md) · [Entscheidungen und Gespräche](docs/DECISIONS.md) ·
+[Aktueller Stand](docs/STATUS.md) · [Architekturentscheidung](docs/adr/0001-implementation-base.md)
+
 Dies ist der Moran-gepflegte Fork von
 [`renespeaker/ha-family-board-card`](https://github.com/renespeaker/ha-family-board-card). Die
 englische README beschreibt zusätzlich die neue Zuordnung von Terminen aus gemeinsamen Kalendern
@@ -48,9 +51,11 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Fork-Status: **v0.25.1-moran.1 – Upstream v0.25 plus Zuordnung aus gemeinsamen
-> Kalendern.** Die Skylight-artige Operationsansicht und der Calendar-Bridge-Provider sind
-> weiterhin geplant.
+> Fork-Status: **v0.25.1-moran.3, Kalender-Vorschau auf Basis von Upstream v0.25.**
+> Das Wall-Layout ist in einem privaten Home-Assistant-Pilotbetrieb installiert,
+> Kalenderänderungen sind dort deaktiviert. Dies ist ein Entwicklungsstand, keine
+> veröffentlichte HACS-Version. Haushaltsmodule und ein direkter Bridge-Adapter bleiben
+> zurückgestellt. Aktuelle Entscheidungen und offene Arbeiten stehen in den verlinkten Projektdokumenten.
 
 ## Installation (HACS Custom Repository)
 
