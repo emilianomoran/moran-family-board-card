@@ -234,8 +234,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _loadError = false;
   @state() private _partialLoad = false;
   @state() private _loading = false;
-  @state() private _fitPx = 0;
-  @state() private _hiddenP: number[] = []; // temporarily hidden persons (header click) // measured px/min when fit_height is on (0 = not measured)
+  @state() private _fitPx = 0; // measured px/min with fit_height (0 = not measured)
+  @state() private _hiddenP: number[] = []; // collapsed person indices; optionally browser-persisted
   @state() private _drag?: {
     raw: RawEvent;
     mode: "move" | "resize";
@@ -338,6 +338,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._hiddenP = config.persons.map((p, i) => (p.hidden ? i : -1)).filter((i) => i >= 0);
     this._preferencesKey = undefined;
     this._scrolledKey = "";
+    this._scrollToNowRequested = false;
+    if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
+    this._scrollToNowFrame = undefined;
     this._restorePreferences();
     // simple size knobs -> CSS tokens (also overridable via theme/card-mod)
     const colMin = Number(config.col_min_width);
@@ -699,27 +702,33 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /** Scroll the day board so the current time is in view (once per view). */
   private _maybeScrollToNow(): void {
-    if (this._view !== "day") return;
-    if (!this._scrollToNowRequested && this._config?.scroll_to_now === false) return;
     const day = this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0];
-    if (!this._isRealToday(day)) return;
+    if (this._view !== "day" || !this._isRealToday(day)) {
+      this._scrollToNowRequested = false;
+      return;
+    }
+    if (this._loading) return;
+    if (!this._scrollToNowRequested && this._config?.scroll_to_now === false) return;
     const key = `${this._now().toDateString()}|${day}|${this._pxPerMin}`;
     if (!this._scrollToNowRequested && key === this._scrolledKey) return;
     const board = this.renderRoot?.querySelector(".board") as HTMLElement | null;
     const body = board?.querySelector(".body") as HTMLElement | null;
     if (!board || !body || !board.clientHeight) return;
-    this._scrolledKey = key;
     this._scrollToNowRequested = false;
+    const config = this._config;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
     this._scrollToNowFrame = requestAnimationFrame(() => {
       this._scrollToNowFrame = undefined;
       if (
         !this.isConnected ||
         this._view !== "day" ||
+        this._config !== config ||
+        (this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0]) !== day ||
         !this._isRealToday(day) ||
         board !== this.renderRoot.querySelector(".board")
       )
         return;
+      this._scrolledKey = key;
       const { startMin, endMin } = this._dayWindow(day);
       const now = this._now();
       const minutes = Math.max(startMin, Math.min(endMin, now.getHours() * 60 + now.getMinutes()));

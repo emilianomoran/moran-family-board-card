@@ -164,6 +164,32 @@ Use sanitized summaries rather than publishing raw household conversations. Priv
 configuration, calendar content, screenshots, tokens, and backups remain outside the public
 repo. Product facts must not exist only in chat or private deployment notes.
 
+### D11. Finish daily-use navigation and browser-local preferences
+
+**Continuation scope, 2026-09-16.** Finish and directly verify the earlier local Today and
+preference work. Today in wall Day view returns to the real current date and brings the
+current time below the sticky headers, even if that date was already selected or automatic
+scrolling is disabled. Clock ticks and ordinary data refreshes must not continually take
+over the user's scroll position. Respect reduced motion and cancel obsolete queued scrolls.
+
+Remember only selected view and hidden lane indices in browser-local storage, scoped to
+the HA user, dashboard path, and card identity. Different otherwise-identical cards can
+set `preferences_key`. Defaults remain on for wall and off for legacy. Reset saved choices
+when lane definitions/order or configured views/defaults change; invalid or unavailable
+storage must fall back safely. Kiosk auto-return is transient and must not overwrite saved
+choices. Do not persist events, credentials, selected dates, or scroll offsets. This is a
+convenience feature, not a security or authorization boundary.
+
+The implementation plan is local regression tests, fixes, a rebuilt prototype, and a repo
+checkpoint. Live deployment, GitHub publication, and physical-device verification are
+separate delivery states, not implied by a local passing build.
+
+**Locally verified 2026-09-16:** real page reload, config/user/card changes, malformed and
+blocked storage, normal/reduced-motion centering, slow loads, and stale queued-scroll
+cancellation pass. The visible prototype confirms hide → Week → reload retains the
+choices and scrolling to midnight → Today restores the current-time line below headers.
+See STATUS.md for test counts and delivery boundaries.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -178,7 +204,7 @@ repo. Product facts must not exist only in chat or private deployment notes.
 | Desktop scrolling in actual HA versus a laptop preview | User confirmed scrolling worked with enough space. Inspect the actual deployed HA surface when it is the reported target. |
 | Misalignment after person toggles and ordinary resize | Reproduced, fixed, regression-tested, and deployed in `0.25.1-moran.3`. |
 | Scrolling stopped at 10 PM | Full-day configuration accepted and deployed; D08 records the distinction from package defaults. |
-| Suggested next steps: Today recentering, remembered preferences, phone checks | Continuation began local work on Today and browser-local preferences. These remain in-progress, not verified or deployed; physical-device checks remain open. |
+| Suggested next steps: Today recentering, remembered preferences, phone checks | Today and browser-local preferences are implemented and locally verified on 2026-09-16; deployment and physical-device checks remain open. |
 | Meaning of “free” versus future events in Status tiles | Existing logic explained and countdown clipping confirmed. Terminology and separate availability/dated-next presentation accepted on 2026-09-16. |
 | Restart the development server for prototype review | Local sample-data harness restarted at port 4173 on 2026-09-16; this does not update HA or claim live-calendar verification. |
 | Fantastical screenshot review of the date strip | Separate full-width date cells replace the compressed centered date cluster; D07 records the accepted presentation and its scope. |

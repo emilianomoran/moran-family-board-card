@@ -138,17 +138,43 @@ Today. Page identity, meaningful content, absence of an error overlay, screensho
 warning/error logs passed. Run `HARNESS_ONLY=responsive npm run test:harness` for these
 focused checks. This remains local-only; physical-device and HA-deployment checks are open.
 
-Status-tile presentation is implemented locally, 2026-09-16, with date/time and rendered
-regression checks and a rebuilt sample-data prototype. Live HA remains on the checkpoint
-above. Earlier local Today/recenter and
-browser-local view/filter preference work is preserved; it is not yet release-verified.
-Preferences are scoped to HA user/card/browser, reset when lane definitions change, and
-store only the selected view and hidden lane indices, never events or credentials.
+### Daily-use navigation and preferences verified locally, 2026-09-16
+
+Today in wall Day view now recenters even when already on today, automatic scrolling is
+off, or the now-line decoration is hidden. Auto-centering waits for loaded data so trimmed
+hours and sticky rows are measured correctly. Queued centering cannot affect another date,
+and navigating away during a slow load cancels a pending Today request. Reduced motion is
+respected; ticks and normal data refreshes preserve intentional scroll position.
+
+The selected view and hidden people survive a real page reload. Preferences are scoped to
+HA user, dashboard path, and card in local browser storage; a changed lane definition/order
+or view configuration invalidates positional filters. Missing users, disabled persistence,
+legacy defaults, malformed data, blocked storage, and kiosk auto-return are covered.
+Only version/view/hidden indices are stored; no events, names, credentials, selected dates,
+or scroll offsets. This is convenience state, not a security boundary. See D11.
+
+Verification: 109 unit tests (including 25 preference tests) and the full 30-scenario
+browser suite pass, plus TypeScript, build, formatting, and whitespace checks. The four
+new daily-use cases cover desktop 1920×1080 and phone-width 390×1080, each with normal and
+reduced motion. They perform an actual page reload, remount both HA initialization orders,
+switch HA users, change card IDs/person ordering/enabled views/defaults, simulate storage
+failures, and exercise delayed reads and cancelled scrolling. Reproduce with
+`HARNESS_ONLY=daily npm run test:harness` and `npm test`.
+
+Visible in-app checks confirmed hide a person → choose Week → reload restores both,
+including after resizing; returning to Day retains the hidden header. Scrolling to midnight
+then tapping Today moved the current-time line below the sticky person header. Page identity,
+meaningful rendering, no error overlay, screenshot evidence, and warning/error logs passed.
+The full-day sample-data review link is
+`http://127.0.0.1:4173/dev/harness.html?scenario=wall&daily=1&status=1`.
+The existing browser zoom was preserved during phone-sized review. No real calendar events
+were changed. This is locally verified work; the installed HA bundle, physical Safari
+verification, and GitHub/HACS release remain unchanged/pending.
 
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
-| Today recenters on current time | Local implementation in progress; not release-verified or deployed | Explicit Today action should return to the current date and bring now into view, including on a previously visited day. |
-| Remember hidden people and selected view | Local implementation in progress; not release-verified or deployed | Browser-local, HA-user/card-scoped; reset filters when lane definitions change. Do not retain private event payloads. |
+| Today recenters on current time | Locally verified 2026-09-16; not deployed | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
+| Remember hidden people and selected view | Locally verified 2026-09-16; not deployed | Real reload persistence, safe identity/config invalidation, and graceful storage failure covered. |
 | Status tiles separate availability and next event | Accepted and locally verified 2026-09-16; not deployed | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
 | Fantastical-style separated date cells | Accepted and locally verified 2026-09-16; not deployed | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
 | Fantastical-inspired event-page date snapping | Accepted direction; interaction design and implementation pending | Strip snapping is implemented, not date-page swiping. Keep the time axis fixed, date/content synchronized, and time context stable; resolve person scrolling versus date paging. |

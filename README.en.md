@@ -237,8 +237,8 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
-| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Prototype: retain selected view and hidden people in this browser for the HA user/card. No calendar payloads are stored. Changing lane definitions or view defaults resets the saved preferences. |
-| `preferences_key` | string | title-based identity | Prototype: distinguish otherwise identical cards on the same dashboard path; not a credential or security boundary. |
+| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Retain selected view and hidden people in this browser for the HA user/card. No calendar payloads are stored. Changing lane definitions, enabled views, or view defaults resets the saved choices. Blocked storage falls back to normal unsaved use. |
+| `preferences_key` | string | title-based identity | Distinguish otherwise identical cards on the same dashboard path; not a credential or security boundary. |
 | `time_grid` | number | `30` | Time axis grid in minutes |
 | `start_hour` | number | `6` | First visible hour |
 | `end_hour` | number | `22` | Last visible hour |
@@ -269,7 +269,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `max_columns` | number | `3` | Max. side-by-side columns per person/day; with more overlaps a “+N” chip appears (1–8) |
 | `tentative_patterns` | list | – | Mark events with a matching title pattern as tentative (dashed / translucent) |
 | `first_day` | string | `monday` | Week starts on `monday` or `sunday` |
-| `scroll_to_now` | boolean | `true` | Scroll the day view to the current time on load |
+| `scroll_to_now` | boolean | `true` | Automatically scroll Day to now after loading. Wall Day's explicit Today action still recenters when this is `false`; ordinary clock ticks and refreshes do not take over manual scrolling. |
 | `refresh_interval` | number | `300` | Auto refresh of the events in seconds (0 = off); additionally when the tablet wakes up |
 
 Every `calendar.*` entity works – no matter whether `local_calendar` (local, no cloud), Google or CalDAV. Home Assistant delivers them all in the same shape.

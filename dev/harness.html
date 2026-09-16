@@ -101,6 +101,7 @@
       const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
       const query = new URLSearchParams(window.location.search);
       const scenario = query.get("scenario") ?? "legacy";
+      const dailyUse = query.get("daily") === "1" || query.get("checks") === "daily";
       let feed = query.get("feed") ?? "healthy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
@@ -219,6 +220,7 @@
       const calendarCalls = { family: 0, activities: 0 };
       const calendarRanges = [];
       const hass = {
+        ...(dailyUse ? { user: { id: "fixture-local-user", name: "Fixture user" } } : {}),
         states,
         locale: { language: "en-US", time_format: "12" },
         config: { unit_system: { temperature: "°F" } },
@@ -257,12 +259,21 @@
         title: "Family Board",
         view: "day",
         views: ["day", "timeline", "week", "month", "agenda"],
-        start_hour: 7,
-        end_hour: 21,
+        start_hour: dailyUse ? 0 : 7,
+        end_hour: dailyUse ? 24 : 21,
         trim_hours: false,
         hour_height: 64,
         show_now_line: true,
-        scroll_to_now: false,
+        scroll_to_now: dailyUse,
+        ...(dailyUse
+          ? {
+              read_only: true,
+              preferences_key:
+                query.get("checks") === "daily"
+                  ? `fixture-daily-${document.documentElement.clientWidth}`
+                  : "fixture-daily-preview",
+            }
+          : {}),
         refresh_interval: 0,
         drag_drop: false,
         filter_duplicates: query.get("checks") === "calendar",
@@ -1008,33 +1019,37 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "status"
-          ? import("./calendar-status-check.mjs").then(({ runCalendarStatusChecks }) =>
-              runCalendarStatusChecks(card, hass, nextRender),
+        (query.get("checks") === "daily"
+          ? import("./calendar-daily-use-check.mjs").then(({ runCalendarDailyUseChecks }) =>
+              runCalendarDailyUseChecks(card, hass, nextRender),
             )
-          : query.get("checks") === "alignment"
-            ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
-                runCalendarAlignmentChecks(card, hass, nextRender),
+          : query.get("checks") === "status"
+            ? import("./calendar-status-check.mjs").then(({ runCalendarStatusChecks }) =>
+                runCalendarStatusChecks(card, hass, nextRender),
               )
-            : query.get("checks") === "calendar"
-              ? runCalendarHealthChecks()
-              : query.get("checks") === "recovery"
-                ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
-                    runCalendarRecoveryChecks(card, hass, nextRender),
-                  )
-                : query.get("checks") === "integrity"
-                  ? import("./calendar-integrity-check.mjs").then(
-                      ({ runCalendarIntegrityChecks }) =>
-                        runCalendarIntegrityChecks(card, hass, nextRender),
+            : query.get("checks") === "alignment"
+              ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
+                  runCalendarAlignmentChecks(card, hass, nextRender),
+                )
+              : query.get("checks") === "calendar"
+                ? runCalendarHealthChecks()
+                : query.get("checks") === "recovery"
+                  ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
+                      runCalendarRecoveryChecks(card, hass, nextRender),
                     )
-                  : query.get("checks") === "lifecycle"
-                    ? import("./calendar-lifecycle-check.mjs").then(
-                        ({ runCalendarLifecycleChecks }) =>
-                          runCalendarLifecycleChecks(card, hass, nextRender),
+                  : query.get("checks") === "integrity"
+                    ? import("./calendar-integrity-check.mjs").then(
+                        ({ runCalendarIntegrityChecks }) =>
+                          runCalendarIntegrityChecks(card, hass, nextRender),
                       )
-                    : query.get("checks") === "responsive"
-                      ? runResponsiveChecks()
-                      : runInteractionChecks()
+                    : query.get("checks") === "lifecycle"
+                      ? import("./calendar-lifecycle-check.mjs").then(
+                          ({ runCalendarLifecycleChecks }) =>
+                            runCalendarLifecycleChecks(card, hass, nextRender),
+                        )
+                      : query.get("checks") === "responsive"
+                        ? runResponsiveChecks()
+                        : runInteractionChecks()
         )
           .then((results) => writeCheckResult("pass", results.join("; ")))
           .catch((error) => {

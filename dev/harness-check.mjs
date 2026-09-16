@@ -109,6 +109,16 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[1920, 390].flatMap((width) =>
+    [false, true].map((reducedMotion) => ({
+      name: "wall",
+      checks: "daily",
+      chromeHeight: 64,
+      width,
+      reducedMotion,
+      expectedGeometryMarker: "calendar daily use:",
+    })),
+  ),
   ...[1920, 746, 390].map((width) => ({
     name: "wall",
     checks: "status",
@@ -199,6 +209,7 @@ try {
     width = 1920,
     panelWidth,
     feed,
+    reducedMotion = false,
     expectedGeometryMarker,
   } of scenarios.filter((scenario) =>
     process.env.HARNESS_ONLY ? scenario.checks === process.env.HARNESS_ONLY : true,
@@ -219,6 +230,11 @@ try {
     const cdp = new CdpClient(webSocket);
     await cdp.send("Page.enable");
     await cdp.send("Runtime.enable");
+    await cdp.send("Emulation.setEmulatedMedia", {
+      features: [
+        { name: "prefers-reduced-motion", value: reducedMotion ? "reduce" : "no-preference" },
+      ],
+    });
     await cdp.send("Emulation.setTimezoneOverride", { timezoneId: "America/Chicago" });
     await cdp.send("Emulation.setDeviceMetricsOverride", {
       width,
@@ -404,7 +420,7 @@ try {
     }
 
     let result;
-    for (let attempt = 0; attempt < 100; attempt += 1) {
+    for (let attempt = 0; attempt < (checks === "daily" ? 300 : 100); attempt += 1) {
       const evaluation = await cdp.send("Runtime.evaluate", {
         expression:
           'document.querySelector("#harness-check-result") ? ({ status: document.querySelector("#harness-check-result").dataset.harnessCheck, details: document.querySelector("#harness-check-result").textContent }) : null',
