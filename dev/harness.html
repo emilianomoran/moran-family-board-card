@@ -27,6 +27,13 @@
       * {
         box-sizing: border-box;
       }
+      :root[data-theme="dark"] {
+        --primary-text-color: #f2f2f7;
+        --secondary-text-color: #c7c7cc;
+        --secondary-background-color: #2c2c2e;
+        --divider-color: #48484a;
+        --card-background-color: #1c1c1e;
+      }
       html,
       body {
         width: 100%;
@@ -39,7 +46,7 @@
         min-width: 0;
         min-height: 0;
         overflow: hidden;
-        background: #ffffff;
+        background: var(--card-background-color);
         color: var(--primary-text-color);
       }
       #host-chrome {
@@ -100,6 +107,7 @@
       const EVIDENCE_TIME_ZONE = "America/Chicago";
       const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
       const query = new URLSearchParams(window.location.search);
+      document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
       const scenario = query.get("scenario") ?? "legacy";
       const dailyUse = query.get("daily") === "1" || query.get("checks") === "daily";
       let feed = query.get("feed") ?? "healthy";
@@ -1015,7 +1023,11 @@
         ) {
           throw new Error("Weekday-only date cells did not fill the strip.");
         }
-        return [`responsive wall: ${expectedCardWidth}px menu and date controls contained`];
+        const { runViewSwitcherChecks } = await import("./view-switcher-check.mjs");
+        await runViewSwitcherChecks(card, nextRender);
+        return [
+          `responsive wall: ${expectedCardWidth}px menu and date controls contained; light/dark view capsule verified`,
+        ];
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {

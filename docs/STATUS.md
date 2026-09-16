@@ -171,12 +171,46 @@ The existing browser zoom was preserved during phone-sized review. No real calen
 were changed. This is locally verified work; the installed HA bundle, physical Safari
 verification, and GitHub/HACS release remain unchanged/pending.
 
+### View-switcher capsule verified locally, 2026-09-16
+
+The top Day / Timeline / Week / Month / Agenda control now follows the supplied reference:
+a rounded neutral track, inset selected pill, and separators only between unselected
+segments. It no longer uses a filled blue selected button. Changes are scoped to wall
+styles in `src/wall-shell.ts`; the full-width date cells and legacy presentation remain
+unchanged. Keyboard focus remains visible and inset; touch targets remain at least 48px.
+
+Reference comparison: capsule shape, neutral selection, and subtle separators match the
+requested pattern. HA theme colors, our existing five view names, and larger wall touch
+targets are intentional adaptations. This does not add Quarter/Year or reproduce native
+platform materials. The supplied private screenshot is not stored in the repo.
+
+Flow under test: local wall preview → choose a view by click or keyboard → the selected
+pill and corresponding calendar panel update together, including at phone widths.
+`dev/view-switcher-check.mjs` extends all seven responsive scenarios with all five views,
+light/dark colors, pill geometry, non-wrapping labels, separators, focus containment,
+German-label reachability, two-view configuration, and single-view switcher omission.
+Widths are 1920/800/749/400/390/320 plus a 400px card inside a desktop viewport.
+
+Verification: all 109 unit tests and all 30 browser scenarios pass, along with TypeScript,
+formatting, build, and whitespace checks. Visible in-app checks covered desktop and an
+effective 391×844 CSS viewport, Day → Week → Day clicks, Agenda activation with Enter,
+and Day activation with Space. Page identity, meaningful content, no error overlay, clean
+warning/error logs, and light/dark screenshot review passed. The standalone Browser
+plugin/skill is absent; existing repository browser tests and Codex in-app controls were
+used without installing browser dependencies.
+
+Reproduce with `HARNESS_ONLY=responsive npm run test:harness`; append `&theme=dark` to the
+sample-data harness URL to inspect dark styling. The local server serves the rebuilt bundle
+after a refresh. This remains a local commit/preview, not a push, HA deployment, or release;
+physical iPhone/Safari verification remains open.
+
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
 | Today recenters on current time | Locally verified 2026-09-16; not deployed | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
 | Remember hidden people and selected view | Locally verified 2026-09-16; not deployed | Real reload persistence, safe identity/config invalidation, and graceful storage failure covered. |
 | Status tiles separate availability and next event | Accepted and locally verified 2026-09-16; not deployed | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
 | Fantastical-style separated date cells | Accepted and locally verified 2026-09-16; not deployed | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
+| iOS-like view-switcher capsule | Accepted and locally verified 2026-09-16; not deployed | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired event-page date snapping | Accepted direction; interaction design and implementation pending | Strip snapping is implemented, not date-page swiping. Keep the time axis fixed, date/content synchronized, and time context stable; resolve person scrolling versus date paging. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Verification pending | Confirm ordinary source changes and cancellations reach HA and the card. Synthetic changes and snapshot parity do not measure real propagation. No live appointment mutation is authorized merely for testing. |

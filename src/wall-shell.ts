@@ -111,7 +111,6 @@ export const wallShellStyles = css`
     line-height: 1.25;
   }
 
-  .moran-wall-shell .switch,
   .moran-wall-shell > .tabs {
     box-sizing: border-box;
     gap: 4px;
@@ -138,11 +137,63 @@ export const wallShellStyles = css`
       transform 160ms ease-out;
   }
 
-  .moran-wall-shell .switch button.on,
   .moran-wall-shell .tabs button.on {
     background: var(--moran-wall-accent);
     color: #ffffff;
     font-weight: 700;
+  }
+
+  /* View modes share a neutral capsule; the separate date strip keeps its day cells. */
+  .moran-wall-shell .switch {
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    gap: 0;
+    min-width: 0;
+    max-width: 100%;
+    padding: 3px;
+    border: 1px solid color-mix(in srgb, var(--moran-wall-text) 12%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--moran-wall-canvas) 90%, var(--moran-wall-text));
+    box-shadow: inset 0 1px 0 #ffffff14;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .moran-wall-shell .switch button {
+    position: relative;
+    flex: 1 0 auto;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--moran-wall-muted);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .moran-wall-shell .switch button.on {
+    background: color-mix(in srgb, var(--moran-wall-canvas) 84%, #ffffff);
+    color: var(--moran-wall-text);
+    font-weight: 600;
+    box-shadow:
+      0 1px 3px color-mix(in srgb, var(--moran-wall-text) 16%, transparent),
+      inset 0 0 0 1px #ffffff14;
+  }
+
+  .moran-wall-shell .switch button:hover:not(.on) {
+    background: color-mix(in srgb, var(--moran-wall-text) 6%, transparent);
+    color: var(--moran-wall-text);
+  }
+
+  .moran-wall-shell .switch button:not(.on) + button:not(.on)::before {
+    position: absolute;
+    inset-block: 25%;
+    inset-inline-start: 0;
+    border-inline-start: 1px solid color-mix(in srgb, var(--moran-wall-text) 16%, transparent);
+    content: "";
+    pointer-events: none;
   }
 
   .moran-wall-shell .dayhead,
@@ -576,12 +627,12 @@ export const wallShellStyles = css`
 
     .moran-wall-shell .switch {
       display: flex;
-      flex-wrap: wrap;
       width: 100%;
     }
 
     .moran-wall-shell .switch button {
-      flex: 1 1 auto;
+      padding-inline: 6px;
+      font-size: 13px;
     }
   }
 
@@ -612,6 +663,9 @@ export const wallShellStyles = css`
     outline-offset: 2px !important;
   }
 
+  .moran-wall-shell .switch > button:focus,
+  .moran-wall-shell .switch > button:focus-visible,
+  .moran-wall-shell .switch > button:focus-within,
   .moran-wall-shell > .tabs > button:focus,
   .moran-wall-shell > .tabs > button:focus-visible,
   .moran-wall-shell > .tabs > button:focus-within {

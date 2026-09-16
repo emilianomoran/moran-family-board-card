@@ -190,6 +190,25 @@ cancellation pass. The visible prototype confirms hide → Week → reload retai
 choices and scrolling to midnight → Today restores the current-time line below headers.
 See STATUS.md for test counts and delivery boundaries.
 
+### D12. Use an iOS-like segmented control for calendar views
+
+**Accepted 2026-09-16.** The user supplied a desktop Fantastical reference and asked for
+the top view tabs to match its rounded segmented control. Use one neutral capsule, an
+inset selected pill, and subtle separators between unselected segments instead of the
+bright-blue selected button. Keep Day, Timeline, Week, Month, and Agenda; the reference's
+Quarter and Year options are not new feature requests.
+
+This applies only to the wall view switcher. D07's distinct full-width date cells below
+remain unchanged. Adapt neutral colors to the HA theme, retain visible keyboard focus and
+48px touch targets, and keep controls reachable at narrow widths. The implementation plan
+is a wall-scoped styling change, responsive/interaction checks, and a rebuilt local preview.
+The reference image and its private calendar contents must not enter the repository.
+
+**Locally verified 2026-09-16:** the view control now uses the neutral capsule in both
+light and dark themes. All five English tabs fit on one row down to 320px; longer localized
+labels remain horizontally reachable. Date cells and legacy styling are unchanged. See
+STATUS.md for interaction evidence and the local-only delivery boundary.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -208,6 +227,7 @@ See STATUS.md for test counts and delivery boundaries.
 | Meaning of “free” versus future events in Status tiles | Existing logic explained and countdown clipping confirmed. Terminology and separate availability/dated-next presentation accepted on 2026-09-16. |
 | Restart the development server for prototype review | Local sample-data harness restarted at port 4173 on 2026-09-16; this does not update HA or claim live-calendar verification. |
 | Fantastical screenshot review of the date strip | Separate full-width date cells replace the compressed centered date cluster; D07 records the accepted presentation and its scope. |
+| Separate screenshot review of the top view switcher | Neutral capsule with an inset selected pill requested; D12 keeps this separate from the full-width date cells. |
 
 ## Evidence and date boundaries
 
