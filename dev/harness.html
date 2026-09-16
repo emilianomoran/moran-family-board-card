@@ -886,23 +886,28 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "calendar"
-          ? runCalendarHealthChecks()
-          : query.get("checks") === "recovery"
-            ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
-                runCalendarRecoveryChecks(card, hass, nextRender),
-              )
-            : query.get("checks") === "integrity"
-              ? import("./calendar-integrity-check.mjs").then(({ runCalendarIntegrityChecks }) =>
-                  runCalendarIntegrityChecks(card, hass, nextRender),
+        (query.get("checks") === "alignment"
+          ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
+              runCalendarAlignmentChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "calendar"
+            ? runCalendarHealthChecks()
+            : query.get("checks") === "recovery"
+              ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
+                  runCalendarRecoveryChecks(card, hass, nextRender),
                 )
-              : query.get("checks") === "lifecycle"
-                ? import("./calendar-lifecycle-check.mjs").then(({ runCalendarLifecycleChecks }) =>
-                    runCalendarLifecycleChecks(card, hass, nextRender),
+              : query.get("checks") === "integrity"
+                ? import("./calendar-integrity-check.mjs").then(({ runCalendarIntegrityChecks }) =>
+                    runCalendarIntegrityChecks(card, hass, nextRender),
                   )
-                : query.get("checks") === "responsive"
-                  ? runResponsiveChecks()
-                  : runInteractionChecks()
+                : query.get("checks") === "lifecycle"
+                  ? import("./calendar-lifecycle-check.mjs").then(
+                      ({ runCalendarLifecycleChecks }) =>
+                        runCalendarLifecycleChecks(card, hass, nextRender),
+                    )
+                  : query.get("checks") === "responsive"
+                    ? runResponsiveChecks()
+                    : runInteractionChecks()
         )
           .then((results) => writeCheckResult("pass", results.join("; ")))
           .catch((error) => {

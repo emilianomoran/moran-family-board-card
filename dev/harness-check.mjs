@@ -109,6 +109,13 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[1920, 746, 390].map((width) => ({
+    name: "wall",
+    checks: "alignment",
+    chromeHeight: 64,
+    width,
+    expectedGeometryMarker: "calendar alignment:",
+  })),
   {
     name: "wall",
     checks: "interactions",

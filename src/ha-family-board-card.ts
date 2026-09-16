@@ -1542,6 +1542,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const nowMin = Math.max(startMin, Math.min(endMin, now.getHours() * 60 + now.getMinutes()));
     const showNow = this._config.show_now_line !== false && this._isRealToday(day);
     const hasAllDay = this._persons.some((_, i) => this._allDayFor(day, i).length > 0);
+    const hiddenLanes = this._persons.filter((_, i) => this._isOff(i)).length;
 
     return html`
       <div class="dayhead">
@@ -1558,6 +1559,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       ${this._renderDayTabs()}
       <div
         class="board ${this._layout === "wall" ? "wall-pan-board" : ""}"
+        style="--fb-wall-visible-lanes:${this._persons.length -
+        hiddenLanes};--fb-wall-hidden-lanes:${hiddenLanes}"
         @pointerdown=${this._onWallBoardPointerDown}
         @pointermove=${this._onWallBoardPointerMove}
         @pointerup=${this._onWallBoardPointerUp}
@@ -4142,7 +4145,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.2 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.3 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

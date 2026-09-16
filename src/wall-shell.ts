@@ -281,9 +281,19 @@ export const wallShellStyles = css`
     cursor: grabbing;
   }
 
+  /* Every row must size against the same full grid, not the viewport or a
+     fixed four-person fixture. Otherwise sticky headers diverge on resize. */
+  .moran-wall-shell .board > :is(.header-row, .allday-row, .body) {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: calc(
+      var(--fb-axis-width) + var(--fb-wall-visible-lanes) * var(--fb-col-min) +
+        var(--fb-wall-hidden-lanes) * 48px
+    );
+  }
+
   .moran-wall-shell .header-row {
     top: 0;
-    min-width: calc(72px + 4 * 240px);
     height: 80px;
     background: var(--moran-wall-canvas);
   }
@@ -296,7 +306,6 @@ export const wallShellStyles = css`
 
   .moran-wall-shell .phead {
     box-sizing: border-box;
-    min-width: 240px;
     height: 80px;
     padding: 8px 16px;
   }
@@ -380,13 +389,11 @@ export const wallShellStyles = css`
     position: sticky;
     top: 80px;
     z-index: 4;
-    min-width: calc(72px + 4 * 240px);
     min-height: 48px;
     background: var(--moran-wall-canvas);
   }
 
   .moran-wall-shell .allday-cell {
-    min-width: 240px;
     padding: 8px;
     gap: 4px;
   }
@@ -400,12 +407,16 @@ export const wallShellStyles = css`
     line-height: 1.5;
   }
 
-  .moran-wall-shell .body {
-    min-width: calc(72px + 4 * 240px);
+  /* More specific than generic touch-target sizing: all three kinds of cells
+     share both expanded and collapsed widths, regardless of role attributes. */
+  .moran-wall-shell .board :is(.phead, .allday-cell, .col):not(.off) {
+    flex: 1 1 0;
+    min-width: var(--fb-col-min);
   }
 
-  .moran-wall-shell .col {
-    min-width: 240px;
+  .moran-wall-shell .board :is(.phead, .allday-cell, .col).off {
+    flex: 0 0 48px;
+    min-width: 48px;
   }
 
   .moran-wall-shell .event {
