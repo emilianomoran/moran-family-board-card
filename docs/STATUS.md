@@ -1,6 +1,6 @@
 # Current status and next work
 
-Last recorded: 2026-09-16. This is the current project status, not a release announcement.
+Last recorded: 2026-09-17. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
 ## What is working
@@ -30,6 +30,22 @@ in the recorded deployment work. Laptop preview servers are separate from the in
 HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
+
+### Source and routing audit, 2026-09-17
+
+Fresh six-week reads matched **166 of 166 source occurrences** between Calendar Bridge
+and HA, with no missing/extra events or compared-field differences. The actual app routing
+functions retained **175 intended person copies**, with zero rejected or unrouted events.
+All-day end normalization and four differing detached occurrence IDs are accounted for.
+Two snapshots agreed; the installed `moran.4` asset hash is unchanged.
+
+The card's 60-second range reads use CalDAV provider queries, not HA's 15-minute next-event
+entity-state cache. Request durations of 1.87–5.20 seconds are not edit-propagation latency.
+No appointments, HA configuration, or application code were changed. Existing unit/browser
+results below are historical, not rerun UI evidence for this API-only pass.
+
+See [Calendar sync validation](calendar-sync-validation.md) for source-pinned behavior,
+matching rules, limitations, and the real-edit/physical-phone verification procedures.
 
 ### Daily-use update, 2026-09-16 at 20:44 CDT
 
@@ -249,7 +265,7 @@ physical iPhone/Safari verification remains open.
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired event-page date snapping | Accepted direction; interaction design and implementation pending | Strip snapping is implemented, not date-page swiping. Keep the time axis fixed, date/content synchronized, and time context stable; resolve person scrolling versus date paging. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
-| Actual provider propagation | Verification pending | Confirm ordinary source changes and cancellations reach HA and the card. Synthetic changes and snapshot parity do not measure real propagation. No live appointment mutation is authorized merely for testing. |
+| Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |

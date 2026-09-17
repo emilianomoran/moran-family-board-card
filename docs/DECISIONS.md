@@ -227,6 +227,15 @@ Remaining evidence is specific: real iPhone/Safari sleep/wake and provider-chang
 not more prototype styling as a prerequisite. No actual appointments were mutated as a test.
 The source and documentation are committed locally; no GitHub push or release was performed.
 
+**Read-only continuation, 2026-09-17:** the next pass checked the data path before additional
+presentation work. Both managed calendars use native HA CalDAV; range reads are distinct
+from the background current/next entity-state update. The fresh audit matched 166 source
+occurrences and retained 175 intended person copies. No app, provider, or HA configuration
+change was needed. Snapshot parity, request duration, edit-to-screen latency, and physical
+phone recovery are different claims; [the validation record](calendar-sync-validation.md)
+keeps their evidence and remaining checks separate. No new calendar database or direct
+browser-to-Bridge adapter is justified by these findings.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |

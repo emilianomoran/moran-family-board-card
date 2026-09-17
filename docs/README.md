@@ -1,7 +1,7 @@
 # Project documentation
 
 This repository owns the Family Board product record: decisions, discussion outcomes,
-requirements, known behavior, implementation, and tests. Updated 2026-09-16.
+requirements, known behavior, implementation, and tests. Updated 2026-09-17.
 
 ## Start here
 
@@ -12,6 +12,8 @@ requirements, known behavior, implementation, and tests. Updated 2026-09-16.
 - [Implementation-base ADR](adr/0001-implementation-base.md): source-pinned rationale for
   continuing this Home Assistant Lit fork.
 - [Configuration reference](../README.en.md): supported options and generic examples.
+- [Calendar sync validation](calendar-sync-validation.md): verified read path, source/routing
+  audit, and how to measure real edit propagation and physical phone recovery safely.
 
 ## Historical material
 
