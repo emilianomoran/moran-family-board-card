@@ -18,7 +18,7 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Wochenansicht** – Wochentage als Zeilen, Personen als Spalten, kompakte Termin-Chips.
 - **Monatsansicht** – klassisches Monats-Grid mit farbigen Terminen pro Person; Klick auf einen Tag springt in die Tagesansicht.
 - **Agenda-/Listenansicht** – chronologische Terminliste, nach Tagen gruppiert; ideal fürs Handy.
-- **„Jetzt / als Nächstes"-Leiste** – optionale Glanz-Zeile über den Ansichten: pro Person auf einen Blick, was gerade läuft (mit Puls-Punkt) oder als Nächstes ansteht (inkl. Countdown) – ideal fürs Wandtablet.
+- **Status-Kacheln** (`show_focus`) – im Wall-Layout aktueller Frei-/Belegt-Status und nächster Termin mit eigenem Datum/Uhrzeit. Unvollständige Daten gelten nicht als frei; Ganztagstermine zählen nicht als belegt. Das Legacy-Layout behält die bisherige „Jetzt / als Nächstes“-Darstellung.
 - **Auto-Symbole** – optional bekommt jeder Termin per Stichwort ein passendes Emoji (Arzt → 🩺, Sport → 🏃, Geburtstag → 🎂, Schule → 🎒 …); eigene Regeln möglich. Titel, die schon ein Emoji haben, bleiben unberührt.
 - **Zeitstrahl-Ansicht** – Personen als Zeilen links, die Zeit läuft horizontal: Termine als Balken auf einem Zeitstrahl (Gantt-Stil); überlappende Termine stapeln sich in Unterzeilen.
 - **Ansichten wählbar** – im Editor festlegen, welche Umschalter (Tag/Zeitstrahl/Woche/Monat/Agenda) erscheinen.
@@ -51,11 +51,17 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Fork-Status: **v0.25.1-moran.3, Kalender-Vorschau auf Basis von Upstream v0.25.**
+> Fork-Status: **v0.25.1-moran.4, Kalender-Vorschau auf Basis von Upstream v0.25.**
 > Das Wall-Layout ist in einem privaten Home-Assistant-Pilotbetrieb installiert,
 > Kalenderänderungen sind dort deaktiviert. Dies ist ein Entwicklungsstand, keine
 > veröffentlichte HACS-Version. Haushaltsmodule und ein direkter Bridge-Adapter bleiben
 > zurückgestellt. Aktuelle Entscheidungen und offene Arbeiten stehen in den verlinkten Projektdokumenten.
+
+Der Wall-Pilot trennt jetzt den aktuellen Frei-/Belegt-Status vom nächsten Termin und zeigt
+dessen Datum und Uhrzeit separat. „Heute“ scrollt zur aktuellen Zeit; Ansicht und ausgeblendete
+Personen bleiben lokal im Browser gespeichert. Getrennte Datumszellen und der neutrale
+Ansichtsumschalter sind ebenfalls installiert. Nachweise und verbleibende Geräteprüfungen:
+[Aktueller Stand](docs/STATUS.md).
 
 ## Installation (HACS Custom Repository)
 

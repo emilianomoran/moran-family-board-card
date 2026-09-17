@@ -19,20 +19,48 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Basic presentation | Circular avatars, dated Day heading, locale-aware 12/24-hour axis, reachable narrow controls, and person-grid scrolling implemented. |
 | Lane alignment | Headers, all-day rows, and timed columns share sizing on resize and hide/show; `0.25.1-moran.3` deployed. |
 | Full-day range | Pilot uses hours 0–24, no trimming, and initial scroll to now. Config-only change; package defaults remain 6–22. |
-| Status tiles | Installed pilot retains current-or-next behavior; accepted availability/dated-next presentation implemented and tested in the local prototype only. |
+| Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
+| Daily-use navigation | Today recentering, saved view/person preferences, separated date cells, and neutral view switcher deployed in `0.25.1-moran.4`. |
 
-Installed application checkpoint: `42495b0f572dc7ddf226bff432f075168f43ffe1`, version
-`0.25.1-moran.3`, on `feature/moran-foundation`. The private pilot uses a dated bundle.
+Installed application checkpoint: `e6c1c5b0372004222ca44165eef9abab1e5fba54`, version
+`0.25.1-moran.4`, on `feature/moran-foundation`, deployed 2026-09-16 at 20:44 CDT.
+The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
 HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
-These are recorded results from 2026-09-16, not tests rerun by this documentation change:
+### Daily-use update, 2026-09-16 at 20:44 CDT
+
+- Candidate checks rerun: all 109 unit tests and all 30 synthetic browser scenarios passed,
+  plus TypeScript, source formatting, build, and whitespace checks.
+- The served HA asset matches the committed build. Preview config, 74 other resource
+  registrations, and all 27 dashboard registrations remain unchanged. Core validation passed;
+  the previous asset remains available for rollback. No restart or calendar mutation.
+- Authenticated HA review confirmed real calendar rendering and **Free now** alongside
+  **Next** with a separate Tomorrow/date-and-time line. Loading did not imply Free now.
+- Hide one person → Week → actual page reload restored both choices. Returning to Day
+  retained the collapsed lane. Headers, all-day cells, and timed lanes had 0px measured
+  misalignment at 746×777, 390×844, and 1920×1080, including horizontal scrolling.
+- Native desktop scrolling reached both midnight boundaries; Today recentered the current
+  time below the sticky headers. Tomorrow updated the heading and selected date together.
+- Phone-width review confirmed reachable view controls, horizontal person access, a fixed
+  time axis, readable Status timing, and disabled event-detail fields with no Save/Delete.
+  A long dashboard title can leave the final view partially outside the switcher's visible
+  area at intermediate widths; it remains scrollable and was successfully activated.
+- Page identity, meaningful content, absence of an error overlay, and screenshots checked.
+  No Family Board warning/error observed after reload. Existing custom-sidebar, HA routing,
+  Better Thermostat, and config-template-card messages are unrelated and remain unresolved.
+- Restored Day/Today, all originally visible people, and the browser's normal viewport.
+  Physical iPhone/Safari wake/reconnect and real provider propagation are still unverified.
+
+### Earlier reliability and calendar-correctness evidence
+
+These results were recorded earlier on 2026-09-16, not repeated by the daily-use rollout:
 
 - 79 unit tests, TypeScript, source formatting, build, and whitespace checks passed for
-  the current app checkpoint.
+  the earlier `0.25.1-moran.3` checkpoint.
 - 19 synthetic browser scenarios passed, including legacy compatibility, narrow/desktop
   layouts, panning, calendar integrity, recovery, and lane alignment.
 - Alignment tests cover 1/4/7 people and 29 visibility/resize states per viewport.
@@ -51,11 +79,14 @@ These are recorded results from 2026-09-16, not tests rerun by this documentatio
 
 ## Status tiles: current rules and known issue
 
+The accepted presentation below is now installed in wall mode. The historical issue is
+retained here to explain the decision; it no longer describes the wall pilot.
+
 The tiles describe actual clock time, not the selected date. Their candidate events come
 from the range already loaded for the active view: one displayed week for non-Month views,
 or the visible month grid for Month. If that range does not cover now, status is unavailable.
 
-| Display | Installed pilot behavior (`0.25.1-moran.3`) |
+| Display | Previous pilot behavior (`0.25.1-moran.3`); retained in legacy layout |
 |---|---|
 | Current event | A timed event satisfies `start <= now < end`. If several overlap, choose the latest start, then the earliest end. |
 | Next event | No current event takes display precedence, so show the earliest future timed event in the loaded range. No same-day or soon cutoff exists. |
@@ -66,12 +97,12 @@ All-day events are excluded. A distant next event prevents the tile from display
 even though the person has no current timed appointment. Changing loaded ranges can change
 which future events are considered; the lookahead is not independent of the calendar view.
 
-The future-event countdown was confirmed to extend outside its clipped line in the actual
+The previous future-event countdown was confirmed to extend outside its clipped line in the actual
 pilot: 159px of content inside a 112px text area. The title remained visible while almost
-all of the time qualifier disappeared. The local prototype now fixes this, but the installed
-HA bundle has not been updated.
+all of the time qualifier disappeared. The `0.25.1-moran.4` wall pilot fixes this with the
+separate wrapping timing line described below.
 
-### Accepted wall presentation implemented locally, 2026-09-16
+### Current wall presentation, deployed 2026-09-16
 
 - Header: person name and **Free now**, **Busy now**, or **schedule unavailable**.
 - A current timed event shows its title and end date/time. The next event has its own
@@ -90,7 +121,7 @@ HA bundle has not been updated.
 
 The sample-data review URL is
 `http://127.0.0.1:4173/dev/harness.html?scenario=wall&status=1`. Its fixed sample date is
-intentional. This is a local prototype checkpoint, not an HA deployment or release.
+intentional. This URL is the sample-data prototype; the same behavior is now in the HA pilot.
 
 Verification: TypeScript, formatting, build, 84 unit tests, and the complete 23-scenario
 browser suite passed. Four new synthetic
@@ -99,7 +130,8 @@ events, empty/all-day-only schedules, long titles, hide/show, 12/24-hour display
 partial-source recovery, exact appointment start/end boundaries, and navigating away
 from/returning to now. In-app review verified
 nonblank rendering, no error overlay, clean warning/error logs, hide/show, and horizontal
-tile scrolling at 390×844. Physical iPhone/Safari and deployment remain unverified.
+tile scrolling at 390×844. This was the initial local verification; the deployment checks
+above supersede its local-only delivery state. Physical iPhone/Safari remains unverified.
 
 Reproduce with `npm run format:check`, `npm run lint`, `npm test`, `npm run build`, and
 `npm run test:harness`; use `HARNESS_ONLY=status npm run test:harness` for the focused cases.
@@ -111,7 +143,9 @@ Implementation references: `selectTimedActivity` in [events.ts](../src/events.ts
 [ha-family-board-card.ts](../src/ha-family-board-card.ts), and `formatStatusDateTime` in
 [localize.ts](../src/localize.ts).
 
-## Next work and open decisions
+## Implementation history
+
+The following local checkpoints were subsequently deployed together in `0.25.1-moran.4`.
 
 ### Date-strip correction verified locally, 2026-09-16
 
@@ -136,7 +170,7 @@ Visible in-app checks covered the reported desktop layout and an effective 391×
 viewport (the browser's existing zoom was preserved), selecting Sunday and returning to
 Today. Page identity, meaningful content, absence of an error overlay, screenshots, and
 warning/error logs passed. Run `HARNESS_ONLY=responsive npm run test:harness` for these
-focused checks. This remains local-only; physical-device and HA-deployment checks are open.
+focused checks. Subsequent HA checks are recorded above; physical-device checks remain open.
 
 ### Daily-use navigation and preferences verified locally, 2026-09-16
 
@@ -168,8 +202,8 @@ meaningful rendering, no error overlay, screenshot evidence, and warning/error l
 The full-day sample-data review link is
 `http://127.0.0.1:4173/dev/harness.html?scenario=wall&daily=1&status=1`.
 The existing browser zoom was preserved during phone-sized review. No real calendar events
-were changed. This is locally verified work; the installed HA bundle, physical Safari
-verification, and GitHub/HACS release remain unchanged/pending.
+were changed. This local checkpoint was subsequently deployed; physical Safari verification
+and GitHub/HACS publication remain pending.
 
 ### View-switcher capsule verified locally, 2026-09-16
 
@@ -201,16 +235,18 @@ used without installing browser dependencies.
 
 Reproduce with `HARNESS_ONLY=responsive npm run test:harness`; append `&theme=dark` to the
 sample-data harness URL to inspect dark styling. The local server serves the rebuilt bundle
-after a refresh. This remains a local commit/preview, not a push, HA deployment, or release;
+after a refresh. The same code is now installed in the HA pilot, not pushed or published;
 physical iPhone/Safari verification remains open.
+
+## Next work and open decisions
 
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
-| Today recenters on current time | Locally verified 2026-09-16; not deployed | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
-| Remember hidden people and selected view | Locally verified 2026-09-16; not deployed | Real reload persistence, safe identity/config invalidation, and graceful storage failure covered. |
-| Status tiles separate availability and next event | Accepted and locally verified 2026-09-16; not deployed | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
-| Fantastical-style separated date cells | Accepted and locally verified 2026-09-16; not deployed | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
-| iOS-like view-switcher capsule | Accepted and locally verified 2026-09-16; not deployed | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
+| Today recenters on current time | Deployed and HA-verified 2026-09-16 | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
+| Remember hidden people and selected view | Deployed and HA-verified 2026-09-16 | Real reload persistence, safe identity/config invalidation, and graceful storage failure covered. |
+| Status tiles separate availability and next event | Deployed and HA-verified 2026-09-16 | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
+| Fantastical-style separated date cells | Deployed and HA-verified 2026-09-16 | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
+| iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired event-page date snapping | Accepted direction; interaction design and implementation pending | Strip snapping is implemented, not date-page swiping. Keep the time axis fixed, date/content synchronized, and time context stable; resolve person scrolling versus date paging. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Verification pending | Confirm ordinary source changes and cancellations reach HA and the card. Synthetic changes and snapshot parity do not measure real propagation. No live appointment mutation is authorized merely for testing. |

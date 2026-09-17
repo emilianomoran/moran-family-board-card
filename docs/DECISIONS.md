@@ -121,8 +121,8 @@ Use `start_hour: 0`, `end_hour: 24`, `trim_hours: false`, and `scroll_to_now: tr
 pilot so the full day remains reachable while the initial view opens near now.
 
 This was a dashboard configuration change using existing support, not a new bundle or a
-change to the package's default hour limits. A stronger Today/recenter action is separate
-unfinished work.
+change to the package's default hour limits. The stronger Today/recenter action was later
+completed under D11 and deployed with D13.
 
 ### D09. Call the top per-person chips “Status tiles”
 
@@ -207,7 +207,25 @@ The reference image and its private calendar contents must not enter the reposit
 **Locally verified 2026-09-16:** the view control now uses the neutral capsule in both
 light and dark themes. All five English tabs fit on one row down to 320px; longer localized
 labels remain horizontally reachable. Date cells and legacy styling are unchanged. See
-STATUS.md for interaction evidence and the local-only delivery boundary.
+STATUS.md for interaction evidence; D13 records the subsequent live pilot rollout.
+
+### D13. Promote accepted daily-use work into the existing read-only pilot
+
+**Continuation scope, 2026-09-16.** After the user asked to continue calendar work while
+deferring an image-annotation preview, the next step was to install the tested Status tiles,
+Today recentering, local preferences, date cells, and view capsule in the existing HA pilot.
+This does not authorize calendar editing, another app/framework, a public release, or
+the deferred image preview.
+
+**Deployed and verified 2026-09-16:** `0.25.1-moran.4` is installed from a local committed
+build. Only the existing preview resource URL changed; dashboard configuration, other
+registrations, and the read-only restriction are unchanged. The old asset is retained for
+rollback. Real HA browser checks cover loaded calendars, Status timing, reload preferences,
+Today, 24-hour scrolling, responsive lane alignment, and read-only event details.
+
+Remaining evidence is specific: real iPhone/Safari sleep/wake and provider-change propagation,
+not more prototype styling as a prerequisite. No actual appointments were mutated as a test.
+The source and documentation are committed locally; no GitHub push or release was performed.
 
 ## Discussion sequence and disposition
 
@@ -223,11 +241,12 @@ STATUS.md for interaction evidence and the local-only delivery boundary.
 | Desktop scrolling in actual HA versus a laptop preview | User confirmed scrolling worked with enough space. Inspect the actual deployed HA surface when it is the reported target. |
 | Misalignment after person toggles and ordinary resize | Reproduced, fixed, regression-tested, and deployed in `0.25.1-moran.3`. |
 | Scrolling stopped at 10 PM | Full-day configuration accepted and deployed; D08 records the distinction from package defaults. |
-| Suggested next steps: Today recentering, remembered preferences, phone checks | Today and browser-local preferences are implemented and locally verified on 2026-09-16; deployment and physical-device checks remain open. |
+| Suggested next steps: Today recentering, remembered preferences, phone checks | Today and browser-local preferences deployed and HA-verified on 2026-09-16; physical-device checks remain open. |
 | Meaning of “free” versus future events in Status tiles | Existing logic explained and countdown clipping confirmed. Terminology and separate availability/dated-next presentation accepted on 2026-09-16. |
 | Restart the development server for prototype review | Local sample-data harness restarted at port 4173 on 2026-09-16; this does not update HA or claim live-calendar verification. |
 | Fantastical screenshot review of the date strip | Separate full-width date cells replace the compressed centered date cluster; D07 records the accepted presentation and its scope. |
 | Separate screenshot review of the top view switcher | Neutral capsule with an inset selected pill requested; D12 keeps this separate from the full-width date cells. |
+| Continue calendar work; defer an image-annotation preview | Accepted local improvements promoted to the existing read-only HA pilot under D13; no image preview or public release created. |
 
 ## Evidence and date boundaries
 
@@ -236,6 +255,8 @@ STATUS.md for interaction evidence and the local-only delivery boundary.
 - Source checkpoint `7006fd2551dbc64064e1d1ef1c6957eec2948fcf` records the read-only,
   reliability, responsive, and locale work accumulated through 2026-09-16.
 - Source checkpoint `42495b0f572dc7ddf226bff432f075168f43ffe1` records the alignment fix.
+- Source checkpoint `e6c1c5b0372004222ca44165eef9abab1e5fba54` is the deployed
+  `0.25.1-moran.4` daily-use build; public documentation records sanitized QA outcomes.
 - The 2026-09-16 full-day configuration and Status-tile diagnosis were verified in the
   authenticated HA pilot. Sensitive operational evidence remains in the private workspace.
 - The 2026-09-16 conversation established D07 through D10; a later annotation explicitly
