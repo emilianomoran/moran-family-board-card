@@ -1198,6 +1198,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     return this._hiddenP.includes(idx);
   }
   private _togglePerson(idx: number): void {
+    // Collapsing a focused sticky header can make WebKit scroll it back to its
+    // original flow position. Preserve clock time across the resulting layout.
+    this._rememberDayScroll(this._dateForDay(this._shownDay()));
     this._hiddenP = this._isOff(idx)
       ? this._hiddenP.filter((i) => i !== idx)
       : [...this._hiddenP, idx];
@@ -1445,8 +1448,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
 
   /** Keep a clock-time anchor, not a raw pixel offset: all-day rows and trimmed hours vary. */
-  private _navigateDay(date: Date): void {
-    if (date.getTime() === this._dateForDay(this._day).getTime()) return;
+  private _rememberDayScroll(date: Date): void {
     if (this._dayScrollFrame !== undefined) cancelAnimationFrame(this._dayScrollFrame);
     this._dayScrollFrame = undefined;
     const board = this.renderRoot.querySelector<HTMLElement>(".board");
@@ -1471,6 +1473,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
       this._scrollToNowFrame = undefined;
     }
+  }
+
+  private _navigateDay(date: Date): void {
+    if (date.getTime() === this._dateForDay(this._day).getTime()) return;
+    this._rememberDayScroll(date);
     this._goToDate(date);
   }
 
@@ -4453,7 +4460,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.5 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.6 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

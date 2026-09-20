@@ -109,7 +109,7 @@
       const query = new URLSearchParams(window.location.search);
       document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
       const scenario = query.get("scenario") ?? "legacy";
-      const dailyUse = query.get("daily") === "1" || ["daily", "navigation"].includes(query.get("checks"));
+      const dailyUse = query.get("daily") === "1" || ["daily", "navigation", "pan"].includes(query.get("checks"));
       let feed = query.get("feed") ?? "healthy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
@@ -272,8 +272,9 @@
         trim_hours: false,
         hour_height: 64,
         show_now_line: true,
-        scroll_to_now: dailyUse,
-        ...(query.get("checks") === "navigation" ? { remember_preferences: false } : {}),
+        scroll_to_now: dailyUse && query.get("checks") !== "pan",
+        ...(["navigation", "pan"].includes(query.get("checks")) ? { remember_preferences: false } : {}),
+        ...(query.get("checks") === "pan" ? { full_height: true } : {}),
         ...(dailyUse
           ? {
               read_only: true,
@@ -286,7 +287,7 @@
         refresh_interval: 0,
         drag_drop: false,
         filter_duplicates: query.get("checks") === "calendar",
-        show_focus: query.get("checks") === "calendar" || query.get("status") === "1",
+        show_focus: ["calendar", "pan"].includes(query.get("checks")) || query.get("status") === "1",
         persons: [
           {
             name: "Avery",

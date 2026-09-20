@@ -300,7 +300,7 @@ try {
       let before;
       for (let attempt = 0; attempt < 100; attempt += 1) {
         before = await metrics();
-        if (before?.chipX != null) break;
+        if (before?.chipX != null && await evaluate('!document.querySelector("moran-family-board-card")._loading')) break;
         await delay(100);
       }
       if (!before?.chipX || before.max < 200) {
@@ -407,7 +407,14 @@ try {
       await evaluate(
         'document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = 0',
       );
+      await evaluate('document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollTop = 240');
+      await delay(80);
+      const timeBeforeFilter = await evaluate('document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollTop');
       await mouseClick(200, headerY);
+      const timeAfterFilter = await evaluate('document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollTop');
+      if (Math.abs(timeBeforeFilter - timeAfterFilter) > 2) {
+        throw new Error(`${width}px person filter changed vertical scroll: ${timeBeforeFilter} → ${timeAfterFilter}.`);
+      }
       if ((await metrics()).offCount !== 1) {
         throw new Error(`${width}px ordinary person-header click stopped working after panning.`);
       }

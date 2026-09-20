@@ -34,6 +34,19 @@ export async function runCalendarNavigationChecks(card, hass, nextRender) {
   await nextRender();
   const beforeMinute = minute();
   const beforeLeft = board().scrollLeft;
+  // A focused sticky header can be scrolled to its original flow position by
+  // WebKit during collapse. Simulate that layout-side adjustment in Chromium.
+  const person = root.querySelector('.header-row .phead');
+  person.focus({ preventScroll: true });
+  person.click();
+  await card.updateComplete;
+  board().scrollTop = 0;
+  await settle();
+  assert(Math.abs(minute() - beforeMinute) < 2, 'Person collapse lost visible clock time.');
+  assert(root.activeElement === person && person.classList.contains('off'), 'Person collapse lost focus/state.');
+  person.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+  await settle();
+  assert(Math.abs(minute() - beforeMinute) < 2 && !person.classList.contains('off'), 'Keyboard restore lost time/state.');
   await selectDate('Wednesday, Feb 18');
   assert(!card._dayScrollAnchor, 'Selecting the already active date retained pending work.');
   assert(board().querySelector('.allday-row'), 'Fixture needs an all-day row.');

@@ -136,6 +136,12 @@ allow old scroll work to overwrite the user's latest intent. Week/Timeline and l
 Day keep week-sized arrows. This resolves the competing gesture surfaces without a
 new calendar grid or framework rewrite. Delivery and QA are recorded in STATUS.md.
 
+**Live follow-up, 2026-09-20:** person hide/show must also preserve visible clock time.
+Actual preview testing found that resizing a focused sticky person header could jump to
+midnight even with keyboard activation. Reuse the same clock anchor for that layout
+change, retain focus, and clamp only when the resulting scroll range is shorter. This is
+a correction within the daily-use milestone, not a new filter design or calendar policy.
+
 ### D08. Show the full 24-hour schedule
 
 **Accepted and configured in the pilot 2026-09-16.** The user could not scroll beyond

@@ -22,8 +22,8 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today recentering, saved view/person preferences, separated date cells, and neutral view switcher deployed in `0.25.1-moran.4`. |
 
-Installed application checkpoint: `e6c1c5b0372004222ca44165eef9abab1e5fba54`, version
-`0.25.1-moran.4`, on `feature/moran-foundation`, deployed 2026-09-16 at 20:44 CDT.
+Installed application checkpoint: `c3d8bfd9a629f8ece1cd03aa17c97f542e15b0bd`, version
+`0.25.1-moran.5`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:38 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -31,9 +31,9 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
-### Date navigation candidate, 2026-09-20
+### Date navigation update, 2026-09-20
 
-`0.25.1-moran.5` is the current local candidate; live deployment is recorded separately.
+`0.25.1-moran.5` was deployed to the existing read-only preview.
 Wall Day arrows and date-heading swipes/keyboard move one visible day at a time. The grid
 retains person scrolling and the fixed time axis. Date changes preserve visible clock
 time and lane position across all-day rows, trimmed hours, and week-boundary reads.
@@ -50,7 +50,18 @@ navigation cases (1920/390px, normal/reduced motion), extended native touch/mous
 all seven responsive configurations, saved preferences, alignment, read-only protections,
 and synthetic recovery. Reproduce with `HARNESS_ONLY=navigation npm run test:harness`,
 `HARNESS_ONLY=pan npm run test:harness`, or the full `npm run test:harness`.
-The final packaged candidate is rechecked before promotion.
+The served bundle and unchanged dashboard/other registrations were verified; Core check
+passed. Live desktop/phone-width checks preserved clock time exactly across a week boundary
+and removal of an all-day row, with 0px lane misalignment and a fixed time axis. Event
+details stayed disabled. No provider events changed and no release was published.
+
+Those live checks found a separate filter-scroll problem: collapsing/restoring a focused
+sticky person header could jump near midnight, using either mouse or keyboard. The
+`0.25.1-moran.6` follow-up extends clock-time anchoring to that layout change. Native
+Chromium filter tests now cover full-height, full-day boards with Status tiles; navigation
+tests also simulate the browser's post-layout scroll adjustment and verify keyboard focus.
+Local in-app verification preserved time on keyboard restoration. Final candidate checks
+and live follow-up verification are in progress; do not infer deployment from the version.
 
 The next milestone remains a dependable read-only daily-use calendar, not a completed
 visual redesign. Physical iPhone sleep/wake and ordinary provider edit/cancellation timing
@@ -288,7 +299,8 @@ physical iPhone/Safari verification remains open.
 | Status tiles separate availability and next event | Deployed and HA-verified 2026-09-16 | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
 | Fantastical-style separated date cells | Deployed and HA-verified 2026-09-16 | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
-| Fantastical-inspired discrete day navigation | Implemented and locally verified 2026-09-20; promotion pending | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
+| Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
+| Preserve time when hiding/restoring a person | Follow-up fix in verification, 2026-09-20 | Preserve visible clock time and keyboard focus despite sticky-header layout changes; clamp only at actual range boundaries. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
