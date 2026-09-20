@@ -20,10 +20,10 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Lane alignment | Headers, all-day rows, and timed columns share sizing on resize and hide/show; `0.25.1-moran.3` deployed. |
 | Full-day range | Pilot uses hours 0–24, no trimming, and initial scroll to now. Config-only change; package defaults remain 6–22. |
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
-| Daily-use navigation | Today recentering, saved view/person preferences, separated date cells, and neutral view switcher deployed in `0.25.1-moran.4`. |
+| Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `c3d8bfd9a629f8ece1cd03aa17c97f542e15b0bd`, version
-`0.25.1-moran.5`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:38 CDT.
+Installed application checkpoint: `3fb839c48cef80954de43a9d46aa347093ce5cf0`, version
+`0.25.1-moran.6`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:47 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -60,12 +60,29 @@ sticky person header could jump near midnight, using either mouse or keyboard. T
 `0.25.1-moran.6` follow-up extends clock-time anchoring to that layout change. Native
 Chromium filter tests now cover full-height, full-day boards with Status tiles; navigation
 tests also simulate the browser's post-layout scroll adjustment and verify keyboard focus.
-Local in-app verification preserved time on keyboard restoration. Final candidate checks
-and live follow-up verification are in progress; do not infer deployment from the version.
+The final candidate passed 130 unit tests, all 34 browser scenarios, TypeScript, formatting,
+build, and whitespace checks, then was deployed at 18:47 CDT. Served checksum, unchanged
+dashboard/other registrations, retained prior asset, and Core validation passed again.
+
+Authenticated HA verification at 390×844 and 1280×720: native person click and keyboard
+restore both preserved visible clock time with a measured 0-minute change; focus stayed
+on the restored header and lane misalignment remained 0px. Crossing into the next week
+also preserved time exactly. Today recentered, and all original people/normal viewport
+were restored. Page identity, meaningful content, screenshots, and no error overlay passed.
+No Family Board warning/error was observed after reload; existing HA routing/custom-sidebar
+errors and unrelated custom-card warnings remain outside this change. Browser plugin not
+available; repository Chromium tests and Codex in-app browser controls were used.
 
 The next milestone remains a dependable read-only daily-use calendar, not a completed
 visual redesign. Physical iPhone sleep/wake and ordinary provider edit/cancellation timing
 are separate pending evidence; no actual appointment is changed to obtain it.
+
+The software navigation pass is complete. The next acceptance objective is real-use
+reliability: an ordinary event change/cancellation reaches HA and this card with measured
+timing, and the real phone recovers after background/lock/reconnect without stale events
+or a misleading Free now state. Those checks require the real device/ordinary source
+activity; desktop emulation and snapshot parity do not establish them. Larger presentation
+work and optional household modules remain deferred, not silently included in this milestone.
 
 ### Source and routing audit, 2026-09-17
 
@@ -300,7 +317,7 @@ physical iPhone/Safari verification remains open.
 | Fantastical-style separated date cells | Deployed and HA-verified 2026-09-16 | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
-| Preserve time when hiding/restoring a person | Follow-up fix in verification, 2026-09-20 | Preserve visible clock time and keyboard focus despite sticky-header layout changes; clamp only at actual range boundaries. |
+| Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |

@@ -295,8 +295,12 @@ browser-to-Bridge adapter is justified by these findings.
 - Source checkpoint `7006fd2551dbc64064e1d1ef1c6957eec2948fcf` records the read-only,
   reliability, responsive, and locale work accumulated through 2026-09-16.
 - Source checkpoint `42495b0f572dc7ddf226bff432f075168f43ffe1` records the alignment fix.
-- Source checkpoint `e6c1c5b0372004222ca44165eef9abab1e5fba54` is the deployed
-  `0.25.1-moran.4` daily-use build; public documentation records sanitized QA outcomes.
+- Source checkpoint `e6c1c5b0372004222ca44165eef9abab1e5fba54` was the
+  `0.25.1-moran.4` daily-use build installed on 2026-09-16.
+- Source checkpoint `c3d8bfd9a629f8ece1cd03aa17c97f542e15b0bd` supplied one-day navigation
+  in `moran.5` on 2026-09-20; `3fb839c48cef80954de43a9d46aa347093ce5cf0` superseded it
+  the same day with the `moran.6` filter-scroll correction. Both were committed locally
+  and deployed to the same read-only preview, not pushed or published as releases.
 - The 2026-09-16 full-day configuration and Status-tile diagnosis were verified in the
   authenticated HA pilot. Sensitive operational evidence remains in the private workspace.
 - The 2026-09-16 conversation established D07 through D10; a later annotation explicitly
