@@ -1033,7 +1033,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "navigation"
+        (query.get("checks") === "details"
+          ? import("./calendar-details-check.mjs").then(({ runCalendarDetailsChecks }) =>
+              runCalendarDetailsChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "navigation"
           ? import("./calendar-navigation-check.mjs").then(({ runCalendarNavigationChecks }) =>
               runCalendarNavigationChecks(card, hass, nextRender),
             )

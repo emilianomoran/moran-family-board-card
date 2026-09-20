@@ -48,6 +48,12 @@ const EN: Dict = {
   recur_this: "This event only",
   recur_future: "This and following",
   read_only: "This calendar is read-only.",
+  details_refreshing: "Checking for updates. Showing previously loaded details…",
+  details_updated: "These details have been updated from the calendar.",
+  details_unavailable:
+    "Could not verify this event. These previously loaded details may be out of date.",
+  details_missing:
+    "This event was not found in the refreshed calendar range. It may have changed, moved, or been removed. These are previously loaded details.",
   delete: "Delete",
   cancel: "Cancel",
   save: "Save",
@@ -117,6 +123,12 @@ const DE: Dict = {
   recur_this: "Nur dieser Termin",
   recur_future: "Dieser und folgende",
   read_only: "Dieser Kalender ist schreibgeschützt.",
+  details_refreshing: "Aktualisierung wird geprüft. Zuletzt geladene Details werden angezeigt…",
+  details_updated: "Diese Details wurden aus dem Kalender aktualisiert.",
+  details_unavailable:
+    "Dieser Termin konnte nicht geprüft werden. Die zuletzt geladenen Details sind möglicherweise veraltet.",
+  details_missing:
+    "Dieser Termin wurde im aktualisierten Kalenderzeitraum nicht gefunden. Er wurde möglicherweise geändert, verschoben oder entfernt. Angezeigt werden die zuletzt geladenen Details.",
   delete: "Löschen",
   cancel: "Abbrechen",
   save: "Speichern",

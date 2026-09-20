@@ -265,6 +265,25 @@ phone recovery are different claims; [the validation record](calendar-sync-valid
 keeps their evidence and remaining checks separate. No new calendar database or direct
 browser-to-Bridge adapter is justified by these findings.
 
+### D14. Open details must not silently become stale
+
+**Implementation correction under the daily-use goal, 2026-09-20.** A synthetic source
+change updated the grid while the open read-only dialog still showed its old time/title.
+The r7 candidate reconciles inspected details after refresh using calendar and occurrence
+identity. Recurring neighbors must not replace a missing occurrence; ambiguous or ID-less
+changed records are not matched by guesswork. Shared owner copies remain the same source.
+
+Show when details are being checked, updated, unverifiable, or missing from the refreshed
+range. Missing does not prove cancellation: the event may have moved or its routing may
+have changed. Retain the last inspected values with that warning; suppress an unverified
+old map link and offer Retry. Do not silently dismiss the dialog or overwrite editable
+upstream drafts. Calendar writes remain out of scope.
+
+The modal focuses an enabled control, contains Tab/Shift+Tab, makes the underlying card
+inert, and restores focus without changing the calendar scroll. Date fields must fit at
+phone widths; action targets are at least 48px. This is reliability/accessibility work,
+not the deferred full presentation redesign. Delivery evidence is in STATUS.md.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |

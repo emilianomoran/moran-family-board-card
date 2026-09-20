@@ -51,7 +51,7 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Fork-Status: **v0.25.1-moran.6, Kalender-Vorschau auf Basis von Upstream v0.25.**
+> Fork-Status: **v0.25.1-moran.7, Kalender-Vorschau auf Basis von Upstream v0.25.**
 > Das Wall-Layout ist in einem privaten Home-Assistant-Pilotbetrieb installiert,
 > Kalenderänderungen sind dort deaktiviert. Dies ist ein Entwicklungsstand, keine
 > veröffentlichte HACS-Version. Haushaltsmodule und ein direkter Bridge-Adapter bleiben

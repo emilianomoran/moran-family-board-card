@@ -31,6 +31,23 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
+### Event-details reliability candidate, 2026-09-20
+
+Continuing the full daily-use goal exposed another software gap rather than just a
+physical-device dependency: an open read-only event remained stale after the grid refreshed.
+The new rendered regression failed against r6 with an obsolete appointment snapshot.
+The r7 candidate refreshes exact occurrence details, labels unverifiable/missing snapshots,
+and preserves editable drafts. It also contains modal keyboard focus, restores the opener
+without scrolling, and fixes overflowing date fields/small action targets. See D14.
+
+Identity tests cover recurring neighbors, moved non-recurring events, shared owner copies,
+different calendars, conflicting identities, and missing IDs. Four new rendered scenarios
+exercise 1920×1080, 390×844, 320×568, and 844×390; synthetic source changes do not touch real
+appointments. The final r7 candidate passed 140 unit tests, all 38 browser scenarios,
+TypeScript, formatting, build, and whitespace checks. Visible local review confirmed native
+Tab/Shift+Tab containment, initial Close focus, readable stacked date fields, Escape, and
+no browser warnings/errors. Live promotion verification is still pending.
+
 ### Date navigation update, 2026-09-20
 
 `0.25.1-moran.5` was deployed to the existing read-only preview.

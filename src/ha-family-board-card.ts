@@ -16,6 +16,7 @@ import {
   displayTitleForRoute,
   dedupeRoutedEvents,
   occurrenceKey,
+  findRefreshedEvent,
   selectTimedActivity,
 } from "./events";
 import {
@@ -71,6 +72,8 @@ interface DialogState {
   calendarOptions?: string[]; // when a person has several writable calendars
   busy?: boolean;
   error?: string;
+  source?: RawEvent; // read-only details snapshot; editable drafts are never replaced by a poll
+  detailsStatus?: "updated" | "unavailable" | "missing";
 }
 
 /* ------------------------------------------------------------------ */
@@ -595,6 +598,28 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       e.stopPropagation();
       this._closeDialog();
     }
+    if (e.key === "Tab" && this._dialog) {
+      const dialog = this.renderRoot.querySelector<HTMLElement>(".dialog");
+      if (!dialog) return;
+      const controls = [
+        ...dialog.querySelectorAll<HTMLElement>(
+          "button, input, textarea, select, a[href], [tabindex]",
+        ),
+      ].filter(
+        (node) => node.tabIndex >= 0 && !node.matches(":disabled") && node.getClientRects().length,
+      );
+      const active = (this.renderRoot as ShadowRoot).activeElement;
+      const first = controls[0] ?? dialog;
+      const last = controls[controls.length - 1] ?? dialog;
+      if (
+        !dialog.contains(active) ||
+        active === dialog ||
+        (e.shiftKey ? active === first : active === last)
+      ) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus({ preventScroll: true });
+      }
+    }
   };
 
   private _startTimer(): void {
@@ -766,14 +791,24 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /** Focus the first dialog field on open; restore focus on close. */
   private _manageDialogFocus(prev?: DialogState): void {
+    const previouslyFocused = (this.renderRoot as ShadowRoot).activeElement as HTMLElement | null;
+    const surface = this.renderRoot.querySelector<HTMLElement>(".moran-wall-shell, ha-card");
+    surface?.toggleAttribute("inert", !!this._dialog);
     if (this._dialog && !prev) {
-      this._restoreFocus = (this.renderRoot as ShadowRoot)?.activeElement as HTMLElement;
+      this._restoreFocus = previouslyFocused ?? undefined;
       requestAnimationFrame(() => {
-        const input = this.renderRoot?.querySelector(".dialog input") as HTMLElement | null;
-        input?.focus();
+        if (!this._dialog || !this.isConnected) return;
+        const target =
+          this.renderRoot.querySelector<HTMLElement>(".dialog input:not(:disabled)") ??
+          this.renderRoot.querySelector<HTMLElement>(".dialog .icon");
+        target?.focus({ preventScroll: true });
       });
     } else if (!this._dialog && prev) {
-      this._restoreFocus?.focus?.();
+      const target = this._restoreFocus?.isConnected
+        ? this._restoreFocus
+        : (this.renderRoot.querySelector<HTMLElement>(".dayname[tabindex]") ??
+          this.renderRoot.querySelector<HTMLElement>('.switch [aria-selected="true"], .nav-now'));
+      target?.focus({ preventScroll: true });
       this._restoreFocus = undefined;
     }
   }
@@ -1038,6 +1073,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._loadError = failed && !succeeded;
     this._partialLoad = failed && succeeded;
     this._loading = false;
+    this._refreshReadOnlyDialog();
   }
 
   /* ---- capabilities -------------------------------------------- */
@@ -2702,11 +2738,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   private _openEvent(e: BoardEvent): void {
-    const raw: RawEvent = e.ref;
+    this._dialog = this._eventDialog(e.ref);
+  }
+
+  private _eventDialog(raw: RawEvent): DialogState {
     const cal = raw.calendar;
     const canUpdate = this._canUpdate(cal) && !!raw.uid;
     const canDelete = this._canDelete(cal) && !!raw.uid;
-    this._dialog = {
+    return {
       mode: "edit",
       personIdx: raw.personIdx,
       calendar: cal,
@@ -2723,7 +2762,31 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       start: raw.allDay ? toLocalDate(raw.start) : toLocalInput(raw.start),
       // all-day end is exclusive in HA; show the inclusive last day to the user
       end: raw.allDay ? toLocalDate(addLocalDays(raw.end, -1)) : toLocalInput(raw.end),
+      source: this._config.read_only ? raw : undefined,
     };
+  }
+
+  /** Keep inspected facts fresh, but never overwrite an editable draft. */
+  private _refreshReadOnlyDialog(): void {
+    const dialog = this._dialog;
+    if (!this._config.read_only || !dialog?.source || dialog.mode !== "edit") return;
+    if (
+      this._calendarResults.find((result) => result.entityId === dialog.calendar)?.status !== "ok"
+    ) {
+      this._dialog = { ...dialog, detailsStatus: "unavailable" };
+      return;
+    }
+    const event = findRefreshedEvent(dialog.source, this._raw);
+    if (!event) {
+      // Not found does not prove cancellation: it may have moved out of range or routing.
+      this._dialog = { ...dialog, detailsStatus: "missing" };
+      return;
+    }
+    const fresh = this._eventDialog(event);
+    const changed = (
+      ["summary", "start", "end", "allDay", "location", "description"] as const
+    ).some((field) => fresh[field] !== dialog[field]);
+    this._dialog = { ...fresh, detailsStatus: changed ? "updated" : undefined };
   }
 
   private _dlgField<K extends keyof DialogState>(key: K, value: DialogState[K]): void {
@@ -2948,13 +3011,22 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           if (e.target === e.currentTarget) this._closeDialog();
         }}
       >
-        <div class="dialog" role="dialog" aria-modal="true" aria-label=${heading}>
+        <div class="dialog" role="dialog" aria-modal="true" aria-label=${heading} tabindex="-1">
           <div class="dlg-head">
             <span>${heading}</span>
             <button class="icon" aria-label=${this._t("close")} @click=${this._closeDialog}>
               ✕
             </button>
           </div>
+          ${d.source && (this._loading || d.detailsStatus)
+            ? html`<div class="details-status" role="status">
+                ${this._t(this._loading ? "details_refreshing" : `details_${d.detailsStatus}`)}
+                ${!this._loading &&
+                (d.detailsStatus === "unavailable" || d.detailsStatus === "missing")
+                  ? html`<button class="retry" @click=${this._refetch}>${this._t("retry")}</button>`
+                  : nothing}
+              </div>`
+            : nothing}
           ${d.calendarOptions && d.calendarOptions.length > 1
             ? html`<label class="fld">
                 <span>${this._t("field_calendar")}</span>
@@ -3020,7 +3092,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           <label class="fld">
             <span>
               ${this._t("field_location")}
-              ${d.location.trim()
+              ${d.location.trim() &&
+              !(
+                d.source &&
+                (this._loading ||
+                  d.detailsStatus === "missing" ||
+                  d.detailsStatus === "unavailable")
+              )
                 ? html`<a
                     class="maplink"
                     href=${this._mapUrl(d.location)}
@@ -4305,6 +4383,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
       box-sizing: border-box;
     }
+    .dialog button {
+      min-width: 48px;
+      min-height: 48px;
+    }
     .dlg-head {
       display: flex;
       align-items: center;
@@ -4316,6 +4398,16 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       font-size: 12px;
       color: var(--secondary-text-color);
       margin: 2px 0 10px;
+    }
+    .details-status {
+      margin: 8px 0 12px;
+      padding: 8px;
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .details-status .retry {
+      margin-top: 8px;
     }
     .icon {
       border: none;
@@ -4336,10 +4428,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
     .row {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
     }
     .row .fld {
-      flex: 1;
+      flex: 1 1 200px;
+      min-width: 0;
     }
     input,
     textarea,
@@ -4460,7 +4554,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.6 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.7 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

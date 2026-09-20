@@ -109,6 +109,10 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920, 1080], [390, 844], [320, 568], [844, 390]].map(([width, height]) => ({
+    name: "wall", checks: "details", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "calendar details:",
+  })),
   ...[1920, 390].flatMap((width) =>
     [false, true].map((reducedMotion) => ({
       name: "wall",
@@ -217,6 +221,7 @@ try {
     checks,
     chromeHeight,
     width = 1920,
+    height = 1080,
     panelWidth,
     feed,
     reducedMotion = false,
@@ -248,7 +253,7 @@ try {
     await cdp.send("Emulation.setTimezoneOverride", { timezoneId: "America/Chicago" });
     await cdp.send("Emulation.setDeviceMetricsOverride", {
       width,
-      height: 1080,
+      height,
       deviceScaleFactor: 1,
       mobile: checks === "pan",
     });
@@ -503,7 +508,7 @@ try {
       );
     }
     console.log(
-      `${name}: ${width}x1080${panelWidth ? ` in ${panelWidth}px panel` : ""} America/Chicago browser check passed (${result.details})`,
+      `${name}: ${width}x${height}${panelWidth ? ` in ${panelWidth}px panel` : ""} America/Chicago browser check passed (${result.details})`,
     );
   }
 } finally {

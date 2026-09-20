@@ -208,6 +208,38 @@ export function occurrenceKey(raw: RawEvent): string {
   ]);
 }
 
+/** Find the same occurrence after a refresh without confusing series or owner copies. */
+export function findRefreshedEvent(reference: RawEvent, events: RawEvent[]): RawEvent | undefined {
+  const candidates = events.filter((event) => {
+    if (event.calendar !== reference.calendar) return false;
+    if (reference.uid) {
+      if (event.uid !== reference.uid) return false;
+      if (reference.recurrence_id) return event.recurrence_id === reference.recurrence_id;
+      if (event.recurrence_id) return false;
+      // A series without occurrence IDs can only be matched at its original start.
+      return (
+        !(reference.rrule || event.rrule) || event.start.getTime() === reference.start.getTime()
+      );
+    }
+    // Without a stable ID, do not guess that a changed title/time is the old event.
+    return !event.uid && occurrenceKey(event) === occurrenceKey(reference);
+  });
+  const content = new Set(
+    candidates.map((event) =>
+      JSON.stringify([
+        event.sourceSummary ?? event.summary,
+        event.start.getTime(),
+        event.end.getTime(),
+        event.allDay,
+        event.location,
+        event.description,
+      ]),
+    ),
+  );
+  if (content.size !== 1) return undefined;
+  return candidates.find((event) => event.personIdx === reference.personIdx) ?? candidates[0];
+}
+
 /**
  * Collapse duplicate copies only within one owner lane. The same occurrence
  * routed to another owner is not a duplicate, and distinct recurring
