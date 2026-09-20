@@ -186,7 +186,9 @@ export async function runCalendarStatusChecks(card, hass, nextRender) {
   card.requestUpdate();
   await nextRender();
 
-  card.shadowRoot.querySelector('button[aria-label="Next week"]').click();
+  card.shadowRoot.querySelectorAll('.tabs button')[6].click();
+  await settle();
+  card.shadowRoot.querySelector('button[aria-label="Next day"]').click();
   await settle();
   assert(
     tiles().every((tile) => content(tile.querySelector(".ffree")) === "schedule unavailable"),

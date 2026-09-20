@@ -39,6 +39,26 @@ export async function runViewSwitcherChecks(card, nextRender) {
   };
 
   try {
+    // Real dashboards often have longer titles than the baseline fixture. The whole
+    // capsule must wrap onto its own row instead of losing its final English tab.
+    for (const title of ["Family Board · Preview", "A long household calendar dashboard title"]) {
+      card.setConfig({ ...originalConfig, title });
+      await nextRender();
+      const { track, buttons } = checkGeometry();
+      const outer = track.getBoundingClientRect();
+      const header = root.querySelector(".moran-wall-header").getBoundingClientRect();
+      assert(track.scrollWidth <= track.clientWidth + 1, "Long title clips an English view tab.");
+      for (const button of buttons) {
+        const rect = button.getBoundingClientRect();
+        assert(rect.left >= outer.left && rect.right <= outer.right, "Long title hides a view.");
+        assert(rect.top >= header.top && rect.bottom <= header.bottom, "Wrapped menu escapes header.");
+      }
+      buttons[4].click();
+      await nextRender();
+      assert(root.querySelector(".agenda"), "Agenda is not usable after header wrapping.");
+    }
+    card.setConfig(originalConfig);
+    await nextRender();
     for (const theme of ["light", "dark"]) {
       themeRoot.dataset.theme = theme;
       await nextRender();

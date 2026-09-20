@@ -119,7 +119,9 @@ export async function runCalendarDailyUseChecks(card, hass, nextRender) {
     "Clock tick or refresh stole the user's scroll position.",
   );
 
-  card.shadowRoot.querySelector('button[aria-label="Next week"]').click();
+  card.shadowRoot.querySelectorAll('.tabs button')[6].click();
+  await settle();
+  card.shadowRoot.querySelector('button[aria-label="Next day"]').click();
   await settle();
   await today();
   await waitFor(nowVisible, "Today from another week did not reveal the current time.");

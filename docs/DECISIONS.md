@@ -61,6 +61,14 @@ Historical phase documents and reviewer-model requirements do not reinstate that
 The original request for a phased plan remains part of project history, not the current
 execution process.
 
+**Reaffirmed through 2026-09-20:** the user reported repeated idle checkpoints even after
+setting a goal and again asked to continue. Work toward a dependable read-only daily-use
+calendar across desktop/mobile, not isolated tiny tasks. Implement, test, document, and
+advance the accepted backlog in the same run; progress messages are not approval gates.
+Stop for a real safety/authority boundary, consequential unresolved product choice, or a
+completed scoped milestone. Physical-phone evidence can remain pending while software
+work advances. This does not authorize background scheduling, event edits, or publication.
+
 ## Calendar interaction and presentation
 
 ### D06. Address concrete usability defects while deferring the full design
@@ -112,6 +120,21 @@ was consulted for date/navigation context. The supplied screenshots now provide 
 evidence of day separation, today's marker, and selected-day treatment. Their private
 event contents and original images are not copied into this repo. Exact current gesture
 behavior was not independently verified inside the Fantastical app.
+
+**Implementation choice under the accepted direction, 2026-09-20:** wall Day's arrows
+advance one visible date (skipping weekends when configured). Horizontal swipes/drags on
+the date heading page exactly one day on release; arrow keys on the focused heading offer
+the same operation. The grid retains native two-axis person/time scrolling. Short,
+vertical, cancelled, and secondary-pointer gestures do not page dates. This is discrete
+day navigation, not a physics-driven animated carousel or a claim of native Fantastical
+gesture parity. The separate date strip continues to scroll without selecting dates.
+
+Carry the visible clock time and horizontal lane position across date changes, including
+all-day-row and trimmed-hour changes; clamp to the available destination range. Explicit
+Today still recenters. Slow reads, rapid paging, and Today/view/config changes must not
+allow old scroll work to overwrite the user's latest intent. Week/Timeline and legacy
+Day keep week-sized arrows. This resolves the competing gesture surfaces without a
+new calendar grid or framework rewrite. Delivery and QA are recorded in STATUS.md.
 
 ### D08. Show the full 24-hour schedule
 
@@ -256,6 +279,8 @@ browser-to-Bridge adapter is justified by these findings.
 | Fantastical screenshot review of the date strip | Separate full-width date cells replace the compressed centered date cluster; D07 records the accepted presentation and its scope. |
 | Separate screenshot review of the top view switcher | Neutral capsule with an inset selected pill requested; D12 keeps this separate from the full-width date cells. |
 | Continue calendar work; defer an image-annotation preview | Accepted local improvements promoted to the existing read-only HA pilot under D13; no image preview or public release created. |
+| Later request to view the reference screenshot for annotations | Opened in an isolated temporary loopback page; original image unchanged and no private image copied into this repo. |
+| Continue and clarify the next milestone, 2026-09-20 | Dependable read-only desktop/mobile daily use; finish visible controls and discrete date navigation while retaining data integrity/recovery. Full redesign and household modules remain deferred. |
 
 ## Evidence and date boundaries
 

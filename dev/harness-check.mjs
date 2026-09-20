@@ -112,6 +112,16 @@ const scenarios = [
   ...[1920, 390].flatMap((width) =>
     [false, true].map((reducedMotion) => ({
       name: "wall",
+      checks: "navigation",
+      chromeHeight: 64,
+      width,
+      reducedMotion,
+      expectedGeometryMarker: "calendar date navigation:",
+    })),
+  ),
+  ...[1920, 390].flatMap((width) =>
+    [false, true].map((reducedMotion) => ({
+      name: "wall",
       checks: "daily",
       chromeHeight: 64,
       width,
@@ -271,6 +281,12 @@ try {
             top: rect.top,
             offCount: board.querySelectorAll(".header-row .phead.off").length,
             dialogCount: root.querySelectorAll(".dialog").length,
+            date: root.querySelector('.tabs [aria-selected="true"]')?.getAttribute('aria-label'),
+            axisX: board.querySelector('.axis')?.getBoundingClientRect().left,
+            heading: (() => {
+              const r = root.querySelector('.dayname').getBoundingClientRect();
+              return { x: r.right - 8, y: r.top + r.height / 2 };
+            })(),
             chipX: chipRect ? chipRect.left + chipRect.width / 2 : null,
             chipY: chipRect ? chipRect.top + chipRect.height / 2 : null,
             visibleNames: [...board.querySelectorAll(".header-row .phead")]
@@ -310,6 +326,9 @@ try {
       const afterTouch = await metrics();
       if (afterTouch.left < 100) {
         throw new Error(`${width}px native touch swipe did not pan the Day board.`);
+      }
+      if (afterTouch.date !== before.date || Math.abs(afterTouch.axisX) > 1) {
+        throw new Error(`${width}px person swipe changed date or moved the fixed time axis.`);
       }
       await evaluate(
         'document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = 0',
@@ -395,6 +414,40 @@ try {
       await mouseClick(96, headerY);
       if ((await metrics()).offCount !== 0) {
         throw new Error(`${width}px ordinary person-header click did not restore its lane.`);
+      }
+      // Native pointer events, not direct handler calls: date heading owns paging.
+      const dateStart = await metrics();
+      const swipeHeading = async (dx, dy = 0, cancel = false) => {
+        const { heading } = await metrics();
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: 'touchStart', touchPoints: [{ x: heading.x, y: heading.y, id: 1 }],
+        });
+        for (let step = 1; step <= 8; step++) {
+          await cdp.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x: heading.x + dx * step / 8, y: heading.y + dy * step / 8, id: 1 }],
+          });
+          await delay(20);
+        }
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: cancel ? 'touchCancel' : 'touchEnd', touchPoints: [],
+        });
+        await delay(100);
+      };
+      await swipeHeading(-95);
+      if ((await metrics()).date !== 'Thursday, Feb 19') {
+        throw new Error(`${width}px native date swipe did not advance exactly one day.`);
+      }
+      const tomorrow = await metrics();
+      await mouseDrag(tomorrow.heading.x - 95, tomorrow.heading.y, -95);
+      if ((await metrics()).date !== dateStart.date) {
+        throw new Error(`${width}px mouse date drag did not return to the previous day.`);
+      }
+      await swipeHeading(-20);
+      await swipeHeading(-95, 0, true);
+      await swipeHeading(0, 60);
+      if ((await metrics()).date !== dateStart.date) {
+        throw new Error(`${width}px short/cancelled/vertical gesture changed the date.`);
       }
       await evaluate(
         `document.querySelector("moran-family-board-card").shadowRoot.querySelector(".board").scrollLeft = ${before.max}`,

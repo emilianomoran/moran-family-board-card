@@ -109,7 +109,7 @@
       const query = new URLSearchParams(window.location.search);
       document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
       const scenario = query.get("scenario") ?? "legacy";
-      const dailyUse = query.get("daily") === "1" || query.get("checks") === "daily";
+      const dailyUse = query.get("daily") === "1" || ["daily", "navigation"].includes(query.get("checks"));
       let feed = query.get("feed") ?? "healthy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
@@ -264,7 +264,7 @@
       card.nowProvider = () => new Date(FIXED_NOW.getTime());
       const config = {
         type: "custom:moran-family-board-card",
-        title: "Family Board",
+        title: query.get("long-title") === "1" ? "Family Board · Preview" : "Family Board",
         view: "day",
         views: ["day", "timeline", "week", "month", "agenda"],
         start_hour: dailyUse ? 0 : 7,
@@ -273,6 +273,7 @@
         hour_height: 64,
         show_now_line: true,
         scroll_to_now: dailyUse,
+        ...(query.get("checks") === "navigation" ? { remember_preferences: false } : {}),
         ...(dailyUse
           ? {
               read_only: true,
@@ -912,7 +913,7 @@
           const rect = button.getBoundingClientRect();
           const styles = getComputedStyle(button);
           if (rect.height < 72 || rect.width < 64 || styles.borderRadius !== "0px") {
-            throw new Error("Date controls regressed to compressed pill tabs.");
+            throw new Error(`Date controls regressed to compressed pill tabs: ${rect.width}x${rect.height}, radius ${styles.borderRadius}, strip ${dayTabs.clientHeight}px.`);
           }
           if (button !== dayButtons[6] && styles.borderInlineEndWidth !== "1px") {
             throw new Error("Date cell divider is missing.");
@@ -969,14 +970,14 @@
           throw new Error("Date cell selection did not update the calendar heading.");
         }
         const priorDate = dayButtons[6].getAttribute("aria-label");
-        weeknav.querySelector('button[aria-label="Next week"]').click();
+        weeknav.querySelector('button[aria-label="Next day"]').click();
         await nextRender();
         if (
           dayButtons[6].getAttribute("aria-label") === priorDate ||
           dayTabs.querySelector("[aria-current='date']")
         ) {
           throw new Error(
-            "Next week did not refresh date labels or remove the out-of-week Today marker.",
+            "Next day across the week boundary did not refresh date labels or remove Today.",
           );
         }
         dayhead.querySelector(".nav-now").click();
@@ -1031,7 +1032,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "daily"
+        (query.get("checks") === "navigation"
+          ? import("./calendar-navigation-check.mjs").then(({ runCalendarNavigationChecks }) =>
+              runCalendarNavigationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "daily"
           ? import("./calendar-daily-use-check.mjs").then(({ runCalendarDailyUseChecks }) =>
               runCalendarDailyUseChecks(card, hass, nextRender),
             )

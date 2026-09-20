@@ -78,19 +78,22 @@ export const wallShellStyles = css`
   .moran-wall-shell .moran-wall-header {
     box-sizing: border-box;
     display: flex;
-    flex: 0 0 72px;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 32px;
-    height: 72px;
-    padding: 0 24px;
+    gap: 8px 32px;
+    min-height: 72px;
+    padding: 8px 24px;
     border-bottom: 1px solid var(--moran-wall-divider);
     background: var(--moran-wall-canvas);
   }
 
   .moran-wall-shell .moran-wall-brand {
     display: flex;
+    flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
     align-items: baseline;
     gap: 16px;
   }
@@ -147,7 +150,7 @@ export const wallShellStyles = css`
   .moran-wall-shell .switch {
     box-sizing: border-box;
     display: inline-flex;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     flex-wrap: nowrap;
     gap: 0;
     min-width: 0;
@@ -212,6 +215,19 @@ export const wallShellStyles = css`
     line-height: 1.2;
   }
 
+  /* Dates page only from this heading; the event grid retains native person panning. */
+  .moran-wall-shell .dayhead {
+    flex: 0 0 auto;
+    touch-action: pan-y pinch-zoom;
+    user-select: none;
+  }
+
+  .moran-wall-shell .dayhead .dayname {
+    min-height: 48px;
+    border-radius: 6px;
+    cursor: ew-resize;
+  }
+
   .moran-wall-shell > .tabs {
     display: flex;
     flex: 0 0 80px;
@@ -230,8 +246,13 @@ export const wallShellStyles = css`
     overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
+    /* A non-overlay OS scrollbar must not consume the date cells' touch height. */
+    scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .moran-wall-shell > .tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .moran-wall-shell > .tabs button {
