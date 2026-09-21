@@ -859,6 +859,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private async _maybeFetch(force = false): Promise<void> {
     if (!this.isConnected || !this.hass || !this._config) return;
+    // Every trigger shares this guard, including throttled clock ticks and HA
+    // updates. A read started while hidden could be suspended and reused on wake.
+    if (document.visibilityState === "hidden") return;
     const configuredCalendars = [
       ...new Set(this._config.persons.flatMap((p) => this._calsOf(p))),
     ].sort();
@@ -4554,7 +4557,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.7 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.8 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

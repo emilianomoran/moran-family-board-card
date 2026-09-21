@@ -198,6 +198,15 @@ export async function runCalendarRecoveryChecks(card, hass, nextRender) {
     const beforeSleep = calls;
     await poll();
     assert(calls === beforeSleep, "Hidden tab continued periodic polling.");
+    // Browsers can throttle rather than stop minute ticks in the background.
+    // The clock and HA updates share the same read path as the paused poll.
+    card._onClockTick();
+    await nextRender();
+    assert(calls === beforeSleep, "Hidden clock tick started a calendar read that wake could reuse.");
+    card.hass = { ...connection };
+    await nextRender();
+    await card._refetch();
+    assert(calls === beforeSleep, "Hidden HA update or forced refresh started a background read.");
     deferred = false;
     revision = 8;
     Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
@@ -239,6 +248,6 @@ export async function runCalendarRecoveryChecks(card, hass, nextRender) {
   await nextRender();
   assert(!card._raw.some((r) => r.uid === "pre-write"), "Pre-write read replaced fresh data.");
   return [
-    "calendar recovery: automatic updates/cancellations, coalesced wake, HA/browser reconnect, unavailable source, failed poll, detach/remount, suspended reads, page restore, post-write invalidation",
+    "calendar recovery: automatic updates/cancellations, coalesced wake, HA/browser reconnect, unavailable source, failed poll, detach/remount, hidden-clock/HA-update suppression, suspended reads, page restore, post-write invalidation",
   ];
 }

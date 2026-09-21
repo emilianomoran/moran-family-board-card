@@ -288,6 +288,20 @@ Deployed 2026-09-20 at 18:59 CDT as source `e7868ccd585bc07dad5279c551e953d669f7
 140 unit tests, 38 browser scenarios, and actual HA details/keyboard/normal-poll checks
 passed. This does not certify physical iPhone recovery or real provider-change latency.
 
+### D15. Hidden-page reads must not undermine wake recovery
+
+**Implementation correction under the daily-use goal, 2026-09-20.** The poll callback
+already skipped hidden pages, but a throttled minute tick or HA state update could still
+start a read after the hide handler invalidated the pre-sleep request. Wake could then
+coalesce with that background read rather than request a fresh snapshot.
+
+The shared calendar-read entry point now defers every trigger while the document is hidden.
+On visibility restoration, the existing fresh-read path runs; older suspended responses
+remain generation-rejected. This changes no refresh interval, calendar data, or UI design.
+The compiled-card regression failed against r7 on the hidden clock tick and passes after
+the fix at desktop and phone widths. Full candidate/deployment evidence belongs in STATUS.md;
+synthetic lifecycle tests still do not certify physical iPhone recovery.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |

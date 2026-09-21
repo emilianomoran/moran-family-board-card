@@ -31,6 +31,18 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
+### Hidden-page recovery candidate, 2026-09-20
+
+The rendered r7 regression exposed a hidden clock tick starting a calendar read despite
+the paused poll. Wake could reuse that background request. The r8 candidate moves the
+hidden-page guard to the shared read entry point, covering clock, HA-update, and forced-read
+triggers. Desktop/phone recovery checks now assert no new reads while hidden, a fresh wake
+snapshot, and rejection of late pre-sleep data. See D15. All 140 unit tests and 38 browser
+scenarios pass, as do formatting, TypeScript, build, and whitespace checks. Visible local
+review confirmed date navigation, meaningful content, no error overlay, and no browser
+warnings/errors. Browser plugin not available; repository Chromium tests and Codex in-app
+controls were used. Live promotion is pending; the installed checkpoint above remains r7.
+
 ### Event-details reliability update, 2026-09-20
 
 Continuing the full daily-use goal exposed another software gap rather than just a
