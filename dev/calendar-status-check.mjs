@@ -43,6 +43,7 @@ export async function runCalendarStatusChecks(card, hass, nextRender) {
   const tiles = () => [...card.shadowRoot.querySelectorAll(".focus .fchip")];
   const content = (node) => node?.textContent.replace(/\s+/g, " ").trim() ?? "";
   const wall = card._layout === "wall";
+  if (wall) { card.shadowRoot.querySelector('.wall-status-toggle').click(); await nextRender(); }
   if (!wall) {
     assert(!tiles()[0].querySelector(".fheading"), "Wall status semantics leaked into legacy.");
     assert(content(tiles()[0]).includes("next:"), "Legacy next label changed.");

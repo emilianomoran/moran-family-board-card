@@ -613,17 +613,17 @@
             );
           }
         }
-        const todayAction = wall.querySelector(".dayhead .nav-now");
+        const todayAction = wall.querySelector(".wall-datebar .nav-now");
         if (
           todayAction?.textContent.trim() !== "Today" ||
           todayAction.getAttribute("aria-label") !== "Show today"
         ) {
           throw new Error("Wall Day current-date action is not labeled Today / Show today.");
         }
-        if (wall.querySelector(".dayhead .dayname")?.textContent.trim() !== "Today: Feb 18") {
+        if (wall.querySelector(".wall-datebar .dayname")?.getAttribute("aria-label") !== "Today: Feb 18") {
           throw new Error("Wall Day heading does not include today's short date.");
         }
-        const dateTabs = [...wall.querySelectorAll(":scope > .tabs [role='tab']")];
+        const dateTabs = [...wall.querySelectorAll(":scope > .wall-datebar > .tabs [role='tab']")];
         if (
           dateTabs.length !== 7 ||
           dateTabs.some(
@@ -771,7 +771,12 @@
 
           for (const target of focusable) {
             const rect = target.getBoundingClientRect();
-            if (rect.width < 48 || rect.height < 48) {
+            const compactView = target.closest('.switch');
+            const compactDate = target.closest('.wall-date-tools');
+            const statusToggle = target.matches('.wall-status-toggle');
+            const minWidth = compactDate ? 28 : statusToggle ? 40 : 48;
+            const minHeight = compactView ? 34 : compactDate ? 36 : statusToggle ? 40 : 48;
+            if (rect.width < minWidth || rect.height < minHeight) {
               throw new Error(
                 `${activeView}: ${target.className || target.localName} is ${rect.width}x${rect.height}.`,
               );
@@ -822,7 +827,7 @@
         const wall = root?.querySelector(".moran-wall-shell");
         const header = wall?.querySelector(".moran-wall-header");
         const viewSwitcher = header?.querySelector(".switch");
-        const dayhead = wall?.querySelector(".dayhead");
+        const dayhead = wall?.querySelector(".wall-datebar");
         const weeknav = dayhead?.querySelector(".weeknav");
         if (!wall || !header || !viewSwitcher || !dayhead || !weeknav) {
           throw new Error("Responsive wall Day view is missing a navigation surface.");
@@ -861,20 +866,21 @@
         contained(viewSwitcher, "View switcher", header);
         contained(weeknav, "Date navigation", dayhead);
         for (const button of viewSwitcher.querySelectorAll("button")) {
+          button.scrollIntoView({block:'nearest',inline:'nearest'}); await nextRender();
           contained(button, `${button.textContent.trim()} view tab`, viewSwitcher);
           const rect = button.getBoundingClientRect();
-          if (rect.width < 48 || rect.height < 48) {
-            throw new Error(`${button.textContent.trim()} view tab is smaller than 48px.`);
+          if (rect.width < 48 || rect.height < 34 || rect.height > 40) {
+            throw new Error(`${button.textContent.trim()} view tab is outside compact dimensions.`);
           }
         }
         for (const button of weeknav.querySelectorAll("button")) {
           contained(button, "Date navigation button", weeknav);
           const rect = button.getBoundingClientRect();
-          if (rect.width < 48 || rect.height < 48) {
-            throw new Error("Date navigation button is smaller than 48px.");
+          if (rect.width < 28 || rect.height < 36) {
+            throw new Error("Compact date navigation button is too small.");
           }
         }
-        const dayTabs = wall.querySelector(":scope > .tabs");
+        const dayTabs = wall.querySelector(":scope > .wall-datebar > .tabs");
         const dayButtons = [...(dayTabs?.querySelectorAll("button") ?? [])];
         if (!dayTabs || dayButtons.length !== 7) {
           throw new Error("Wall Day view did not render seven weekday tabs.");
@@ -890,7 +896,7 @@
           throw new Error("Date cells do not have equal widths.");
         }
         if (
-          expectedCardWidth >= 448 &&
+          dayTabs.clientWidth >= 448 &&
           (Math.abs(dateRects[0].left - tabsRect.left) > 1 ||
             Math.abs(dateRects[6].right - tabsRect.right) > 1)
         ) {
@@ -907,7 +913,7 @@
         if (dayTabs.scrollHeight > dayTabs.clientHeight + 1) {
           throw new Error("Weekday tabs wrap below their fixed-height row.");
         }
-        if (expectedCardWidth < 400 && dayTabs.scrollWidth <= dayTabs.clientWidth + 1) {
+        if (dayTabs.clientWidth < 400 && dayTabs.scrollWidth <= dayTabs.clientWidth + 1) {
           throw new Error("Weekday row cannot scroll at narrow card widths.");
         }
         for (const button of dayButtons) {
@@ -967,7 +973,7 @@
             `Date keyboard focus is clipped outside the strip (offset=${getComputedStyle(dayButtons[6]).outlineOffset}, focused=${root.activeElement === dayButtons[6]}).`,
           );
         }
-        if (!dayhead.querySelector(".dayname").textContent.includes("Feb 22")) {
+        if (!dayhead.querySelector(".dayname").getAttribute("aria-label").includes("Feb 22")) {
           throw new Error("Date cell selection did not update the calendar heading.");
         }
         const priorDate = dayButtons[6].getAttribute("aria-label");
@@ -1010,18 +1016,18 @@
         }
         card.setConfig({ ...card._config, first_day: "sunday", show_weekends: true });
         await nextRender();
-        let configuredDates = [...root.querySelectorAll(".moran-wall-shell > .tabs button")];
+        let configuredDates = [...root.querySelectorAll(".moran-wall-shell .wall-datebar > .tabs button")];
         if (!configuredDates[0].getAttribute("aria-label").startsWith("Sunday")) {
           throw new Error("Date cells ignored Sunday-first configuration.");
         }
         card.setConfig({ ...card._config, show_weekends: false });
         await nextRender();
-        configuredDates = [...root.querySelectorAll(".moran-wall-shell > .tabs button")];
+        configuredDates = [...root.querySelectorAll(".moran-wall-shell .wall-datebar > .tabs button")];
         const firstRect = configuredDates[0].getBoundingClientRect();
         const lastRect = configuredDates.at(-1).getBoundingClientRect();
         if (
           configuredDates.length !== 5 ||
-          Math.abs(lastRect.right - firstRect.left - expectedCardWidth) > 1
+          Math.abs(lastRect.right - firstRect.left - Math.max(dayTabs.clientWidth, 320)) > 1
         ) {
           throw new Error("Weekday-only date cells did not fill the strip.");
         }
@@ -1033,7 +1039,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "presentation"
+        (query.get("checks") === "chrome"
+          ? import("./calendar-chrome-check.mjs").then(({ runCalendarChromeChecks }) =>
+              runCalendarChromeChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "presentation"
           ? import("./calendar-presentation-check.mjs").then(({ runCalendarPresentationChecks }) =>
               runCalendarPresentationChecks(card, hass, nextRender),
             )

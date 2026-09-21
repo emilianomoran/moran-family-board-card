@@ -52,7 +52,7 @@ export async function runCalendarNavigationChecks(card, hass, nextRender) {
   assert(board().querySelector('.allday-row'), 'Fixture needs an all-day row.');
   await nav('Next day');
   assert(shown() === 'Thursday, Feb 19', 'Arrow skipped more than one date.');
-  assert(root.querySelector('.dayname').textContent.includes('Tomorrow: Feb 19'), 'Heading and selection diverged.');
+  assert(root.querySelector('.dayname').getAttribute('aria-label').includes('Tomorrow: Feb 19'), 'Accessible date and selection diverged.');
   assert(!board().querySelector('.allday-row') && !board().querySelector('.event'), 'Previous date content leaked.');
   assert(Math.abs(minute() - beforeMinute) < 2, 'Removing all-day row changed visible time.');
   assert(Math.abs(board().scrollLeft - beforeLeft) < 1, 'Day navigation changed visible people.');

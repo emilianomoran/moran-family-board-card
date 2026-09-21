@@ -4,6 +4,7 @@ export interface WallShellOptions {
   title: string;
   calendarIdentity: string;
   viewNavigation: unknown;
+  statusToggle: unknown;
   focus: unknown;
   content: TemplateResult;
 }
@@ -13,17 +14,18 @@ export function renderWallShell({
   title,
   calendarIdentity,
   viewNavigation,
+  statusToggle,
   focus,
   content,
 }: WallShellOptions): TemplateResult {
   return html`
-    <section class="moran-wall-shell" aria-label=${calendarIdentity}>
+    <section class="moran-wall-shell" aria-label=${`${title} · ${calendarIdentity}`}>
       <header class="moran-wall-header">
         <div class="moran-wall-brand">
-          <div class="moran-wall-title">${title}</div>
+          <div class="moran-wall-title" title=${title}>${title}</div>
           <div class="moran-wall-calendar-identity">${calendarIdentity}</div>
         </div>
-        ${viewNavigation}
+        ${viewNavigation} ${statusToggle}
       </header>
       ${focus} ${content}
     </section>
@@ -79,28 +81,29 @@ export const wallShellStyles = css`
     box-sizing: border-box;
     display: flex;
     flex: 0 0 auto;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 32px;
-    min-height: 72px;
-    padding: 8px 24px;
+    gap: 8px;
+    height: 48px;
+    min-height: 48px;
+    padding: 3px 12px;
     border-bottom: 1px solid var(--moran-wall-divider);
     background: var(--moran-wall-canvas);
   }
 
   .moran-wall-shell .moran-wall-brand {
     display: flex;
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-width: 0;
     max-width: 100%;
     align-items: baseline;
-    gap: 16px;
+    gap: 8px;
   }
 
   .moran-wall-shell .moran-wall-title {
     overflow: hidden;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.1;
     text-overflow: ellipsis;
@@ -108,13 +111,14 @@ export const wallShellStyles = css`
   }
 
   .moran-wall-shell .moran-wall-calendar-identity {
+    display: none;
     color: var(--moran-wall-muted);
     font-size: 16px;
     font-weight: 700;
     line-height: 1.25;
   }
 
-  .moran-wall-shell > .tabs {
+  .moran-wall-shell .wall-datebar > .tabs {
     box-sizing: border-box;
     gap: 4px;
     border-radius: 10px;
@@ -155,23 +159,27 @@ export const wallShellStyles = css`
     gap: 0;
     min-width: 0;
     max-width: 100%;
-    padding: 3px;
+    padding: 2px;
+    height: 40px;
     border: 1px solid color-mix(in srgb, var(--moran-wall-text) 12%, transparent);
     border-radius: 999px;
     background: color-mix(in srgb, var(--moran-wall-canvas) 90%, var(--moran-wall-text));
     box-shadow: inset 0 1px 0 #ffffff14;
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
 
   .moran-wall-shell .switch button {
     position: relative;
     flex: 1 0 auto;
-    padding: 8px 16px;
+    padding: 2px 12px;
+    min-height: 34px;
+    height: 34px;
+    max-height: 34px;
     border-radius: 999px;
     background: transparent;
     color: var(--moran-wall-muted);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
   }
@@ -215,27 +223,63 @@ export const wallShellStyles = css`
     line-height: 1.2;
   }
 
-  /* Dates page only from this heading; the event grid retains native person panning. */
-  .moran-wall-shell .dayhead {
-    flex: 0 0 auto;
-    touch-action: pan-y pinch-zoom;
-    user-select: none;
+  /* Date context/navigation shares the date strip, never a separate fixed row. */
+  .moran-wall-shell .wall-datebar {
+    display: flex;
+    flex: 0 0 80px;
+    min-height: 80px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--moran-wall-divider);
   }
 
-  .moran-wall-shell .dayhead .dayname {
-    min-height: 48px;
+  .moran-wall-shell .wall-date-tools {
+    display: flex;
+    flex: 0 0 112px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    border-inline-end: 1px solid var(--moran-wall-divider);
+  }
+
+  .moran-wall-shell .wall-date-tools .dayname {
+    justify-content: center;
+    width: 100%;
+    min-height: 28px;
+    font-size: 13px;
+    touch-action: pan-y pinch-zoom;
+    user-select: none;
     border-radius: 6px;
     cursor: ew-resize;
   }
 
-  .moran-wall-shell > .tabs {
+  .moran-wall-shell .wall-date-tools .weeknav {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) 28px;
+    gap: 0;
+    padding-inline: 2px;
+  }
+
+  .moran-wall-shell .wall-date-tools .weeknav button {
+    min-width: 0;
+    min-height: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 12px;
+    background: transparent;
+  }
+
+  .moran-wall-shell .wall-date-tools .weeknav .nav {
+    font-size: 20px;
+  }
+
+  .moran-wall-shell .wall-datebar > .tabs {
     display: flex;
-    flex: 0 0 80px;
+    flex: 1 1 0;
     flex-wrap: nowrap;
     align-items: stretch;
     justify-content: flex-start;
     gap: 0;
-    width: 100%;
+    min-width: 0;
     min-height: 80px;
     margin: 0;
     padding: 0;
@@ -251,37 +295,39 @@ export const wallShellStyles = css`
     -webkit-overflow-scrolling: touch;
   }
 
-  .moran-wall-shell > .tabs::-webkit-scrollbar {
+  .moran-wall-shell .wall-datebar > .tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .moran-wall-shell > .tabs button {
+  .moran-wall-shell .wall-datebar > .tabs button {
     display: flex;
     flex: 1 0 64px;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 4px;
     min-width: 64px;
     height: 100%;
-    padding: 6px 4px;
+    padding: 6px 12px;
     border-inline-end: 1px solid var(--moran-wall-divider);
     border-radius: 0;
     scroll-snap-align: start;
-    font-variant-numeric: tabular-nums;
+    text-align: start;
+    font-variant-numeric: proportional-nums;
+    letter-spacing: normal;
   }
 
-  .moran-wall-shell > .tabs button:last-child {
+  .moran-wall-shell .wall-datebar > .tabs button:last-child {
     border-inline-end: 0;
   }
 
-  .moran-wall-shell > .tabs button.on {
+  .moran-wall-shell .wall-datebar > .tabs button.on {
     background: color-mix(in srgb, var(--moran-wall-accent) 12%, var(--moran-wall-canvas));
     color: var(--moran-wall-text);
     box-shadow: inset 0 -3px 0 var(--moran-wall-accent);
   }
 
-  .moran-wall-shell > .tabs button.today:not(.on) {
+  .moran-wall-shell .wall-datebar > .tabs button.today:not(.on) {
     box-shadow: none;
   }
 
@@ -303,21 +349,60 @@ export const wallShellStyles = css`
     font-size: 24px;
     font-weight: 700;
     line-height: 1;
+    font-variant-numeric: proportional-nums;
+    letter-spacing: normal;
   }
 
-  .moran-wall-shell > .tabs button.today .wall-day-number {
+  .moran-wall-shell .wall-datebar > .tabs button.today .wall-day-number {
     background: var(--moran-wall-accent);
     color: #ffffff;
   }
 
-  .moran-wall-shell > .tabs button.on .wall-day-weekday,
-  .moran-wall-shell > .tabs button.today .wall-day-weekday {
+  .moran-wall-shell .wall-datebar > .tabs button.on .wall-day-weekday,
+  .moran-wall-shell .wall-datebar > .tabs button.today .wall-day-weekday {
     color: var(--moran-wall-accent);
   }
 
   .moran-wall-shell .focus {
     flex: 0 0 auto;
     background: var(--moran-wall-canvas);
+  }
+
+  .moran-wall-shell .wall-status-panel {
+    flex: 0 0 auto;
+    max-height: 35%;
+    overflow: auto;
+  }
+
+  .moran-wall-shell .wall-status-panel[hidden] {
+    display: none;
+  }
+
+  .moran-wall-shell .moran-wall-header .wall-status-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    min-width: 40px;
+    min-height: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: var(--moran-wall-muted);
+    background: var(--moran-wall-surface);
+    border: 1px solid var(--moran-wall-divider);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .moran-wall-shell .wall-status-toggle[aria-expanded="true"] {
+    color: var(--moran-wall-accent);
+    background: color-mix(in srgb, var(--moran-wall-accent) 12%, var(--moran-wall-canvas));
+  }
+
+  .moran-wall-shell .wall-status-toggle svg {
+    width: 22px;
+    height: 22px;
   }
 
   .moran-wall-shell .fname,
@@ -867,45 +952,25 @@ export const wallShellStyles = css`
 
   @container (max-width: 700px) {
     .moran-wall-shell .moran-wall-header {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      flex: 0 0 auto;
-      gap: 8px;
-      height: auto;
-      min-height: 72px;
-      padding: 12px 16px;
+      padding-inline: 8px;
     }
 
     .moran-wall-shell .moran-wall-brand {
-      flex-wrap: wrap;
-      gap: 4px 12px;
+      display: none;
     }
 
-    .moran-wall-shell .moran-wall-title {
-      font-size: 20px;
-    }
-
-    .moran-wall-shell .moran-wall-calendar-identity {
-      font-size: 14px;
+    .moran-wall-shell .moran-wall-header:not(:has(.switch)) .moran-wall-brand {
+      display: flex;
     }
 
     .moran-wall-shell .switch {
       display: flex;
-      width: 100%;
+      flex: 1 1 auto;
     }
 
     .moran-wall-shell .switch button {
       padding-inline: 6px;
       font-size: 13px;
-    }
-  }
-
-  @container (max-width: 400px) {
-    .moran-wall-shell .dayhead {
-      flex: 0 0 auto;
-      height: auto;
-      min-height: 56px;
-      padding-inline: 12px;
     }
   }
 
@@ -930,9 +995,9 @@ export const wallShellStyles = css`
   .moran-wall-shell .switch > button:focus,
   .moran-wall-shell .switch > button:focus-visible,
   .moran-wall-shell .switch > button:focus-within,
-  .moran-wall-shell > .tabs > button:focus,
-  .moran-wall-shell > .tabs > button:focus-visible,
-  .moran-wall-shell > .tabs > button:focus-within {
+  .moran-wall-shell .wall-datebar > .tabs > button:focus,
+  .moran-wall-shell .wall-datebar > .tabs > button:focus-visible,
+  .moran-wall-shell .wall-datebar > .tabs > button:focus-within {
     outline-offset: -3px !important;
   }
 

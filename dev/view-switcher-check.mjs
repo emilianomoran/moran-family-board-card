@@ -14,6 +14,7 @@ export async function runViewSwitcherChecks(card, nextRender) {
     const track = root.querySelector(".switch");
     const trackRect = track.getBoundingClientRect();
     const trackStyle = getComputedStyle(track);
+    assert(trackRect.height<=40, 'View capsule exceeds the requested 40px cap.');
     const buttons = [...track.querySelectorAll("button")];
     assert(
       parseFloat(trackStyle.borderRadius) >= trackRect.height / 2,
@@ -23,7 +24,7 @@ export async function runViewSwitcherChecks(card, nextRender) {
     for (const button of buttons) {
       const rect = button.getBoundingClientRect();
       const style = getComputedStyle(button);
-      assert(rect.width >= 48 && rect.height >= 48, "View mode touch target is too small.");
+      assert(rect.width >= 48 && rect.height >= 34 && rect.height <= 40, "View mode target is outside compact dimensions.");
       assert(Math.abs(rect.top - buttons[0].getBoundingClientRect().top) < 1, "View tabs wrapped.");
       assert(
         rect.top > trackRect.top && rect.bottom < trackRect.bottom,
@@ -39,19 +40,19 @@ export async function runViewSwitcherChecks(card, nextRender) {
   };
 
   try {
-    // Real dashboards often have longer titles than the baseline fixture. The whole
-    // capsule must wrap onto its own row instead of losing its final English tab.
+    // A long title yields space to the capsule without adding another fixed row.
     for (const title of ["Family Board · Preview", "A long household calendar dashboard title"]) {
       card.setConfig({ ...originalConfig, title });
       await nextRender();
       const { track, buttons } = checkGeometry();
       const outer = track.getBoundingClientRect();
       const header = root.querySelector(".moran-wall-header").getBoundingClientRect();
-      assert(track.scrollWidth <= track.clientWidth + 1, "Long title clips an English view tab.");
+      assert(header.height<=49, 'Long title creates another fixed header row.');
       for (const button of buttons) {
+        button.scrollIntoView({block:'nearest',inline:'nearest'}); await nextRender();
         const rect = button.getBoundingClientRect();
         assert(rect.left >= outer.left && rect.right <= outer.right, "Long title hides a view.");
-        assert(rect.top >= header.top && rect.bottom <= header.bottom, "Wrapped menu escapes header.");
+        assert(rect.top >= header.top && rect.bottom <= header.bottom, "Compact menu escapes header.");
       }
       buttons[4].click();
       await nextRender();

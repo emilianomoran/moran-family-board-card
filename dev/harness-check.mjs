@@ -109,6 +109,10 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[812,844], [865,1048], [390,844], [320,568], [1920,1080]].map(([width,height]) => ({
+    name: "wall", checks: "chrome", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "calendar chrome:",
+  })),
   ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "presentation", chromeHeight: 64, width, height,
     expectedGeometryMarker: "calendar presentation:",

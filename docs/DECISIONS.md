@@ -388,6 +388,37 @@ the compact end. Existing Day `hour_height`/`fit_height` settings are a possible
 point, not an existing interactive zoom control. View coverage, slider range/default,
 reset behavior, and whether to remember density per device remain design choices.
 
+### D20. Reclaim fixed calendar space
+
+**Explicit browser feedback, 2026-09-21.** The header/Status/Today/date stack consumed too
+much vertical space. The user requested a single-row header, tabs no taller than 40px with
+less padding, left-aligned dates with closer/natural number spacing, expandable/collapsible
+Status tiles, and removal of the separate Today/navigation row.
+
+Implementation choices under that direction:
+
+- The header is 48px including padding/border; the capsule is 40px and its pills are 34px.
+  Long titles truncate. Below 700px the decorative title is omitted, with full board identity
+  retained in the accessible section label. The view capsule can scroll, and newly selected
+  views are brought into its viewport. Single-view cards still show their title.
+- A labeled 40px people/disclosure button toggles Status tiles using `aria-expanded` and
+  `aria-controls`. Tiles start collapsed; expansion is retained across view changes, not
+  persisted across remount/reconfiguration. Disabled `show_focus` leaves no toggle or panel.
+  Day's time/people scroll anchor is preserved during disclosure; source errors remain visible
+  outside the collapsed panel. Availability/event selection logic is unchanged.
+- The separate wall Day/Timeline heading row is removed. An 80px date bar combines
+  month/year, compact Today/paging controls and the date cells. The month label retains
+  Day keyboard/swipe navigation; compact arrows retain Day steps or Timeline week steps.
+  Date cells keep their selected/today distinction and snapping, align content left, and use
+  proportional numerals with normal letter spacing. Narrow date strips remain scrollable.
+- Legacy is unchanged. This deliberately supersedes the older wrapping-header, always-open
+  Status row, visible Today heading, centered dates and blanket 48px-control presentation
+  recorded in D06/D07/D12. Other wall targets retain their existing sizes. D19 zoom is still
+  a separate future feature, not implemented by this change.
+
+The r10 regression failed on excessive header height. Candidate r11 and delivery evidence
+are recorded in STATUS.md; screenshots and household data stay out of this repository.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -413,6 +444,7 @@ reset behavior, and whether to remember density per device remain design choices
 | Continue without the remaining test, 2026-09-21 | Timed provider-change test explicitly waived, not passed. Continue concrete usability corrections; D16/D17 record the scope and date-continuity fix. |
 | What else; continue, 2026-09-21 | Bounded Week/Month/Agenda usability pass chosen under continued read-only calendar work; D18 records the behavior and compatibility limits. No new acceptance gate. |
 | Future zoom slider, 2026-09-21 | User requested adjustable row density to zoom out and show more events. Recorded for later implementation; D19 separates the requested feature from suggested interaction details. |
+| Too many fixed rows, 2026-09-21 | Four annotated corrections accepted: single compact header, left/naturally spaced dates, collapsible Status tiles, and removal of the separate Today row. D20 records preserved navigation and superseded presentation choices. |
 
 ## Evidence and date boundaries
 

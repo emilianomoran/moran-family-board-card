@@ -40,6 +40,30 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Compact calendar chrome — local candidate, 2026-09-21
+
+Candidate `0.25.1-moran.11` implements the four annotated corrections in D20: single-row
+48px header/40px view capsule, left-aligned proportional dates, collapsed-by-default Status
+tiles with a header disclosure, and no separate Day/Timeline heading row. Month/year and
+Today/paging move beside the date strip. Calendar data, read-only controls and legacy are
+unchanged. The requested future density slider remains unimplemented (D19).
+
+Regression-first: the new compact-chrome test failed against r10's tall header. Five new
+cases cover both annotated sizes (812×844 and 865×1048), 390×844, 320×568 and 1920×1080.
+They assert compact geometry, hidden/expanded Status content, accessible disclosure state,
+scroll/focus retention, left/proportional dates, Today/paging, all-view continuity, disabled
+Status config, and legacy isolation. Existing tests now check the deliberately changed
+compact target sizes and date-bar selectors without removing navigation/recovery coverage.
+Run `HARNESS_ONLY=chrome npm run test:harness` for the focused cases.
+
+Local visible review at the annotated 812×844 CSS size measured 48px header, 40px capsule,
+and roughly 129px from shell top to the calendar board. Keyboard Space expands and collapses
+Status tiles, retaining focus. The user's existing browser zoom was preserved. Browser
+plugin not available; repository Chromium/CDP tests and Codex in-app Playwright controls
+provide the rendered checks without new dependencies. Formatting, types, build, whitespace,
+151 unit tests and all 50 compiled-card browser scenarios pass. Deployment remains pending
+at this source checkpoint.
+
 ### Week/Month/Agenda usability deployed, 2026-09-21
 
 Version `0.25.1-moran.10` implements D18: dated, readable Week columns with pinned
@@ -489,6 +513,7 @@ baseline milestone described above; preserve these behaviors during later presen
 | Actual provider propagation | Source parity verified; timing test waived by user 2026-09-21 | 166 source occurrences / 175 intended owner copies match; changed real content agrees in both paths. Timing remains unmeasured, not a completion blocker. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Calendar density zoom slider | User-requested future feature, 2026-09-21; not implemented | Slider adjusts row density: zoom out for more events/time on screen, zoom in for detail. Recommended: preserve the visible time/date and normal-size controls. View coverage, range/default and saved preference behavior remain open; see D19. |
+| Reclaim fixed calendar space | Implemented locally, 2026-09-21; final verification/deployment pending | Single 48px header, 40px capsule, Status disclosure, left/proportional dates, and date-bar navigation replace redundant fixed rows. See D20. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |
 

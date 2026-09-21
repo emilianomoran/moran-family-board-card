@@ -63,7 +63,7 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Compact mode** – one switch (`compact`) for smaller fonts and tighter spacing instead of adjusting three sliders.
 - **People hidden on start** – `hidden: true` per person; the column starts collapsed and a click on the header brings it back.
 
-> Fork status: **v0.25.1-moran.10 – daily-use calendar preview, based on upstream v0.25.**
+> Fork status: **v0.25.1-moran.11 – daily-use calendar preview, based on upstream v0.25.**
 > The wall layout and read-only calendar integration are installed in a private Home Assistant
 > pilot. This is a development checkpoint, not a published HACS release. The card reads calendars
 > through Home Assistant; it does not connect directly to Calendar Bridge.
@@ -78,14 +78,19 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   and Agenda. Month navigation carries the preferred day into the displayed month,
   clamped to a valid visible date; clicking a date explicitly takes precedence.
   Person filters stay intact. Legacy Month navigation remains independent.
-- Wall Day arrows move by one visible day. Swipe/drag the date heading, or focus it and
+- Wall Day arrows move by one visible day. Swipe/drag the month label beside the dates, or focus it and
   press Left/Right, to page between dates. The event grid still scrolls between people.
   Date changes preserve the visible time and horizontal person position (clamped when
   trimmed hours cannot show the same time); Today explicitly recenters on now.
   Week/Timeline and legacy Day retain week-sized arrows. Date-strip scrolling alone
   does not select a date. See [current delivery state](docs/STATUS.md).
-- Long titles wrap the view capsule onto a second header row when needed instead of
-  squeezing the final tab outside the visible control.
+- The wall header stays one 48px row with a maximum 40px view capsule. Long titles truncate;
+  narrow layouts omit the decorative title and let the capsule scroll horizontally if needed.
+  The full board name remains accessible. Status tiles (`show_focus: true`) start collapsed
+  behind the people/disclosure button. Opening them preserves Day's visible time; expansion
+  lasts through view changes but resets on a fresh card/config, without a stored preference.
+- Wall Day/Timeline no longer have a separate heading row: month/year, Today and paging
+  share the date strip. Date cells are left-aligned with proportional, normally spaced numbers.
 - The installed wall pilot includes separate availability/next-event Status tiles, a Today
   action that recenters on now, browser-local view/person preferences, separated date cells,
   and a neutral segmented view switcher. See [verification and remaining work](docs/STATUS.md).
@@ -249,7 +254,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `unmatched` | boolean | `false` | Use the lane as a fallback for events from its calendars that no normal lane claimed |
 | `strip_title_prefix` | boolean | `false` | Remove the matched configured prefix from the displayed event title |
 | `hide_empty_persons` | boolean | `false` | Week view: hide people without events in that week |
-| `show_focus` | boolean | `false` | Status tiles above the views; wall mode separates current availability from the dated next appointment |
+| `show_focus` | boolean | `false` | Enables Status tiles; wall mode places them behind a collapsed-by-default header toggle and separates current availability from the dated next appointment. Legacy remains always visible when enabled. |
 | `read_only` | boolean | `false` | Disable creating, editing, deleting, and dragging events in this card; details and navigation remain available. This is a card behavior setting, not an HA permission boundary. |
 | `drag_drop` | boolean | `true` | Move / resize events in the day view by dragging (writable single events only) |
 | `auto_icons` | boolean | `false` | Prepend an emoji per event based on keywords |

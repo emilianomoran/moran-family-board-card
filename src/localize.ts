@@ -82,6 +82,7 @@ const EN: Dict = {
   status_busy_now: "Busy now",
   status_now: "Now",
   status_next: "Next",
+  status_tiles: "Status tiles",
 };
 
 const DE: Dict = {
@@ -162,6 +163,7 @@ const DE: Dict = {
   status_busy_now: "Jetzt beschäftigt",
   status_now: "Jetzt",
   status_next: "Als Nächstes",
+  status_tiles: "Status-Kacheln",
 };
 
 const TABLE: Record<string, Dict> = { en: EN, de: DE };

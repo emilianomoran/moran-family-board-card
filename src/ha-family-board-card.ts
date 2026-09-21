@@ -271,6 +271,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _fetchGeneration = 0;
   private _pendingFetch?: { key: string; promise: Promise<void> };
   @state() private _browserOnline = navigator.onLine !== false;
+  @state() private _statusExpanded = false;
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -320,6 +321,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       throw new Error("Bitte mindestens eine Person unter 'persons' konfigurieren.");
     }
     this._config = config;
+    this._statusExpanded = false;
     this._daySwipe = undefined;
     this._cancelDayScroll();
     if (config.read_only) {
@@ -666,6 +668,16 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._measureFit();
     this._restoreDayScroll();
     this._maybeScrollToNow();
+    if (this._layout === "wall" && (changed.has("_view") || changed.has("_config"))) {
+      const track = this.renderRoot.querySelector<HTMLElement>(".switch");
+      const selected = track?.querySelector<HTMLElement>('[aria-selected="true"]');
+      if (track && selected) {
+        const outer = track.getBoundingClientRect();
+        const pill = selected.getBoundingClientRect();
+        if (pill.left < outer.left) track.scrollLeft -= outer.left - pill.left;
+        else if (pill.right > outer.right) track.scrollLeft += pill.right - outer.right;
+      }
+    }
     if (
       this._layout === "wall" &&
       (this._view === "day" || this._view === "timeline") &&
@@ -680,7 +692,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   /** Keep a newly selected date in view without resetting an intentional strip scroll. */
   private _keepSelectedDayTabVisible(): void {
-    const strip = this.renderRoot?.querySelector(".moran-wall-shell > .tabs") as HTMLElement | null;
+    const strip = this.renderRoot?.querySelector(
+      ".moran-wall-shell .wall-datebar > .tabs",
+    ) as HTMLElement | null;
     const selected = strip?.querySelector(
       "[role='tab'][aria-selected='true']",
     ) as HTMLElement | null;
@@ -1590,7 +1604,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._daySwipe = undefined;
       return;
     }
-    if (this._layout !== "wall" || ev.button !== 0) return;
+    if (this._layout !== "wall" || this._view !== "day" || ev.button !== 0) return;
     if ((ev.target as Element).closest("button")) return;
     this._daySwipe = {
       pointerId: ev.pointerId,
@@ -1615,7 +1629,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
 
   private _onDayHeadingKey = (ev: KeyboardEvent): void => {
-    if (this._layout !== "wall" || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    if (this._layout !== "wall" || this._view !== "day" || ev.altKey || ev.ctrlKey || ev.metaKey)
+      return;
     if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
     ev.preventDefault();
     ev.stopPropagation();
@@ -1651,7 +1666,41 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             title: this._config.title ?? this._t("wall_board_title"),
             calendarIdentity: this._t("wall_calendar_identity"),
             viewNavigation,
-            focus,
+            statusToggle: this._config.show_focus
+              ? html`<button
+                  class="wall-status-toggle"
+                  title=${this._t("status_tiles")}
+                  aria-label=${this._t("status_tiles")}
+                  aria-expanded=${this._statusExpanded}
+                  aria-controls="wall-status-panel"
+                  @click=${() => {
+                    if (this._view === "day")
+                      this._rememberDayScroll(this._dateForDay(this._shownDay()));
+                    this._statusExpanded = !this._statusExpanded;
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    aria-hidden="true"
+                  >
+                    <circle cx="8" cy="7" r="3"></circle>
+                    <path d="M2 20v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6"></path>
+                    <path d=${this._statusExpanded ? "M17 17l3-3 3 3" : "M17 14l3 3 3-3"}></path>
+                  </svg>
+                </button>`
+              : nothing,
+            focus: this._config.show_focus
+              ? html`<div
+                  id="wall-status-panel"
+                  class="wall-status-panel"
+                  ?hidden=${!this._statusExpanded}
+                >
+                  ${focus}
+                </div>`
+              : nothing,
             content,
           })
         : html`
@@ -1855,7 +1904,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const short = weekdayNames(this.hass, "short", this._firstDayJs);
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
     const wall = this._layout === "wall";
-    return html`
+    const tabs = html`
       <div class="tabs" role="tablist">
         ${this._visibleDays.map((d) => {
           const date = this._dateForDay(d);
@@ -1880,6 +1929,34 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         })}
       </div>
     `;
+    if (!wall) return tabs;
+    const selected = this._dateForDay(this._shownDay());
+    const month = new Intl.DateTimeFormat(this.hass.locale?.language || "en", {
+      month: "short",
+      year: "numeric",
+    }).format(selected);
+    const label = `${this._relativeDay(selected) ?? full[this._shownDay()]}: ${formatShortDate(this.hass, selected)}`;
+    return html`<div class="wall-datebar">
+      <div class="wall-date-tools">
+        <span
+          class="dayname"
+          tabindex=${this._view === "day" ? "0" : nothing}
+          role="group"
+          aria-label=${label}
+          aria-live="polite"
+          aria-atomic="true"
+          title=${this._t("day_navigation_hint")}
+          @keydown=${this._onDayHeadingKey}
+          @pointerdown=${this._onDaySwipeStart}
+          @pointerup=${this._onDaySwipeEnd}
+          @pointercancel=${this._onDaySwipeCancel}
+          @lostpointercapture=${this._onDaySwipeCancel}
+          >${month}</span
+        >
+        ${this._weekNav(true)}
+      </div>
+      ${tabs}
+    </div>`;
   }
 
   private _renderDay() {
@@ -1902,32 +1979,17 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const hiddenLanes = this._persons.filter((_, i) => this._isOff(i)).length;
 
     return html`
-      <div
-        class="dayhead"
-        @pointerdown=${this._onDaySwipeStart}
-        @pointerup=${this._onDaySwipeEnd}
-        @pointercancel=${this._onDaySwipeCancel}
-        @lostpointercapture=${this._onDaySwipeCancel}
-      >
-        <span
-          class="dayname"
-          tabindex=${this._layout === "wall" ? "0" : nothing}
-          role=${this._layout === "wall" ? "group" : nothing}
-          aria-live=${this._layout === "wall" ? "polite" : nothing}
-          aria-atomic=${this._layout === "wall" ? "true" : nothing}
-          title=${this._layout === "wall" ? this._t("day_navigation_hint") : nothing}
-          aria-description=${this._layout === "wall" ? this._t("day_navigation_hint") : nothing}
-          @keydown=${this._onDayHeadingKey}
-        >
-          ${this._layout === "wall"
-            ? `${dayLabel}: ${formatShortDate(this.hass, selectedDate)}`
-            : dayLabel}
-          ${this._weatherChip(selectedDate)}${this._loading && this._raw.length === 0
-            ? html`<span class="spinner"></span>`
-            : nothing}
-        </span>
-        ${this._weekNav(this._layout === "wall")}
-      </div>
+      ${this._layout === "wall"
+        ? nothing
+        : html`<div class="dayhead">
+            <span class="dayname">
+              ${dayLabel}
+              ${this._weatherChip(selectedDate)}${this._loading && this._raw.length === 0
+                ? html`<span class="spinner"></span>`
+                : nothing}
+            </span>
+            ${this._weekNav()}
+          </div>`}
       ${this._renderDayTabs()}
       <div
         class="board ${this._layout === "wall" ? "wall-pan-board" : ""}"
@@ -2230,15 +2292,17 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const LANE = 30;
 
     return html`
-      <div class="dayhead">
-        <span class="dayname">
-          ${this._relativeDay(this._dateForDay(day)) ?? full[day]}
-          ${this._weatherChip(this._dateForDay(day))}${this._loading && this._raw.length === 0
-            ? html`<span class="spinner"></span>`
-            : nothing}
-        </span>
-        ${this._weekNav()}
-      </div>
+      ${this._layout === "wall"
+        ? nothing
+        : html`<div class="dayhead">
+            <span class="dayname">
+              ${this._relativeDay(this._dateForDay(day)) ?? full[day]}
+              ${this._weatherChip(this._dateForDay(day))}${this._loading && this._raw.length === 0
+                ? html`<span class="spinner"></span>`
+                : nothing}
+            </span>
+            ${this._weekNav()}
+          </div>`}
       ${this._renderDayTabs()}
       <div class="tlwrap">
         <div class="tlgrid" style="min-width:calc(var(--fb-tl-label, 150px) + ${width}px)">
@@ -4649,7 +4713,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.10 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.11 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );
