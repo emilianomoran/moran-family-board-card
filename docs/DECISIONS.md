@@ -265,6 +265,13 @@ phone recovery are different claims; [the validation record](calendar-sync-valid
 keeps their evidence and remaining checks separate. No new calendar database or direct
 browser-to-Bridge adapter is justified by these findings.
 
+**Read-only follow-up, 2026-09-20:** two fresh snapshots on HA 2026.9.3 and r8 again retain
+all 166 source occurrences and 175 intended person copies. One calendar's compared content
+has changed since September 17 in both paths, and the two paths agree now. This adds real
+changed-content evidence, but not a known save timestamp or cancellation-specific proof.
+The next milestone remains dependable daily use; physical-phone recovery and targeted
+edit/cancellation timing are pending. No new design or household-module scope was added.
+
 ### D14. Open details must not silently become stale
 
 **Implementation correction under the daily-use goal, 2026-09-20.** A synthetic source

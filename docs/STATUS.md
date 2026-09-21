@@ -135,6 +135,17 @@ or a misleading Free now state. Those checks require the real device/ordinary so
 activity; desktop emulation and snapshot parity do not establish them. Larger presentation
 work and optional household modules remain deferred, not silently included in this milestone.
 
+### Source and routing follow-up, 2026-09-20
+
+Fresh read-only checks on HA 2026.9.3 and the installed r8 asset matched all **166 source
+occurrences**, retaining **175 intended person copies** with zero rejected/unrouted records.
+The six-week range and source counts match the September 17 audit. One calendar's normalized
+content fingerprint changed since then in both Bridge and HA; the two systems now agree.
+Two snapshots at 19:15 and 19:16 CDT agreed. That is real changed-content evidence, but
+without a targeted before/after occurrence and
+save timestamp it cannot establish edit/cancellation latency. No actual events or settings
+were changed by this diagnostic. See [Calendar sync validation](calendar-sync-validation.md).
+
 ### Source and routing audit, 2026-09-17
 
 Fresh six-week reads matched **166 of 166 source occurrences** between Calendar Bridge
@@ -372,7 +383,7 @@ physical iPhone/Safari verification remains open.
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. Physical suspension remains unverified. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
-| Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
+| Actual provider propagation | Snapshot parity/routing reverified 2026-09-20; latency pending | 166 source occurrences / 175 intended owner copies match; one source's changed content agrees in both paths since September 17. Targeted edit/cancellation timing is still unmeasured; no test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |

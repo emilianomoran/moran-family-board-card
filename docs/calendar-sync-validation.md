@@ -1,6 +1,6 @@
 # Calendar sync validation
 
-Status: read-only source comparison and routing audit completed 2026-09-17.
+Status: read-only source comparison and routing audit reverified 2026-09-20.
 Real edit-to-screen latency and physical iPhone sleep/wake remain unmeasured.
 
 ## What the card reads
@@ -26,7 +26,31 @@ Do not promise either instant updates or a fixed 15-minute delay. Provider publi
 device synchronization, browser suspension, network time, and the card poll all matter.
 The 20-second card read timeout bounds a stalled request, not end-to-end synchronization.
 
-## 2026-09-17 read-only results
+## 2026-09-20 read-only follow-up
+
+At 19:15 CDT, fresh reads on HA 2026.9.3 and the installed `moran.8` build again matched
+**166 of 166 occurrences** over September 14–October 25 (October 26 exclusive).
+The actual current parser/routing/deduplication retained **175 intended person copies**,
+with zero rejected or unrouted records. Both configured CalDAV sources were loaded and
+available, both systems used America/Chicago, and the served r8 checksum matched the
+deployment record. Read-only mode, the 60-second interval, and hours 0–24 were unchanged.
+
+Counts remain 111 + 55, with 162 identity matches and four unique exact-content matches
+for detached-ID differences. Compared title/time/all-day/description/location fields agree.
+One calendar's normalized content fingerprint changed since September 17 in both paths,
+and the two paths now agree; the other fingerprint is unchanged. This is evidence that
+real source content changed and is reflected in both systems, not just repeated fixture
+data. Aggregate hashes do not identify the edit, distinguish cancellation from replacement,
+or establish its save time, so **edit/cancellation latency remains unmeasured**.
+
+Two snapshots at 19:15 and 19:16 CDT agreed. HA read durations were 1.85–2.99 seconds,
+not synchronization latency. The diagnostic
+used GET/read operations only; no actual appointments or deployment settings changed.
+Private fingerprints and timing stay in the HA workspace. The source-code explanation
+above remains pinned to the previously inspected HA 2026.9.2 implementation; this follow-up
+verifies live API behavior on 2026.9.3, not a new line-by-line HA source audit.
+
+## 2026-09-17 read-only results (historical)
 
 The audit read both configured calendars for September 14 through October 25 inclusive
 (October 26 exclusive), with explicit America/Chicago offsets. Both integrations were
