@@ -3,10 +3,18 @@
 Last recorded: 2026-09-21. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.13`, the verified full-height Timeline correction.
-The installed HA pilot remains r12 as recorded below; r13 is not deployed or released.
-Source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed to personal origin's
-`feature/moran-foundation` on 2026-09-21 at 10:53 CDT and verified by matching remote HEAD.
+Latest development build: `0.25.1-moran.14`, adding initial/Today centering to wall Timeline.
+The installed HA pilot remains r12 as recorded below; r13/r14 are not deployed or released.
+Source, tests, built bundle and docs belong to the r14 milestone on
+`feature/moran-foundation`; Git/remote history is the delivery source of truth.
+Previous source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed
+on 2026-09-21 at 10:53 CDT with a matching remote HEAD.
+
+Known CI issue (ENG-05): two DST tests fail with the UTC runner; typecheck and formatting
+pass. The existing tests change timezone inside a worker, too late to affect its date
+runtime. All 151 pass when launched with `TZ=America/Chicago`; `TZ=UTC npm test`
+reproduces the two failures. This was diagnosed separately and remains unfixed. Do not
+describe this branch as CI-green or release-ready based on the local Chicago run.
 
 ## What is working
 
@@ -52,6 +60,35 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Timeline opens near now, local verification, 2026-09-21
+
+D25 extends the Day centering lifecycle to wall Timeline. Initial/configured/persisted
+Timeline entry waits for loaded data and measurable layout, then reveals the current time
+after the fixed name column. The Today control resets both date and horizontal position,
+including with `scroll_to_now: false` or `show_now_line: false`. Refresh, clock ticks,
+Status expansion, filters and resizing preserve manual time browsing. Legacy Timeline
+retains its prior behavior. No calendar writes, runtime timezone change or density slider.
+
+The new compiled-browser regression failed against the previous r13 bundle with
+“Timeline did not scroll near now on initial entry.” Eight focused cases pass: normal
+motion at 865×1048, 1920×1080, 390×844, 320×568, 844×390 and a 400px embedded card;
+reduced motion at 1920×1080 and 390×1080. They also cover delayed/trimmed reads,
+obsolete date/view requests, disabled decoration/auto-scroll, configured hour/label width,
+range clamping, hidden-panel reveal, and the existing full-height/overlap regressions.
+
+Flow under test: fixed synthetic preview → enter/reload Timeline → now is visible → pan
+away → activate Today → now returns without losing the fixed person labels. Manual
+in-app review passed at 1707×960 and 391×844 CSS sizes. At phone width, now was at x≈231
+after a 150px name column; native scrolling moved the position and Today restored it.
+URL/title, meaningful content, no overlay, clean warning/error logs, screenshots and
+keyboard/pointer interaction passed. Normal viewport was restored; annotation tab untouched.
+Browser plugin unavailable: existing Chromium/CDP tests and in-app Playwright/CUA controls
+supplied evidence without adding dependencies. The harness's frozen 3:32 PM is intentional.
+
+Format/type/build/whitespace checks, 151 Chicago-timezone unit tests and all 58 compiled
+browser scenarios pass, including existing Day navigation, recovery and legacy checks.
+The separate UTC/CI failure above remains open. No HA deployment or physical-device claim.
 
 ### Full-height Timeline, verified locally, 2026-09-21
 

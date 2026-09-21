@@ -304,7 +304,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `max_columns` | number | `3` | Max. side-by-side columns per person/day; with more overlaps a “+N” chip appears (1–8) |
 | `tentative_patterns` | list | – | Mark events with a matching title pattern as tentative (dashed / translucent) |
 | `first_day` | string | `monday` | Week starts on `monday` or `sunday` |
-| `scroll_to_now` | boolean | `true` | Automatically scroll Day to now after loading. Wall Day's explicit Today action still recenters when this is `false`; ordinary clock ticks and refreshes do not take over manual scrolling. |
+| `scroll_to_now` | boolean | `true` | Automatically scroll today's Day or wall Timeline to now after loading. The wall Today action still recenters when this is `false` or the now line is hidden. Ordinary ticks, refreshes and Timeline resizing do not take over manual scrolling. Legacy Timeline is unchanged. |
 | `refresh_interval` | number | `300` | Auto refresh of the events in seconds (0 = off); additionally when the tablet wakes up |
 
 Every `calendar.*` entity works – no matter whether `local_calendar` (local, no cloud), Google or CalDAV. Home Assistant delivers them all in the same shape.

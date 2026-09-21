@@ -57,9 +57,16 @@ Markdown checker. The compiled-browser runner starts its own temporary loopback 
 and headless Chrome, so it does not require the interactive server on 4173. No Playwright
 dependency is currently installed; do not add one just to run the existing suite.
 
-Known passing baseline at r13: **151 unit tests, 56 browser scenarios**. Count changes are
+Known local baseline at r14: **151 unit tests, 58 browser scenarios**. Count changes are
 expected as tests are added; preserve behaviors, not a frozen number. CI currently does
 not run the compiled-browser suite. Never substitute a successful build for rendered QA.
+
+Known CI issue, diagnosed 2026-09-21 (ENG-05): two DST fixture tests assume Chicago while
+CI launches Vitest in UTC. Their `beforeAll` environment assignment is too late for worker
+timezone initialization. For the existing local baseline, launch with
+`TZ=America/Chicago npm test`. `TZ=UTC npm test` still reproduces the two failures; do not
+claim CI is green based on the Chicago run. Repair the runner before a release candidate;
+do not weaken the DST assertions or change the app's runtime timezone.
 
 ### Focused browser suites
 
@@ -69,7 +76,7 @@ assuming new filter names. Useful current filters:
 | Filter | Primary coverage |
 |---|---|
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
-| `timeline` | Remaining height, growing rows/bars, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
+| `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |
 | `presentation` | Week/Month/Agenda readability, filters, counts, drilldown and fallbacks |
 | `views` | Date continuity across all views and month boundaries |

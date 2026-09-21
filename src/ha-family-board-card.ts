@@ -482,7 +482,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (this.hass && this._config) void this._maybeFetch();
     // recompute the fit-to-height scaling whenever the card is resized
     if (typeof ResizeObserver !== "undefined") {
-      this._ro = new ResizeObserver(() => requestAnimationFrame(() => this._measureFit()));
+      this._ro = new ResizeObserver(() =>
+        requestAnimationFrame(() => {
+          this._measureFit();
+          // A hidden/zero-width panel may not have been measurable on first render.
+          this._maybeScrollToNow();
+        }),
+      );
       this._ro.observe(this);
     }
   }
@@ -765,39 +771,69 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
   }
 
-  /** Scroll the day board so the current time is in view (once per view). */
+  private get _timelineHourWidth(): number {
+    return Math.min(240, Math.max(48, Number(this._config.hour_width) || 96));
+  }
+
+  /** Reveal now on entry to Day / wall Timeline, or on an explicit Today action. */
   private _maybeScrollToNow(): void {
-    if (this._dayScrollAnchor) return;
-    const day = this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0];
-    if (this._view !== "day" || !this._isRealToday(day)) {
+    if (!this.isConnected || !this._config || this._dayScrollAnchor) return;
+    const day = this._shownDay();
+    const view = this._view;
+    const timeline = this._layout === "wall" && view === "timeline";
+    if ((view !== "day" && !timeline) || !this._isRealToday(day)) {
       this._scrollToNowRequested = false;
       return;
     }
     if (this._loading) return;
     if (!this._scrollToNowRequested && this._config?.scroll_to_now === false) return;
-    const key = `${this._now().toDateString()}|${day}|${this._pxPerMin}`;
+    const scale = timeline ? this._timelineHourWidth / 60 : this._pxPerMin;
+    const key = `${timeline ? "timeline|" : ""}${this._now().toDateString()}|${day}|${scale}`;
     if (!this._scrollToNowRequested && key === this._scrolledKey) return;
-    const board = this.renderRoot?.querySelector(".board") as HTMLElement | null;
-    const body = board?.querySelector(".body") as HTMLElement | null;
-    if (!board || !body || !board.clientHeight) return;
-    this._scrollToNowRequested = false;
+    const selector = timeline ? ".tlwrap" : ".board";
+    const board = this.renderRoot?.querySelector<HTMLElement>(selector);
+    const body = board?.querySelector<HTMLElement>(timeline ? ".tlhours" : ".body");
+    if (!board || !body || !board.clientHeight || !board.clientWidth) return;
     const config = this._config;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
     this._scrollToNowFrame = requestAnimationFrame(() => {
       this._scrollToNowFrame = undefined;
       if (
         !this.isConnected ||
-        this._view !== "day" ||
+        this._view !== view ||
         this._config !== config ||
-        (this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0]) !== day ||
+        this._shownDay() !== day ||
         !this._isRealToday(day) ||
-        board !== this.renderRoot.querySelector(".board")
+        this._loading ||
+        !board.clientWidth ||
+        !board.clientHeight ||
+        board !== this.renderRoot.querySelector(selector)
       )
         return;
       this._scrolledKey = key;
+      this._scrollToNowRequested = false;
       const { startMin, endMin } = this._dayWindow(day);
       const now = this._now();
       const minutes = Math.max(startMin, Math.min(endMin, now.getHours() * 60 + now.getMinutes()));
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth";
+      if (timeline) {
+        const labelWidth = board.querySelector<HTMLElement>(".tlcorner")?.offsetWidth ?? 0;
+        const timeLeft =
+          body.getBoundingClientRect().left - board.getBoundingClientRect().left + board.scrollLeft;
+        // Keep a little history visible and most of the usable time area ahead of now.
+        const target =
+          timeLeft +
+          (minutes - startMin) * scale -
+          labelWidth -
+          (board.clientWidth - labelWidth) / 3;
+        board.scrollTo({
+          left: Math.max(0, Math.min(board.scrollWidth - board.clientWidth, target)),
+          behavior,
+        });
+        return;
+      }
       const sticky = [...board.querySelectorAll<HTMLElement>(".header-row, .allday-row")].reduce(
         (height, row) => height + row.offsetHeight,
         0,
@@ -811,7 +847,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         (board.clientHeight - sticky) / 3;
       board.scrollTo({
         top: Math.max(0, Math.min(board.scrollHeight - board.clientHeight, target)),
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        behavior,
       });
     });
   }
@@ -1488,7 +1524,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._cancelDayScroll();
     this._weekOffset = 0;
     this._day = this._todayIndex();
-    if (this._layout === "wall" && this._view === "day") {
+    if (this._layout === "wall" && (this._view === "day" || this._view === "timeline")) {
       this._scrollToNowRequested = true;
       this.requestUpdate();
     }
@@ -2279,7 +2315,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _renderTimeline() {
     const day = this._visibleDays.includes(this._day) ? this._day : this._visibleDays[0];
     const { startMin, endMin } = this._dayWindow(day);
-    const hourPx = Math.min(240, Math.max(48, Number(this._config.hour_width) || 96));
+    const hourPx = this._timelineHourWidth;
     const px = hourPx / 60;
     const width = (endMin - startMin) * px;
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
@@ -4723,7 +4759,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.13 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.14 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

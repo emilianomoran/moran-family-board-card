@@ -53,6 +53,8 @@ This replaces the early screenshot/concept, not the entire product design:
 - Timeline fills the remaining wall panel with growing person rows and event bars.
   Overlapping lanes keep 48px event targets; short panels scroll instead of clipping.
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
+  Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
+  preserve manual time browsing, and other dates do not jump to today's clock (D25).
 
 See D18–D21 for exact scope. Older blanket 48px target rules do not override the explicitly
 requested compact header controls. Other targets retain their tested sizes.

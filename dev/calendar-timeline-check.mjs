@@ -1,3 +1,5 @@
+import { runTimelineScrollChecks } from "./calendar-timeline-scroll-check.mjs";
+
 // Synthetic geometry and interaction checks for the full-height wall Timeline.
 export async function runCalendarTimelineChecks(card, hass, nextRender) {
   const assert = (ok, message) => {
@@ -178,6 +180,7 @@ export async function runCalendarTimelineChecks(card, hass, nextRender) {
     "Time header does not stick during vertical scroll.",
   );
   dense = false;
+  await runTimelineScrollChecks(card, config, settle, nextRender);
   card.setConfig({ ...config, layout: "legacy" });
   await settle();
   assert(
@@ -192,6 +195,6 @@ export async function runCalendarTimelineChecks(card, hass, nextRender) {
   card.hass = hass;
   await settle();
   return [
-    `calendar timeline: ${innerWidth}px remaining height, responsive rows, scroll, status, filters, dense overlaps, read-only details, legacy`,
+    `calendar timeline: ${innerWidth}px remaining height, responsive rows, scroll-to-now, Today, retained manual scroll, status, filters, dense overlaps, read-only details, legacy`,
   ];
 }

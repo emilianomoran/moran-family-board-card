@@ -40,6 +40,7 @@ These are agent recommendations or unresolved questions, not already approved fe
 | ENG-02 | Medium; coverage gap | Add visual-editor configuration round-trip tests before significant editor work. Preserve unknown fields and shared config normalization; inspect current coverage first. |
 | ENG-03 | Medium; measured work only | Reduce controller coupling or redundant processing when a feature/performance measurement warrants it. Extract focused seams, not a React rewrite or a speculative new state framework. |
 | ENG-04 | Before public release; proposed | Decide whether to run the existing compiled-browser suite in CI. CI currently covers format/types/unit/build; the harness is a local Chromium/CDP runner requiring a compatible Node runtime and Chrome. |
+| ENG-05 | High; diagnosed 2026-09-21, repair not yet implemented | Fix the test runner's UTC/Chicago mismatch. Two DST tests fail under `TZ=UTC npm test`; all 151 pass when America/Chicago is supplied before Vitest starts. In-worker `beforeAll` timezone mutation is ineffective. Set test timezone before worker creation, retain real DST assertions, verify a UTC-host run and hosted CI. This is test infrastructure, not a runtime timezone change. |
 | REL-01 | Separate authorization required | Public GitHub/HACS release, clean installation/update and cache/rollback checks. Milestone pushes are authorized; tags, releases and merges to main are not. |
 
 ## Deferred product extensions
@@ -61,6 +62,8 @@ are implemented. [STATUS](STATUS.md) contains the tests and deployment checkpoin
 
 Timeline's remaining-height correction (D24) is implemented and verified in r13;
 see STATUS for verification and delivery. It does not implement CAL-01's density slider.
+Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
+is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
 
 - Physical iPhone HA-app lock/reopen refresh: user-confirmed pass on 2026-09-21.
 - Provider edit/cancellation timing: waived on 2026-09-21. Unknown latency is not a blocker.

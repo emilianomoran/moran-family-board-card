@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "10:53 CDT"
+time: "11:05 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -16,11 +16,15 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.13`, fixing Timeline's unused lower panel.
-  Timeline rows/bars now fill the available height with safe overlap minima and scrolling.
-  See D24 and STATUS for verification/delivery. The density slider is still not implemented.
-  Source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed to personal origin's
-  `feature/moran-foundation` on 2026-09-21 at 10:53 CDT; remote HEAD matched.
+- Latest development build: `0.25.1-moran.14`, opening wall Timeline near now and making
+  Today recenter it. Manual browsing survives refresh, ticks, filters and resizing (D25).
+  r13's full-height rows/bars remain (D24); the density slider is not implemented.
+  Source, built bundle, tests and docs form the r14 milestone on the working branch.
+  Check Git/remote history and STATUS for delivery; no release or main merge is implied.
+- Known CI failure, diagnosed 2026-09-21: two DST assertions assume Chicago while CI
+  launches tests in UTC. `TZ=America/Chicago npm test` passes all 151; UTC still fails two.
+  In-worker timezone mutation is ineffective. ENG-05 owns the test-runner repair;
+  it is not implemented by this Timeline task. Do not claim hosted CI is green.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
   The Timeline fix targets the laptop prototype; it has not been deployed to HA.
@@ -55,8 +59,10 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## Evidence and remaining limits
 
-The r13 checks passed: 151 unit tests and 56 compiled-browser scenarios, plus local
-desktop/phone-width review. Actual HA review remains at r12. The user confirmed physical
+The r14 local checks pass: 151 unit tests launched in America/Chicago and all 58 compiled
+browser scenarios (including eight focused Timeline cases), plus desktop/phone-width
+review. The UTC/hosted-CI exception above remains open. Actual HA review remains at r12.
+The user confirmed physical
 iPhone HA-app lock/reopen refresh.
 They waived the timed provider-edit/cancellation test. Do not reopen that as a gate or
 claim measured latency. No real appointment was mutated to test the card.

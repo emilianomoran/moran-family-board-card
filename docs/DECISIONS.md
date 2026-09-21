@@ -480,6 +480,21 @@ shows older chrome; preserve the current compact header and title instead of res
 The user also reconfirmed that work belongs in the existing dedicated calendar repo, not
 a new repo or the HA operations workspace. No new repository is needed.
 
+### D25. Timeline opens near the current time
+
+**Requested 2026-09-21.** The user reported having to pan manually to now each time
+Timeline opens. Extend the existing Day auto-scroll behavior to wall Timeline: after
+today's data and layout are ready, place now roughly one-third into the time area beyond
+the pinned names, clamped to the scrollable range. The wall Today action also recenters
+Timeline, including when automatic scrolling or the decorative now line is disabled.
+
+Automatic centering is once per view entry/configuration, not continuous tracking.
+Clock ticks, refreshes, person filters, Status disclosure and resizing must not take over
+manual browsing. Other dates do not auto-center to today's clock. Cancel obsolete queued
+work after a date/view/config change; defer hidden-panel and slow/trimmed-load geometry.
+Respect reduced motion and configured hour width. Legacy Timeline stays unchanged.
+This is the local prototype correction, not an HA deployment or the future density slider.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -510,6 +525,8 @@ a new repo or the HA operations workspace. No new repository is needed.
 | Commit and push at milestones, 2026-09-21 | Starting at the next verified milestone, commit and push the current working branch without another routine gate; releases and main-branch merges remain separate. See D22. |
 | Self-contained repo context, 2026-09-21 | Root handoff, portable agent instructions, product brief, prioritized backlog, code map, setup/testing, sanitized operations and research index added. No prior chat or private HA access required for local feature work. See D23. |
 | Timeline uses only a small container, 2026-09-21 | Full remaining height and expanding rows requested; overlap minima, scrolling, Status disclosure, read-only details and legacy compatibility preserved. See D24. Continue in the existing calendar repo. |
+| Timeline starts before the current time, 2026-09-21 | Initial/entry scroll and explicit Today recentering extended to wall Timeline; manual browsing preserved. See D25. |
+| GitHub failure emails, 2026-09-21 | Read-only diagnosis found two UTC-sensitive DST fixture assertions, not typecheck errors. Test timezone must be established before Vitest workers start; engineering follow-up ENG-05. No CI repair was included in that diagnostic request. |
 
 ## Evidence and date boundaries
 
