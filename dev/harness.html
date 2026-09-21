@@ -1033,7 +1033,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "views"
+        (query.get("checks") === "presentation"
+          ? import("./calendar-presentation-check.mjs").then(({ runCalendarPresentationChecks }) =>
+              runCalendarPresentationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "views"
           ? import("./calendar-view-context-check.mjs").then(({ runCalendarViewContextChecks }) =>
               runCalendarViewContextChecks(card, hass, nextRender),
             )

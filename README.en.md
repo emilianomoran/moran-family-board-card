@@ -63,13 +63,17 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Compact mode** – one switch (`compact`) for smaller fonts and tighter spacing instead of adjusting three sliders.
 - **People hidden on start** – `hidden: true` per person; the column starts collapsed and a click on the header brings it back.
 
-> Fork status: **v0.25.1-moran.9 – daily-use calendar preview, based on upstream v0.25.**
+> Fork status: **v0.25.1-moran.10 – daily-use calendar preview, based on upstream v0.25.**
 > The wall layout and read-only calendar integration are installed in a private Home Assistant
 > pilot. This is a development checkpoint, not a published HACS release. The card reads calendars
 > through Home Assistant; it does not connect directly to Calendar Bridge.
 
 ### Calendar reliability preview
 
+- Wall Week shows date numbers and readable, wrapping event cards with pinned date/person
+  headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
+  counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
+  or hides weekends. Agenda wraps long titles/locations instead of truncating them.
 - Wall views keep the browsing date when switching between Day, Timeline, Week, Month,
   and Agenda. Month navigation carries the preferred day into the displayed month,
   clamped to a valid visible date; clicking a date explicitly takes precedence.

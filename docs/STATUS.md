@@ -40,6 +40,32 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Week/Month/Agenda usability verified locally, 2026-09-21
+
+Candidate `0.25.1-moran.10` implements D18: dated, readable Week columns with pinned
+headers; compact narrow Month with unique event counts and date-to-Day drilldown;
+shared person filters in Month/Agenda; wrapping Agenda titles/location/countdowns.
+Restricted Month configurations retain direct event cards when Day cannot expose all dates.
+No calendar-source, mutation, storage, or legacy-view behavior was intentionally changed.
+
+Formatting, TypeScript, build, whitespace, all 151 unit tests, and all 45 compiled-card
+browser scenarios pass. The five new presentation cases cover 1920×1080, 390×844, 320×568,
+844×390 landscape, and a 400px card inside a desktop viewport. They check visible filter
+state, long content wrapping, unique shared-event counts, date/appointment drilldown,
+English/German labels, source failures, Month-only/weekday-only fallbacks, read-only details,
+sticky Week headers, and legacy isolation. Reproduce with
+`HARNESS_ONLY=presentation npm run test:harness` or the complete `npm run test:harness`.
+
+Browser plugin not available; the existing Chromium/CDP harness and Codex in-app Playwright
+controls were used without installing dependencies. Local visible review at an effective
+391×844 CSS viewport exercised Month hide/restore → date → Day, Week two-axis scrolling
+with pinned date/person headers, and Agenda → read-only details. Page identity, meaningful
+content, no framework overlay, screenshots, and clean warning/error logs passed. The user's
+annotated prototype tab was left alone once its unsaved comment was discovered; checks used
+a temporary review tab. This is desktop browser QA, not a new physical-device claim.
+
+Deployment to the existing read-only HA preview is pending at this source checkpoint.
+
 ### Cross-view date continuity deployed, 2026-09-21
 
 The regression reproduced a wall Month jump back to the current month after browsing
@@ -441,6 +467,7 @@ baseline milestone described above; preserve these behaviors during later presen
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
 | Keep the date across view changes | Deployed and HA-verified 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
+| Readable Week/Month/Agenda | Implemented and locally verified 2026-09-21; deployment pending | Dates and pinned headers, wrapping cards, compact Month counts/drilldown, and shared filters; legacy/restricted-view safeguards. See D18. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
 | Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |

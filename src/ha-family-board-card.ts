@@ -2374,6 +2374,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private _renderWeek() {
     const short = weekdayNames(this.hass, "short", this._firstDayJs);
+    const wall = this._layout === "wall";
+    const dateLabel = new Intl.DateTimeFormat(this.hass.locale?.language || "en", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     // optionally hide persons without any events in the shown week
     const people = this._persons
       .map((p, i) => ({ p, i }))
@@ -2382,11 +2389,16 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           this._config.hide_empty_persons !== true || this._events.some((e) => e.personIdx === i),
       );
     const shown = people.length > 0 ? people : this._persons.map((p, i) => ({ p, i }));
-    const cols = `70px repeat(${shown.length}, minmax(110px, 1fr))`;
+    const cols = `70px repeat(${shown.length}, minmax(${wall ? 180 : 110}px, 1fr))`;
     return html`
       <div class="weekhead">${this._weekNav()}</div>
       <div class="weekwrap">
-        <div class="weekgrid" style="grid-template-columns:${cols}">
+        <div
+          class="weekgrid"
+          style="grid-template-columns:${cols};${wall
+            ? `min-width:${70 + shown.length * 180}px`
+            : ""}"
+        >
           <div class="corner"></div>
           ${shown.map(
             ({ p, i }) =>
@@ -2412,6 +2424,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                 role="button"
                 tabindex="0"
                 title=${this._t("day")}
+                aria-label=${wall ? dateLabel.format(this._dateForDay(d)) : nothing}
                 @click=${() => this._openDayView(d)}
                 @keydown=${(k: KeyboardEvent) => {
                   if (k.key === "Enter" || k.key === " ") {
@@ -2421,6 +2434,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                 }}
               >
                 <b>${short[d]}</b>
+                ${wall
+                  ? html`<span class="wall-week-date">${this._dateForDay(d).getDate()}</span>`
+                  : nothing}
               </div>
               ${shown.map(({ p, i }) => {
                 const canCreate = this._personCanCreate(p);
@@ -2499,6 +2515,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
     return html`
       <div class="weekhead">${this._weekNav()}</div>
+      ${this._renderPersonFilters()}
       <div class="agenda">
         ${groups.length === 0
           ? html`<div class="agenda-empty">
@@ -2522,6 +2539,27 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             )}
       </div>
     `;
+  }
+
+  /** Month and Agenda have no lane headers, so keep shared person filters reachable here. */
+  private _renderPersonFilters() {
+    if (this._layout !== "wall") return nothing;
+    return html`<div
+      class="wall-person-filters"
+      role="group"
+      aria-label=${this._t("visible_people")}
+    >
+      ${this._persons.map(
+        (p, i) =>
+          html`<button
+            class=${this._isOff(i) ? "off" : ""}
+            aria-pressed=${!this._isOff(i)}
+            @click=${() => this._togglePerson(i)}
+          >
+            ${this._avatar(p, i)}<span>${this._personName(p, i)}</span>
+          </button>`,
+      )}
+    </div>`;
   }
 
   private _agendaRow(e: BoardEvent) {
@@ -2571,6 +2609,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const numDays = weeks * 7;
     const short = weekdayNames(this.hass, "short", this._firstDayJs);
     const locale = this.hass.locale?.language || "en";
+    const wall = this._layout === "wall";
+    const dateLabel = new Intl.DateTimeFormat(locale, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
     const monthName = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
       new Date(year, month, 1),
     );
@@ -2597,7 +2642,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           </button>
         </div>
       </div>
-      <div class="monthwrap">
+      ${this._renderPersonFilters()}
+      <div
+        class="monthwrap ${wall &&
+        this._enabledViews.includes("day") &&
+        this._config.show_weekends !== false
+          ? "compact-month"
+          : ""}"
+      >
         <div class="monthhead">${short.map((s) => html`<div class="mhcell">${s}</div>`)}</div>
         <div class="monthgrid">
           ${Array.from({ length: numDays }, (_, d) => {
@@ -2607,6 +2659,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             const items = (byDay.get(d) || []).sort(
               (a, b) => Number(b.allDay) - Number(a.allDay) || a.startMin - b.startMin,
             );
+            // A shared appointment counts once, even if several visible people own a copy.
+            const count = new Set(items.map((e) => occurrenceKey(e.ref))).size;
+            const countLabel = `${count} ${this._t(count === 1 ? "event_count_one" : "events")}`;
+            const owners = [...new Map(items.map((e) => [e.personIdx, e])).values()];
             return html`
               <div
                 class="mcell ${inMonth ? "" : "out"} ${isToday ? "today" : ""} ${date.getDay() ===
@@ -2614,6 +2670,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                   ? "wkend"
                   : ""}"
                 role="button"
+                aria-label=${wall
+                  ? `${dateLabel.format(date)}${count ? `, ${countLabel}` : ""}`
+                  : nothing}
                 tabindex="0"
                 @click=${() => this._goToDate(date)}
                 @keydown=${(k: KeyboardEvent) => {
@@ -2624,6 +2683,18 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                 }}
               >
                 <div class="mdate ${isToday ? "today" : ""}">${date.getDate()}</div>
+                ${wall
+                  ? html`<div class="wall-month-summary" aria-hidden="true">
+                      <span class="wall-month-dots"
+                        >${owners
+                          .slice(0, 4)
+                          .map(
+                            (e) => html`<i style="background:${this._eventColor(e)}"></i>`,
+                          )}</span
+                      >
+                      ${count ? html`<span class="wall-month-count">${countLabel}</span>` : nothing}
+                    </div>`
+                  : nothing}
                 <div class="mchips">
                   ${items.slice(0, maxChips).map((e) => {
                     const col = this._eventColor(e);
@@ -4578,7 +4649,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.9 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.10 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

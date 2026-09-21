@@ -346,6 +346,30 @@ The regression failed against r8; r9 passes 151 unit tests and 40 compiled-card 
 scenarios. Deployed 2026-09-21 at 01:15 CDT; actual HA desktop/phone-width navigation and
 filter checks passed. Delivery evidence is recorded in STATUS.md.
 
+### D18. Readable Week/Month/Agenda without a full redesign
+
+**Implementation under continued calendar work, 2026-09-21.** After closing the read-only
+baseline, the user asked what else to do and to continue. The agent selected a bounded
+usability pass: identify a date/person on a narrow screen, filter people, and open the
+correct appointment. This is not approval for editing, new modules, or a complete redesign.
+
+- Week shows date numbers and full accessible date labels. Person columns have a 180px
+  minimum; appointment titles wrap above readable times. Date and person headers remain
+  pinned during two-axis scrolling.
+- Narrow Month uses seven date columns, event-color markers, and unique occurrence counts.
+  Shared owner copies count once; counts respect visible-person filters. Tapping a date
+  opens Day. If Day is disabled or hides weekends, retain event chips so every appointment
+  remains reachable. Desktop Month retains its direct event cards.
+- Month and Agenda expose the existing shared person filters as scrollable native buttons,
+  with pressed state and a non-color-only hidden treatment. No new preference store.
+- Agenda wraps title/location and puts countdown below event text. Each view uses the
+  remaining panel height and owns its scrolling. Legacy presentation is unchanged.
+
+The compiled regression reproduced the missing Agenda filters against r9. Candidate r10
+adds desktop, phone, small-phone, landscape, and embedded-panel checks for these behaviors,
+including English/German labels, source failure, read-only details, and restricted-view
+fallbacks. Delivery and final verification are recorded in STATUS.md.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -369,6 +393,7 @@ filter checks passed. Delivery evidence is recorded in STATUS.md.
 | Later request to view the reference screenshot for annotations | Opened in an isolated temporary loopback page; original image unchanged and no private image copied into this repo. |
 | Continue and clarify the next milestone, 2026-09-20 | Dependable read-only desktop/mobile daily use; finish visible controls and discrete date navigation while retaining data integrity/recovery. Full redesign and household modules remain deferred. |
 | Continue without the remaining test, 2026-09-21 | Timed provider-change test explicitly waived, not passed. Continue concrete usability corrections; D16/D17 record the scope and date-continuity fix. |
+| What else; continue, 2026-09-21 | Bounded Week/Month/Agenda usability pass chosen under continued read-only calendar work; D18 records the behavior and compatibility limits. No new acceptance gate. |
 
 ## Evidence and date boundaries
 

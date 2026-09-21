@@ -622,6 +622,249 @@ export const wallShellStyles = css`
     min-height: 48px;
   }
 
+  /* Each view uses the remaining panel height and owns its own scrolling. */
+  .moran-wall-shell > :is(.weekwrap, .monthwrap, .agenda) {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    width: 100%;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+
+  .moran-wall-shell .weekgrid {
+    width: 100%;
+  }
+
+  .moran-wall-shell .wphead {
+    min-width: 0;
+    padding: 12px 8px;
+    font-size: 14px;
+  }
+
+  .moran-wall-shell .wphead > span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell .wday {
+    flex-direction: column;
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .moran-wall-shell .wall-week-date {
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .moran-wall-shell .wcell {
+    min-width: 0;
+    min-height: 88px;
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .moran-wall-shell .wchip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .moran-wall-shell .wchip > span {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .moran-wall-shell .wchip small {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .moran-wall-shell .wall-person-filters {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--moran-wall-divider);
+    scrollbar-width: thin;
+  }
+
+  .moran-wall-shell .wall-person-filters button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid var(--moran-wall-divider);
+    border-radius: 999px;
+    background: var(--moran-wall-surface);
+    color: var(--moran-wall-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .moran-wall-shell .wall-person-filters .avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .moran-wall-shell .wall-person-filters button.off {
+    background: transparent;
+    color: var(--moran-wall-muted);
+    border-style: dashed;
+  }
+
+  .moran-wall-shell .wall-person-filters button.off > span {
+    text-decoration: line-through;
+  }
+
+  .moran-wall-shell .wall-person-filters button.off .avatar {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+
+  .moran-wall-shell .agenda {
+    padding: 0 12px 12px;
+  }
+
+  .moran-wall-shell .agenda-date {
+    padding: 12px 4px 8px;
+    font-size: 16px;
+  }
+
+  .moran-wall-shell .agenda-row {
+    display: grid;
+    grid-template-columns: 86px 4px minmax(0, 1fr);
+    align-items: start;
+    gap: 4px 10px;
+    padding: 12px 4px;
+  }
+
+  .moran-wall-shell .agenda-time {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell .agenda-bar {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .moran-wall-shell .agenda-main {
+    grid-column: 3;
+  }
+
+  .moran-wall-shell .agenda-title,
+  .moran-wall-shell .agenda-meta {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell .agenda-title {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .moran-wall-shell .agenda-meta,
+  .moran-wall-shell .agenda-cd {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .moran-wall-shell .agenda-cd {
+    grid-column: 3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell .monthgrid,
+  .moran-wall-shell .monthhead {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .moran-wall-shell .mhcell {
+    font-size: 13px;
+  }
+
+  .moran-wall-shell .mdate {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .moran-wall-shell .mchip {
+    padding: 6px;
+    font-size: 13px;
+  }
+
+  .moran-wall-shell .wall-month-summary {
+    display: none;
+  }
+
+  @container (max-width: 600px) {
+    .moran-wall-shell .monthwrap.compact-month {
+      padding: 0 4px 8px;
+    }
+
+    .moran-wall-shell .compact-month .monthgrid {
+      grid-auto-rows: minmax(88px, auto);
+    }
+
+    .moran-wall-shell .compact-month .monthgrid .mcell {
+      min-width: 0;
+      min-height: 88px;
+      padding: 4px 1px;
+    }
+
+    .moran-wall-shell .compact-month .mdate {
+      margin-inline: auto;
+    }
+
+    .moran-wall-shell .compact-month .mchips {
+      display: none;
+    }
+
+    .moran-wall-shell .compact-month .wall-month-summary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      margin-top: 3px;
+    }
+
+    .moran-wall-shell .wall-month-dots {
+      display: flex;
+      gap: 3px;
+      height: 5px;
+    }
+
+    .moran-wall-shell .wall-month-dots i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .moran-wall-shell .wall-month-count {
+      color: var(--moran-wall-muted);
+      font-size: 11px;
+      line-height: 1.2;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+  }
+
   @container (max-width: 700px) {
     .moran-wall-shell .moran-wall-header {
       display: grid;
