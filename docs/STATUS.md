@@ -22,19 +22,28 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `01c6c2db315fe059713f29e154d9e0c30882a9f0`, version
-`0.25.1-moran.8`, on `feature/moran-foundation`, deployed 2026-09-20 at 19:12 CDT.
+Installed application checkpoint: `a3e30486944a29694e5548e086f4790b448acdf3`, version
+`0.25.1-moran.9`, on `feature/moran-foundation`, deployed 2026-09-21 at 01:15 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
 HA dashboard and do not update its bundle automatically.
 
+Milestone disposition, 2026-09-21: the dependable read-only desktop/HA-app calendar
+baseline is complete under the accepted scope. Source parity/routing, full-day display,
+responsive lanes and reachable controls, discrete dates, filters/preferences, fresh
+read-only details, and recovery have implementation/browser evidence; physical HA-app
+lock/reopen is user-confirmed. The user waived timing measurement. This is not a claim
+of zero future bugs, a finished visual design, tested final wall hardware, or a public release.
+The next product milestone is consistent presentation/usability across the five views;
+its broader design remains deferred, not silently authorized by closing this baseline.
+
 ## Verification completed
 
-### Cross-view date continuity candidate, 2026-09-21
+### Cross-view date continuity deployed, 2026-09-21
 
 The regression reproduced a wall Month jump back to the current month after browsing
-future dates. The r9 candidate shares date context across all five views, retains person
+future dates. The r9 update shares date context across all five views, retains person
 filters, gives explicit month-cell selection priority, and clamps shorter/weekday-only
 months without escaping the displayed month. Legacy behavior stays unchanged. See D17.
 
@@ -45,7 +54,22 @@ Visible local review followed Week forward three weeks → March → next month 
 page identity, meaningful content, no error overlay, screenshot, and no warning/error passed.
 Browser plugin not available; existing repository Chromium/CDP tests and Codex in-app
 Playwright controls were used. Run `HARNESS_ONLY=views npm run test:harness` for the focused
-regression. Live deployment is pending; installed checkpoint above is still r8.
+regression. The local screenshot used the browser's existing zoom (520×1125 effective CSS
+viewport); the automated phone regression and actual HA review use their measured sizes.
+
+Installed in the same private HA preview at 01:15 CDT. Repeated served checksum verification,
+unchanged dashboard/74 other resources/27 dashboard registrations, retained r8 asset, and
+Core validation passed. No appointment, integration, or dashboard configuration changed;
+no restart, push, or GitHub/HACS release.
+
+Actual HA at 1280×720: Week advanced into October → Month showed October → next month → Day
+showed November 5 and loaded three timed blocks. At 390×844, hide a person → Month November
+→ previous month → Agenda October 5–11 → Timeline/Day October 5 kept that person's collapsed
+48px lane while the other lanes stayed 240px. No document horizontal overflow. Page identity,
+meaningful content, no error overlay, screenshots, and interaction proof passed. No Family
+Board warning/error appeared after reload; existing HA routing, custom-sidebar,
+config-template-card, and Better Thermostat messages remain unrelated. Today/Day, original
+filters, and normal viewport restored. This is browser QA, not new physical-iPhone evidence.
 
 ### Physical iPhone HA-app recovery, user-confirmed 2026-09-21
 
@@ -404,7 +428,8 @@ physical iPhone/Safari verification remains open.
 Acceptance update, 2026-09-21: the user confirmed physical iPhone lock/reopen refresh in
 the HA app and explicitly waived the timed edit/cancellation test, requesting continued
 development. Remove that test as a blocker without claiming a measured latency result.
-Continue practical calendar usability; preserve the read-only boundary and existing views.
+The cross-view date correction is now deployed and verified. This closes the read-only
+baseline milestone described above; preserve these behaviors during later presentation work.
 
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
@@ -415,7 +440,7 @@ Continue practical calendar usability; preserve the read-only boundary and exist
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
-| Keep the date across view changes | r9 candidate verified locally 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
+| Keep the date across view changes | Deployed and HA-verified 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
 | Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |

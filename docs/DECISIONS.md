@@ -316,7 +316,8 @@ and live HA desktop/phone-width smoke checks pass. No source appointments change
 **User verification, 2026-09-21:** in response to the physical lock/reopen check, the user
 reported using the HA app and confirmed that it refreshes. Accept the physical HA-app
 recovery check as passed; do not require a Safari test for the chosen app or mislabel the
-report as agent-operated testing. Real provider edit/cancellation timing remains open.
+report as agent-operated testing. Provider timing was still open at that point; D16 records
+the subsequent waiver.
 
 ### D16. Continue without a timed provider-change test
 
@@ -341,8 +342,9 @@ An explicitly clicked month cell takes precedence. This month resets context to 
 Person filters remain intact; legacy independent Month navigation is unchanged. No new
 date persistence, calendar writes, visual redesign, or provider behavior is introduced.
 
-The regression failed against r8; the candidate passes 151 unit tests and 40 compiled-card
-browser scenarios. Delivery state and live verification are recorded in STATUS.md.
+The regression failed against r8; r9 passes 151 unit tests and 40 compiled-card browser
+scenarios. Deployed 2026-09-21 at 01:15 CDT; actual HA desktop/phone-width navigation and
+filter checks passed. Delivery evidence is recorded in STATUS.md.
 
 ## Discussion sequence and disposition
 
