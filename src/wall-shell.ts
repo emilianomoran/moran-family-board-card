@@ -338,6 +338,9 @@ export const wallShellStyles = css`
   }
 
   .moran-wall-shell .wall-day-weekday {
+    /* Share the number's footprint without centering the group in its cell. */
+    width: 40px;
+    text-align: center;
     color: var(--moran-wall-muted);
     font-size: 13px;
     font-weight: 600;

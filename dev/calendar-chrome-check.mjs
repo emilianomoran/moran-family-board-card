@@ -38,6 +38,23 @@ export async function runCalendarChromeChecks(card, hass, nextRender) {
   const dates=root.querySelector('.wall-datebar .tabs');
   const first=dates.querySelector('button');
   assert(getComputedStyle(first).alignItems==='flex-start', 'Date cells are not left aligned.');
+  const checkDateAlignment = () => {
+    for (const cell of root.querySelectorAll('.wall-datebar .tabs button')) {
+      const weekday = cell.querySelector('.wall-day-weekday');
+      const number = cell.querySelector('.wall-day-number');
+      const textCenter = (element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const rect = range.getBoundingClientRect();
+        return rect.left + rect.width / 2;
+      };
+      assert(Math.abs(textCenter(weekday) - textCenter(number)) < 1,
+        'Weekday and date number do not share a centered text axis.');
+      assert(Math.abs(number.getBoundingClientRect().left - cell.getBoundingClientRect().left - 12) < 1,
+        'Centered date group moved away from the left cell inset.');
+    }
+  };
+  checkDateAlignment();
   const number=getComputedStyle(first.querySelector('.wall-day-number'));
   assert(number.fontVariantNumeric!=='tabular-nums' && ['normal','0px'].includes(number.letterSpacing), 'Date numbers keep artificial spacing.');
   const board=root.querySelector('.board');
@@ -54,13 +71,19 @@ export async function runCalendarChromeChecks(card, hass, nextRender) {
   assert(panel.hidden && board.clientHeight===beforeHeight, 'Collapsing Status tiles did not reclaim space.');
   const nav=async label=>{root.querySelector(`button[aria-label="${label}"]`).click();await settle();};
   await nav('Next day');
+  checkDateAlignment();
   assert(dates.querySelector('[aria-selected="true"]').getAttribute('aria-label')==='Thursday, Feb 19', 'Compact date controls lost day paging.');
   await nav('Show today');
   assert(dates.querySelector('[aria-selected="true"]').getAttribute('aria-current')==='date', 'Compact Today did not select today.');
   for (const name of ['Timeline','Week','Month','Agenda','Day']) {
     [...root.querySelectorAll('.switch button')].find(b=>b.textContent.trim()===name).click(); await settle();
+    if (name==='Day' || name==='Timeline') checkDateAlignment();
     assert(root.querySelector('.wall-status-toggle').getAttribute('aria-expanded')==='false', 'Changing view reopened Status tiles.');
   }
+  card._weekOffset=-2; await settle();
+  assert(root.querySelector('.wall-day-number').textContent.trim()==='2', 'Single-digit date fixture is invalid.');
+  checkDateAlignment();
+  await nav('Show today');
   card.setConfig({...original,layout:'wall',view:'day',show_focus:false}); await settle();
   assert(!root.querySelector('.wall-status-toggle,#wall-status-panel'), 'Disabled Status tiles leave an empty disclosure.');
   card.setConfig({...original,layout:'legacy',view:'day',show_focus:true}); await settle();

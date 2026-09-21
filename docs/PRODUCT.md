@@ -45,7 +45,8 @@ This replaces the early screenshot/concept, not the entire product design:
 - A people/disclosure button expands Status tiles. Start collapsed, retain expansion
   through view changes, reset on new card/config. No persistent disclosure preference.
 - No separate Today heading row in wall Day/Timeline. Month/year and small Today/arrows
-  sit beside date cells. Dates align left, with natural numeral spacing. Today and the
+  sit beside date cells. Weekday and number share a centered 40px group, placed 12px
+  from each cell's left edge, with natural numeral spacing (D26). Today and the
   selected date have different visual treatments. Date-strip scrolling does not select a day.
 - Day keeps person columns. Narrow Month provides counts and date-to-Day drilldown;
   restricted configurations keep appointments reachable. Week has pinned date/person

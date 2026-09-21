@@ -495,6 +495,14 @@ work after a date/view/config change; defer hidden-panel and slow/trimmed-load g
 Respect reduced motion and configured hour width. Legacy Timeline stays unchanged.
 This is the local prototype correction, not an HA deployment or the future density slider.
 
+### D26. Center weekday and number within a left-aligned date group
+
+**Requested 2026-09-21.** Center each short weekday label over its date number, but
+keep their shared group at the left of the cell. Both use a 40px footprint with centered
+text; the group retains the existing 12px left inset. Do not center the group across the
+whole cell, change natural numeral spacing, or alter today/selection treatments. This
+refines D20 for the shared wall Day/Timeline date strip; legacy tabs are unchanged.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -526,6 +534,7 @@ This is the local prototype correction, not an HA deployment or the future densi
 | Self-contained repo context, 2026-09-21 | Root handoff, portable agent instructions, product brief, prioritized backlog, code map, setup/testing, sanitized operations and research index added. No prior chat or private HA access required for local feature work. See D23. |
 | Timeline uses only a small container, 2026-09-21 | Full remaining height and expanding rows requested; overlap minima, scrolling, Status disclosure, read-only details and legacy compatibility preserved. See D24. Continue in the existing calendar repo. |
 | Timeline starts before the current time, 2026-09-21 | Initial/entry scroll and explicit Today recentering extended to wall Timeline; manual browsing preserved. See D25. |
+| Weekday/number alignment, 2026-09-21 | Center text over a shared axis while keeping the date group at the cell's left inset. See D26. |
 | GitHub failure emails, 2026-09-21 | Read-only diagnosis found two UTC-sensitive DST fixture assertions, not typecheck errors. Test timezone must be established before Vitest workers start; engineering follow-up ENG-05. No CI repair was included in that diagnostic request. |
 
 ## Evidence and date boundaries

@@ -3,9 +3,9 @@
 Last recorded: 2026-09-21. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.14`, adding initial/Today centering to wall Timeline.
-The installed HA pilot remains r12 as recorded below; r13/r14 are not deployed or released.
-Source, tests, built bundle and docs belong to the r14 milestone on
+Latest development build: `0.25.1-moran.15`, centering weekday/date text within each
+left-aligned date group. The installed HA pilot remains r12; r13–r15 are not deployed
+or released. Source, tests, built bundle and docs belong to the r15 milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
 Previous source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed
 on 2026-09-21 at 10:53 CDT with a matching remote HEAD.
@@ -60,6 +60,26 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Date-group alignment, local verification, 2026-09-21
+
+D26 is a wall-style-only alignment correction: the weekday label now shares the date
+number's 40px width and centers its text, retaining the group's 12px left cell inset.
+Cell width, touch area, date-strip scrolling, natural numeral spacing, selection underline
+and today circle are unchanged. Both Day and Timeline use the corrected shared strip.
+
+The new text-center regression failed against r14 and passes after the change at
+812×844, 865×1048, 390×844, 320×568 and 1920×1080. It checks all seven labels, single-
+and double-digit numbers, today/selected states and Day/Timeline switching. Format,
+typecheck, build, 151 Chicago-timezone unit tests and all 58 browser scenarios pass.
+The existing UTC/CI exception remains ENG-05, not part of this CSS correction.
+
+Manual loopback-preview review at 1707×960 and 391×844 CSS sizes measured a zero-pixel
+difference between label/number centers and a retained 12px left inset. Selecting Monday
+then Today updated the date and retained the alignment/today circle. Page identity,
+meaningful rendering, no overlay, clean warning/error logs and screenshots passed.
+Browser plugin unavailable; existing Chromium tests and in-app Playwright/CUA controls
+provided evidence. Normal viewport restored; annotation tab untouched. No HA deployment.
 
 ### Timeline opens near now, local verification, 2026-09-21
 
