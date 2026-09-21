@@ -41,7 +41,8 @@ These are agent recommendations or unresolved questions, not already approved fe
 | ENG-02 | Medium; coverage gap | Add visual-editor configuration round-trip tests before significant editor work. Preserve unknown fields and shared config normalization; inspect current coverage first. |
 | ENG-03 | Medium; measured work only | Reduce controller coupling or redundant processing when a feature/performance measurement warrants it. Extract focused seams, not a React rewrite or a speculative new state framework. |
 | ENG-04 | Before public release; proposed | Decide whether to run the existing compiled-browser suite in CI. CI currently covers format/types/unit/build; the harness is a local Chromium/CDP runner requiring a compatible Node runtime and Chrome. |
-| ENG-05 | Repair implemented in r16; CI evidence in STATUS | Set America/Chicago in Vitest configuration before workers start; remove ineffective in-worker hooks. All DST assertions retained. `TZ=UTC npm test` passes. This changes test infrastructure, not runtime timezone. See D28. |
+| ENG-05 | Closed in r16; hosted CI passed | Set America/Chicago in Vitest configuration before workers start; remove ineffective in-worker hooks. All DST assertions retained. `TZ=UTC npm test` and hosted CI pass. This changes test infrastructure, not runtime timezone. See D28 and STATUS. |
+| ENG-06 | Maintenance; before release | Review the non-failing Actions runtime deprecation and upcoming Ubuntu runner migration notices observed in r16 CI. Check current official guidance and validate workflow/action upgrades separately; no incidental dependency or runner changes in UI work. |
 | REL-01 | Separate authorization required | Public GitHub/HACS release, clean installation/update and cache/rollback checks. Milestone pushes are authorized; tags, releases and merges to main are not. |
 
 ## Deferred product extensions

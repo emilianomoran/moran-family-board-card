@@ -7,11 +7,15 @@ Latest development build: `0.25.1-moran.16`, wall Day density slider (D27) and t
 timezone repair (D28/ENG-05). The installed HA pilot remains r12; r13–r16 are not deployed
 or released. Source, tests, built bundle and docs belong to the r16 milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Local verification is complete; milestone push and hosted CI verification are next.
+Application source: `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105`, pushed to the personal working
+branch on 2026-09-21; `git ls-remote` matched local HEAD. Later documentation-only receipts
+retain this application build. No merge, tag or release occurred.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 151
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
-to the app's runtime timezone. Hosted CI must be checked separately after the push.
+to the app's runtime timezone. Hosted [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117304)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117313)
+both succeeded for that exact source commit. ENG-05 is closed.
 
 ## What is working
 
@@ -97,7 +101,15 @@ the built bundle (SHA-256 `eae69e8def93c13b4f66af321d01eb887e0c0f4f7702a7b78272d
 
 ENG-05: `vitest.config.ts` establishes Chicago before worker creation; ineffective worker
 hooks were removed, not assertions. Format/type/build and 151 UTC-launched unit tests pass.
-Push/hosted-CI receipt will be recorded after delivery. No HA deployment or release.
+Source `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105` is pushed and verified against remote HEAD.
+Hosted CI typecheck/format/unit/build and HACS validation both passed (links above), closing
+ENG-05. A fresh rebuild reproduces the committed bundle. Ten changed Markdown documents
+have no broken local links, and the outgoing credential-pattern scan found no matches.
+The pre-existing untracked debug note remains excluded. No HA deployment or release.
+
+Hosted Actions emitted non-failing Node/action-runtime and upcoming Ubuntu runner migration
+notices. Those are maintenance follow-ups (ENG-06), not a reason to change dependencies or
+the runtime in this feature milestone.
 
 ### Freshness and delivery audit, 2026-09-21
 

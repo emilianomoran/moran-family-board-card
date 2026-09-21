@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "11:31 CDT"
+time: "11:33 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -22,11 +22,12 @@ when the task originated in the separate Home Assistant operations workspace.
   across views but reset on config/reload; other views and legacy have no slider yet.
   Short Day events use duration-scaled title strips rather than stretching across neighbors.
   Day uses remaining flex height; r13–r15 Timeline/date improvements remain intact.
-  Source, bundle, tests and docs are verified locally for the milestone; see STATUS for
-  the push/CI receipt. No main merge, release or HA deployment is part of this work.
+  Application source `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105` is pushed, remote HEAD
+  matched, and hosted CI/Validate both passed; see STATUS for the linked receipt.
+  Later docs-only commits retain r16. No main merge, release or HA deployment occurred.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` passes all 151; no DST assertion or app runtime timezone was changed.
-  Do not restore ineffective in-worker timezone hooks. Hosted CI is checked after push.
+  Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
   The r13–r16 presentation changes target the laptop prototype; they are not deployed to HA.
