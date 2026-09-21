@@ -174,6 +174,12 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 
 ## Git and Distribution
 
+- User direction, 2026-09-21: at each next verified milestone, commit and push the
+  completed work to the current working branch on the personal origin remote.
+  Include updated product docs and the built bundle when source changes. Review the
+  outgoing diff for private data and unrelated changes; verify the push succeeded.
+  This authorizes ordinary milestone pushes, not force-pushes, merges to main,
+  release tags, or GitHub/HACS publication. Report a real failure without claiming success.
 - Build `dist/moran-family-board-card.js` after any source change and commit the result.
 - Preserve the upstream MIT license and `NOTICE.md` attribution.
 - Keep upstream compatibility unless an explicitly documented Moran requirement requires divergence.

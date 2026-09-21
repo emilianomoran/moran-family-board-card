@@ -29,6 +29,10 @@ This checkpoint was committed locally, not pushed or published as a GitHub/HACS 
 in the recorded deployment work. Laptop preview servers are separate from the installed
 HA dashboard and do not update its bundle automatically.
 
+Delivery policy added 2026-09-21: starting at the next verified milestone, commit and push
+the current working branch, including docs and the built bundle where applicable (D22).
+The title/clock checkpoint above remains locally committed; this policy update is not a push.
+
 Milestone disposition, 2026-09-21: the dependable read-only desktop/HA-app calendar
 baseline is complete under the accepted scope. Source parity/routing, full-day display,
 responsive lanes and reachable controls, discrete dates, filters/preferences, fresh

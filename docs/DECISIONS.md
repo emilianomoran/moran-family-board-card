@@ -438,6 +438,16 @@ The missing-clock regression failed against r11. Version `0.25.1-moran.12` was d
 2026-09-21 at 10:28 CDT; STATUS.md records tests and actual HA desktop/phone-width checks.
 The future zoom slider remains separate and unimplemented (D19).
 
+### D22. Commit and push verified milestones
+
+**Explicit user direction, 2026-09-21.** Starting with the next completed milestone,
+commit and push verified work to the current working branch on the personal origin remote.
+Include product decisions/status and the generated bundle when applicable. Review the
+outgoing changes for private data and unrelated work, then verify the remote branch updated.
+No additional routine approval gate. This does not authorize force-pushes, merges to main,
+release tags or GitHub/HACS publication. Preserve truthful local-versus-pushed records;
+this policy does not retroactively mark prior local checkpoints as pushed.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -465,6 +475,7 @@ The future zoom slider remains separate and unimplemented (D19).
 | Future zoom slider, 2026-09-21 | User requested adjustable row density to zoom out and show more events. Recorded for later implementation; D19 separates the requested feature from suggested interaction details. |
 | Too many fixed rows, 2026-09-21 | Four annotated corrections accepted: single compact header, left/naturally spaced dates, collapsible Status tiles, and removal of the separate Today row. D20 records preserved navigation and superseded presentation choices. |
 | Title and time, 2026-09-21 | “Moran Calendar” with a current-time label 12px after the title; compact dimensions, locale preference and narrow behavior retained. See D21. |
+| Commit and push at milestones, 2026-09-21 | Starting at the next verified milestone, commit and push the current working branch without another routine gate; releases and main-branch merges remain separate. See D22. |
 
 ## Evidence and date boundaries
 
