@@ -22,8 +22,8 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `3fb839c48cef80954de43a9d46aa347093ce5cf0`, version
-`0.25.1-moran.6`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:47 CDT.
+Installed application checkpoint: `e7868ccd585bc07dad5279c551e953d669f79a8f`, version
+`0.25.1-moran.7`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:59 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -31,12 +31,12 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
-### Event-details reliability candidate, 2026-09-20
+### Event-details reliability update, 2026-09-20
 
 Continuing the full daily-use goal exposed another software gap rather than just a
 physical-device dependency: an open read-only event remained stale after the grid refreshed.
 The new rendered regression failed against r6 with an obsolete appointment snapshot.
-The r7 candidate refreshes exact occurrence details, labels unverifiable/missing snapshots,
+The r7 update refreshes exact occurrence details, labels unverifiable/missing snapshots,
 and preserves editable drafts. It also contains modal keyboard focus, restores the opener
 without scrolling, and fixes overflowing date fields/small action targets. See D14.
 
@@ -46,7 +46,18 @@ exercise 1920×1080, 390×844, 320×568, and 844×390; synthetic source changes 
 appointments. The final r7 candidate passed 140 unit tests, all 38 browser scenarios,
 TypeScript, formatting, build, and whitespace checks. Visible local review confirmed native
 Tab/Shift+Tab containment, initial Close focus, readable stacked date fields, Escape, and
-no browser warnings/errors. Live promotion verification is still pending.
+no browser warnings/errors. Promoted to the same HA preview at 18:59 CDT; source/bundle
+hash and unchanged dashboard, 74 other resources, and 27 dashboard registrations verified.
+Core validation passed; prior r6 asset retained. No calendar mutation or restart.
+
+Actual HA checks at 1280×720 and 390×844 confirmed read-only inputs and no Save/Delete,
+enabled initial Close focus, native Tab/Shift+Tab containment, inert calendar background,
+and no horizontal dialog overflow (420px and 358px respectively). Close and Cancel targets
+are at least 48px. Landscape 844×390 kept the dialog inside the viewport with internal
+vertical scrolling. A normal HA poll was observed with details open: the checking message
+appeared and cleared on success, keeping the dialog open/read-only and focus on Close.
+Today and normal viewport restored. The physical phone and real edit-propagation checks remain outstanding;
+neither synthetic changed-event tests nor a phone-width in-app screenshot replaces them.
 
 ### Date navigation update, 2026-09-20
 
@@ -335,6 +346,7 @@ physical iPhone/Safari verification remains open.
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
+| Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |

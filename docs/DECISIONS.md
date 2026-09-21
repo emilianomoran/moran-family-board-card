@@ -269,7 +269,7 @@ browser-to-Bridge adapter is justified by these findings.
 
 **Implementation correction under the daily-use goal, 2026-09-20.** A synthetic source
 change updated the grid while the open read-only dialog still showed its old time/title.
-The r7 candidate reconciles inspected details after refresh using calendar and occurrence
+The r7 update reconciles inspected details after refresh using calendar and occurrence
 identity. Recurring neighbors must not replace a missing occurrence; ambiguous or ID-less
 changed records are not matched by guesswork. Shared owner copies remain the same source.
 
@@ -283,6 +283,10 @@ The modal focuses an enabled control, contains Tab/Shift+Tab, makes the underlyi
 inert, and restores focus without changing the calendar scroll. Date fields must fit at
 phone widths; action targets are at least 48px. This is reliability/accessibility work,
 not the deferred full presentation redesign. Delivery evidence is in STATUS.md.
+
+Deployed 2026-09-20 at 18:59 CDT as source `e7868ccd585bc07dad5279c551e953d669f79a8f`.
+140 unit tests, 38 browser scenarios, and actual HA details/keyboard/normal-poll checks
+passed. This does not certify physical iPhone recovery or real provider-change latency.
 
 ## Discussion sequence and disposition
 

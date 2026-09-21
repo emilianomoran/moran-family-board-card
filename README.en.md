@@ -87,6 +87,9 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - `read_only: true` keeps event details and navigation while blocking create, edit, delete,
   and drag changes, including stale action handlers. It is a card behavior guard, not a
   substitute for Home Assistant permissions.
+- Open read-only details refresh with their source occurrence. Unverifiable or missing
+  events retain an explicit warning instead of silently presenting old details as current.
+  Editable drafts are never overwritten by a background read.
 - Calendar failures and unavailable sources are visible; incomplete reads never mean
   everyone is free. Healthy sources remain usable when another source fails.
 - Periodic refresh picks up changed or removed appointments. Focus, page restoration,
