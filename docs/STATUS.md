@@ -22,8 +22,8 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `96cdd790b3c7ab1f2ae0eb984e906cffef64a7a7`, version
-`0.25.1-moran.11`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:22 CDT.
+Installed application checkpoint: `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, version
+`0.25.1-moran.12`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:28 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -40,9 +40,9 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
-### Header title and clock — local candidate, 2026-09-21
+### Header title and clock — deployed, 2026-09-21
 
-Candidate `0.25.1-moran.12` implements D21: the wall preview title is “Moran Calendar” with
+Version `0.25.1-moran.12` implements D21: the wall preview title is “Moran Calendar” with
 the current time 12px after it. Configurable title and existing HA 12/24-hour format/minute
 tick are reused. The sample preview retains its fixed test time. D20 compact dimensions,
 narrow multi-view hidden brand, accessible identity and single-view title remain intact.
@@ -57,7 +57,17 @@ hidden-brand behavior keeps all five modes reachable in the 48px header, without
 Page identity/content, no error overlay, screenshot and interaction checks passed; no local
 warnings/errors. Browser plugin not available; existing Chromium/CDP harness and in-app
 Playwright controls used without new dependencies. Format/types/build/whitespace, 151 unit
-tests and all 50 browser scenarios passed. Deployment pending at this source checkpoint.
+tests and all 50 browser scenarios passed.
+
+Deployed 10:28 CDT. Repeated served checksum/API verification and Core validation passed.
+Only this preview's resource and card title changed; other dashboard settings, 74 resources
+and 27 dashboard registrations are unchanged. Targeted backups and r11 retained for rollback.
+Actual HA at 1280×720 showed “Moran Calendar” and the current 10:29 AM time, exactly 12px
+apart, in a 48px header with 40px view tabs. At 390×844 the brand remains hidden and accessible
+identity retains the new name; keyboard Status expand/collapse works. Neither size overflowed.
+Identity/content, no overlay, screenshot review and interactions passed; r12 loaded with no
+Family Board warning/error. Existing unrelated HA/custom-card logs remain. Normal viewport
+and collapsed Status restored. No calendar writes, restart, push, release or new device claim.
 
 ### Compact calendar chrome — deployed, 2026-09-21
 

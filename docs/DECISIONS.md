@@ -434,8 +434,9 @@ Title remains configurable: change the sample wall preview and installed pilot's
 not other users' defaults, the dashboard/sidebar label or the package name. Legacy unchanged.
 The sample harness intentionally shows its fixed fixture time; live HA uses current time.
 
-The missing-clock regression failed against r11. Delivery and validation are recorded in
-STATUS.md. The future zoom slider remains separate and unimplemented (D19).
+The missing-clock regression failed against r11. Version `0.25.1-moran.12` was deployed
+2026-09-21 at 10:28 CDT; STATUS.md records tests and actual HA desktop/phone-width checks.
+The future zoom slider remains separate and unimplemented (D19).
 
 ## Discussion sequence and disposition
 
