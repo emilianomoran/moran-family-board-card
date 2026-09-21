@@ -2,6 +2,12 @@
 
 **English** · [Deutsch](README.md)
 
+[New agent? Start with HANDOFF.md](HANDOFF.md) · [Development](docs/DEVELOPMENT.md) ·
+[Backlog](docs/BACKLOG.md) · [Research](docs/research/README.md)
+
+The working calendar project is on `feature/moran-foundation`. The active pilot is read-only.
+Images below show upstream/historical concepts, not the latest accepted calendar UI.
+
 [Project documentation](docs/README.md) · [Decisions and discussions](docs/DECISIONS.md) ·
 [Current status and next work](docs/STATUS.md) · [Implementation ADR](docs/adr/0001-implementation-base.md)
 

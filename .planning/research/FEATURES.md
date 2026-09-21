@@ -1,5 +1,8 @@
 # Feature Research
 
+> Historical snapshot from 2026-09-11. Start with the [current reference](../../docs/research/README.md).
+> Phase gates, missing-feature lists and dependency counts below are not current instructions.
+
 **Domain:** Calendar-first family wall display
 **Researched:** 2026-09-11
 **Confidence:** HIGH for v1 calendar features; MEDIUM for post-v1 household operations

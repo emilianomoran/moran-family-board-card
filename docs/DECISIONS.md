@@ -448,6 +448,23 @@ No additional routine approval gate. This does not authorize force-pushes, merge
 release tags or GitHub/HACS publication. Preserve truthful local-versus-pushed records;
 this policy does not retroactively mark prior local checkpoints as pushed.
 
+### D23. Self-contained calendar repository and handoff
+
+**Explicit user request, 2026-09-21.** Give the calendar its own complete context handoff,
+knowledge, backlog, research and agent instructions so another agent can continue from
+this repository without access to the original chat. The root `HANDOFF.md` is the resume
+point; `AGENTS.md` owns persistent rules and `docs/README.md` maps topic ownership.
+
+The repo records sanitized conversation outcomes, not raw transcripts or private calendar
+content. Credentials, exact household configuration, reference screenshots and deployment
+backups stay outside it. Research is consolidated with dates and source links; historical
+GSD files remain as marked evidence, not instructions. One current backlog separates
+requested features, proposals, deferred ideas, completed work and waived tests.
+
+This is a documentation milestone, not authorization to start the zoom feature, rewrite
+the application, deploy a new bundle or publish a release. Follow D22 for the verified
+milestone commit/push and keep the installed application checkpoint unchanged.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -476,6 +493,7 @@ this policy does not retroactively mark prior local checkpoints as pushed.
 | Too many fixed rows, 2026-09-21 | Four annotated corrections accepted: single compact header, left/naturally spaced dates, collapsible Status tiles, and removal of the separate Today row. D20 records preserved navigation and superseded presentation choices. |
 | Title and time, 2026-09-21 | “Moran Calendar” with a current-time label 12px after the title; compact dimensions, locale preference and narrow behavior retained. See D21. |
 | Commit and push at milestones, 2026-09-21 | Starting at the next verified milestone, commit and push the current working branch without another routine gate; releases and main-branch merges remain separate. See D22. |
+| Self-contained repo context, 2026-09-21 | Root handoff, portable agent instructions, product brief, prioritized backlog, code map, setup/testing, sanitized operations and research index added. No prior chat or private HA access required for local feature work. See D23. |
 
 ## Evidence and date boundaries
 

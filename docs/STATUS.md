@@ -44,6 +44,24 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Self-contained project handoff, 2026-09-21
+
+D23 adds a root handoff, portable agent entry points, product brief, stable-ID backlog,
+architecture/code map, development/testing instructions, sanitized operations boundary
+and consolidated research index. Historical research is retained with explicit archive
+labels. Current backlog ownership moved out of this status history into `BACKLOG.md`.
+
+This milestone changes documentation only. The application remains r12, with no new HA
+deployment, calendar mutation or release. All 140 relative links across 22 changed/new
+Markdown files resolve; referenced source paths and documented test commands were checked.
+The outgoing 29-commit history (221 unique changed file blobs) and new docs were scanned
+for credential/private-identifier patterns, with no matches. Review found no private
+screenshots, live configuration or backup files in the outgoing file set.
+
+Re-ran format, TypeScript, build, all 151 unit tests and all 50 compiled-browser scenarios;
+all passed. The rebuild left the committed r12 bundle unchanged. Milestone push is pending
+remote confirmation; an unrelated pre-existing debug note remains untracked and excluded.
+
 ### Header title and clock — deployed, 2026-09-21
 
 Version `0.25.1-moran.12` implements D21: the wall preview title is “Moran Calendar” with
@@ -538,33 +556,12 @@ physical iPhone/Safari verification remains open.
 
 ## Next work and open decisions
 
-Acceptance update, 2026-09-21: the user confirmed physical iPhone lock/reopen refresh in
-the HA app and explicitly waived the timed edit/cancellation test, requesting continued
-development. Remove that test as a blocker without claiming a measured latency result.
-The cross-view date correction is now deployed and verified. This closes the read-only
-baseline milestone described above; preserve these behaviors during later presentation work.
+The [current backlog](BACKLOG.md) owns pending features, proposals and completion criteria.
+CAL-01 (the requested future density zoom slider) is the clearest named feature candidate;
+CAL-02 covers broader presentation work. Neither starts as part of this handoff task.
 
-| Item | State | Acceptance or unresolved question |
-|---|---|---|
-| Today recenters on current time | Deployed and HA-verified 2026-09-16 | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
-| Remember hidden people and selected view | Deployed and HA-verified 2026-09-16 | Real reload persistence, safe identity/config invalidation, and graceful storage failure covered. |
-| Status tiles separate availability and next event | Deployed and HA-verified 2026-09-16 | Date/time stays visible; existing candidate selection boundaries and legacy behavior retained. See D09. |
-| Fantastical-style separated date cells | Deployed and HA-verified 2026-09-16 | Full-width cells, distinct today/selection states, narrow horizontal access and strip snapping; person lanes unchanged. |
-| iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
-| Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
-| Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
-| Keep the date across view changes | Deployed and HA-verified 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
-| Readable Week/Month/Agenda | Deployed and HA-verified 2026-09-21 | Dates and pinned headers, wrapping cards, compact Month counts/drilldown, and shared filters; legacy/restricted-view safeguards. See D18. |
-| Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
-| Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
-| Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |
-| Actual provider propagation | Source parity verified; timing test waived by user 2026-09-21 | 166 source occurrences / 175 intended owner copies match; changed real content agrees in both paths. Timing remains unmeasured, not a completion blocker. No test mutation is authorized. |
-| Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
-| Calendar density zoom slider | User-requested future feature, 2026-09-21; not implemented | Slider adjusts row density: zoom out for more events/time on screen, zoom in for detail. Recommended: preserve the visible time/date and normal-size controls. View coverage, range/default and saved preference behavior remain open; see D19. |
-| Reclaim fixed calendar space | Deployed and HA-verified, 2026-09-21 | Single 48px header, 40px capsule, Status disclosure, left/proportional dates, and date-bar navigation replace redundant fixed rows. See D20. |
-| Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
-| Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |
-
-This list tracks work; it does not introduce GSD phases or approval gates. Once the user
-authorizes a scoped change, implement and verify it directly, then update this page and the
-relevant decision entry.
+Preserve the accepted read-only baseline. The user confirmed physical HA-app lock/reopen
+refresh on 2026-09-21 and explicitly waived timed provider-edit/cancellation testing.
+Provider latency remains unmeasured, not a blocker. Final wall hardware and broader
+physical-device coverage remain open; see CAL-03. Do not reopen completed fixes from
+historical plans or treat optional household modules as approved calendar scope.

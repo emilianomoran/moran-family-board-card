@@ -1,33 +1,55 @@
 # Project documentation
 
-This repository owns the Family Board product record: decisions, discussion outcomes,
-requirements, known behavior, implementation, and tests. Updated 2026-09-21.
+This repository owns the Moran Calendar product record. A fresh agent should not need
+the original conversation or the private HA workspace to understand or develop it.
+Updated 2026-09-21. Private access/configuration remains outside this repo by design.
 
 ## Start here
 
-- [Decisions and discussion record](DECISIONS.md): what we agreed to, why, alternatives,
-  and proposals that have not been accepted.
-- [Current status and next work](STATUS.md): what is implemented, what was verified,
-  known issues, and what remains open.
-- [Implementation-base ADR](adr/0001-implementation-base.md): source-pinned rationale for
-  continuing this Home Assistant Lit fork.
-- [Configuration reference](../README.en.md): supported options and generic examples.
-- [Calendar sync validation](calendar-sync-validation.md): verified read path, source/routing
-  audit, and how to measure real edit propagation and physical phone recovery safely.
+1. [HANDOFF](../HANDOFF.md): current branch/checkpoint, resume order and important limits.
+2. [AGENTS](../AGENTS.md): persistent rules for any contributing agent.
+3. [Product brief](PRODUCT.md): scope, accepted requirements and what not to build yet.
+4. [Backlog](BACKLOG.md): stable feature IDs, provenance, priorities and acceptance criteria.
+5. [Development](DEVELOPMENT.md): run the preview, test and verify a change without HA access.
+
+## Topic owners
+
+| Topic | Canonical reference |
+|---|---|
+| User decisions, corrections and conversation outcomes | [DECISIONS](DECISIONS.md) |
+| Implemented/deployed state and verification evidence | [STATUS](STATUS.md) |
+| Code map, runtime flow and invariants | [ARCHITECTURE](ARCHITECTURE.md) |
+| Why this fork instead of another card or React | [ADR 0001](adr/0001-implementation-base.md) |
+| Skylight, Fantastical and alternative-card findings | [Research](research/README.md) |
+| Source parity, routing and provider-latency limits | [Calendar validation](calendar-sync-validation.md) |
+| Private HA boundary, safe deployment and rollback | [OPERATIONS](OPERATIONS.md) |
+| Supported configuration and generic examples | [English reference](../README.en.md), [German reference](../README.md) |
+| Distribution and attribution | [HACS](HACS_STORE.md), [upstream notice](../NOTICE.md) |
+
+## Conversation coverage
+
+- D01–D04: Skylight-inspired scope, dedicated HA fork, read path and architecture choice.
+- D05–D08: no GSD gates, responsive presentation, Fantastical navigation and full-day pilot.
+- D09–D13: Status tiles, durable records, daily use, view capsule and pilot delivery.
+- D14–D18: details, recovery, waived timing test, cross-view continuity and readability.
+- D19–D23: future zoom, compact chrome, title/clock, milestone pushes and this handoff.
+
+These entries preserve decisions and corrections, not raw private transcripts. Their
+dates and evidence distinguish user acceptance from an agent's proposed next step.
 
 ## Historical material
 
 - [Original fork plan](MORAN_FORK_PLAN.md) and [visual concept](MORAN_DESIGN_SPEC.md)
   preserve earlier exploration. They do not override current calendar-first scope.
-- [Research](../.planning/research/SUMMARY.md) records the 2026-09-11 evaluation of
-  Skylight, Calendar Card Pro, Week Planner Card, and other calendar cards.
+- [Research index](research/README.md) links the original evaluation and identifies
+  findings that were superseded or remain unverified.
 - [Foundation discussion](../.planning/phases/01-prove-the-foundation/01-DISCUSSION-LOG.md)
   and [acceptance record](../.planning/phases/01-prove-the-foundation/01-UAT.md) preserve
   the initial implementation-base and avatar review.
-- `.planning/` is a historical archive. GSD was retired on 2026-09-15; its phase status,
+- [`.planning/`](../.planning/README.md) is a historical archive. GSD was retired on 2026-09-15; its phase status,
   reviewer requirements, and execution gates are not current instructions.
 
-## Recording future conversations
+## Maintaining the record
 
 After a material product discussion, update the relevant decision entry and current status
 in this repo during the same work session. Record the date, user request, decision or
@@ -41,6 +63,6 @@ deployment backups. The private Home Assistant workspace owns access procedures,
 configuration, backup paths, and operational rollback. Summarize deployment outcomes here
 without duplicating sensitive operational records.
 
-Documentation does not add a planning gate or require a separate approval round. Record
-local commits separately from pushes and published releases; a local checkpoint is not a
-GitHub/HACS release.
+Keep one root handoff and one current backlog. Link the topic owner instead of copying
+large summaries between files. Documentation does not add an approval gate. Record local
+commits, verified pushes, HA deployments and published releases as separate states.

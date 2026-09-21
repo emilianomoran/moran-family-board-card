@@ -2,6 +2,12 @@
 
 **Deutsch** · [English](README.en.md)
 
+[Agent-Handoff](HANDOFF.md) · [Entwicklung](docs/DEVELOPMENT.md) ·
+[Backlog](docs/BACKLOG.md) · [Recherche](docs/research/README.md)
+
+Aktueller Entwicklungsbranch: `feature/moran-foundation`. Der aktive Pilot ist schreibgeschützt.
+Die Bilder unten zeigen Upstream bzw. historische Konzepte, nicht die aktuelle Kalenderoberfläche.
+
 [Projektdokumentation](docs/README.md) · [Entscheidungen und Gespräche](docs/DECISIONS.md) ·
 [Aktueller Stand](docs/STATUS.md) · [Architekturentscheidung](docs/adr/0001-implementation-base.md)
 

@@ -3,6 +3,10 @@
 Status: custom-repository distribution only. This fork is intentionally not submitted as a second
 copy of the upstream card in the default HACS store.
 
+The active pilot is a dated local HA resource, not a claim that a current HACS release is
+published or installation-tested. The procedure below applies only to an explicitly scoped
+release. Ordinary milestone pushes do not authorize tags, releases or store submission.
+
 ## Install from the custom repository
 
 1. Open HACS.

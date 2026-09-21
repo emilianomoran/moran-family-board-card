@@ -1,7 +1,31 @@
 # Current product documentation
 
-Start with [docs/README.md](docs/README.md), [docs/DECISIONS.md](docs/DECISIONS.md),
-and [docs/STATUS.md](docs/STATUS.md). They own the current product record.
+Start with [HANDOFF.md](HANDOFF.md), then the [documentation index](docs/README.md).
+The [product brief](docs/PRODUCT.md), [backlog](docs/BACKLOG.md),
+[development guide](docs/DEVELOPMENT.md), [architecture](docs/ARCHITECTURE.md),
+[decisions](docs/DECISIONS.md), [status](docs/STATUS.md),
+[research](docs/research/README.md), and [operations boundary](docs/OPERATIONS.md)
+own the current product record.
+
+## Fresh-agent rules
+
+- Continue the current `feature/moran-foundation` branch unless the task says otherwise.
+  Check branch, remotes and dirty files before editing. Do not start from upstream `main`
+  and mistake it for the current Moran product. Preserve unrelated local work.
+- Keep one root handoff and one current backlog. Refresh them at material milestones;
+  do not scatter a new continuation file into each session or require previous chat access.
+- This is a Home Assistant Lit card, not a React rewrite. Calendar Bridge is not a card
+  runtime dependency. Meals and lists remain optional later modules.
+- The user confirmed HA-app lock/reopen refresh and waived the provider timing test.
+  Do not reopen that test as a gate or describe unmeasured latency as proven.
+- The old 68/32 operations rail and portrait Agenda preference are historical concepts,
+  not approved implementation requirements. Follow the current product brief instead.
+- The sample harness freezes its clock. Build `dist/` and reload before evaluating code
+  changes. Distinguish sample harness, optional live proxy, and deployed HA evidence.
+- For UI changes, verify desktop and narrow card containers, not just viewport width.
+  Preserve the user's annotation surface where possible and reset temporary preview changes.
+- Documentation-only work does not require a new app version or HA deployment. Missing
+  private HA access does not block local implementation or synthetic verification.
 
 - Record material conversation outcomes, decisions, corrections, and open proposals in
   this repo during the same work session. Do not leave product facts only in chat or
@@ -67,7 +91,7 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 
 - Lit 3.x — reactive Web Component implementation and scoped styling.
 - `custom-card-helpers` 1.9.x — Home Assistant frontend types and helper APIs.
-- Vitest 1.6.x — pure event-domain unit tests in `src/events.test.ts`.
+- Vitest 1.6.x — unit tests in `src/*.test.ts` covering config, sources, events, navigation, preferences, details and localization.
 - Rollup 4.x — production bundle.
 - TypeScript compiler — strict type checking via `npm run lint`.
 - Prettier 3.x — formatting via `npm run format` and `npm run format:check`.
@@ -84,7 +108,7 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 
 ## Platform Requirements
 
-- Any platform with Node.js 20-compatible tooling.
+- Node.js 20-compatible tooling for build/unit checks; Node 22+ for the compiled-browser harness's native WebSocket. See the development guide.
 - A Chromium browser or Home Assistant test instance for rendered verification.
 - Home Assistant dashboard with the module installed through HACS or `/config/www`.
 - Browser support for custom elements, shadow DOM, Unicode property escapes, ResizeObserver, and pointer events.
@@ -99,7 +123,7 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 
 - Use kebab-case TypeScript modules: `ha-family-board-card.ts`, `editor-i18n.ts`.
 - Collocate unit tests with source using `*.test.ts`.
-- Use uppercase durable planning/document filenames inside `.planning/`.
+- Put current product documentation in `docs/`; `.planning/` is a historical archive.
 - Use camelCase for exported pure functions such as `routeEventToPeople` and `splitIntoSegments`.
 - Prefix private component methods and mutable runtime fields with `_`, such as `_fetchEvents` and `_events`.
 - Use action-oriented names for handlers: `_openEvent`, `_onDragMove`, `_togglePerson`.
@@ -187,88 +211,20 @@ The initial release focuses on a highly legible, touch-friendly calendar. Meals,
 
 <!-- GSD:conventions-end -->
 
-<!-- GSD:architecture-start source:ARCHITECTURE.md -->
+## Architecture reference
 
-## Architecture
-
-## Pattern Overview
-
-- A single distributed ES module registers both the card and its editor.
-- Home Assistant supplies state, authentication, locale, API access, and theme tokens.
-- Calendar computations are partially isolated from DOM code for deterministic unit testing.
-- All rendered views and most orchestration currently live in one card class.
-- The card has no database or server process of its own.
-
-## Layers
-
-- Location: `src/ha-family-board-card.ts`.
-- Purpose: configuration validation, lifecycle, API calls, capability detection, state management, interactions, view rendering, dialogs, and styles.
-- Depends on: Lit, `custom-card-helpers`, `src/events.ts`, and `src/localize.ts`.
-- Used by: Home Assistant dashboards and `dev/harness.html`.
-- Location: `src/events.ts`.
-- Purpose: shared-calendar routing, title normalization, raw event parsing, day segmentation, drag-time calculation, and overlap layout.
-- Depends on: JavaScript date and collection primitives only.
-- Used by: the card renderer and `src/events.test.ts`.
-- Locations: `src/localize.ts` and `src/editor-i18n.ts`.
-- Purpose: English/German labels plus locale-aware time, weekday, countdown, and week-range formatting.
-- Depends on: browser `Intl` and Home Assistant locale preferences.
-- Used by: the card and editor.
-- Location: `src/editor.ts`.
-- Purpose: graphical configuration, auto-detection, presets, person/calendar metadata, and `config-changed` events.
-- Depends on: Lit, Home Assistant form elements, editor translations, and exported card types/helpers.
-- Used by: Home Assistant's Lovelace card editor.
-- Locations: `rollup.config.js`, `hacs.json`, `.github/workflows/`, and `dist/`.
-- Purpose: typecheck, test, bundle, validate, and release one HACS-compatible module.
-
-## Data Flow
-
-## State Management
-
-- Persistent settings live in Home Assistant Lovelace configuration.
-- Reactive runtime state uses Lit `@state` properties in `FamilyBoardCard` and `FamilyBoardCardEditor`.
-- Raw events, fetch keys, timer handles, and drag geometry use private instance fields.
-- No global application state exists beyond custom-element registration and `window.customCards` metadata.
-
-## Key Abstractions
-
-- The public configuration contract for views, layout, filtering, display, calendars, and people.
-- Defined in `src/ha-family-board-card.ts` and consumed by the card/editor.
-- Represent a visual lane and its calendar/routing rules.
-- Defined in `src/ha-family-board-card.ts` and `src/events.ts`.
-- Successive representations for source occurrences, per-day display segments, and overlap geometry.
-- Defined in `src/events.ts`.
-- `_renderDay`, `_renderTimeline`, `_renderWeek`, `_renderMonth`, and `_renderAgenda` are private methods on the card class.
-- They share normalized event state but own view-specific grouping and markup.
-
-## Entry Points
-
-- `src/ha-family-board-card.ts` — Rollup entry, card registration, card-picker metadata, and lazy editor import.
-- `src/editor.ts` — editor registration, bundled through the dynamic import.
-- `dev/harness.html` — browser-only development fixture with a small mocked `hass` contract.
-- `dist/moran-family-board-card.js` — generated production entry loaded by Home Assistant/HACS.
-
-## Error Handling
-
-- `setConfig` throws for invalid card configuration so Home Assistant can display an error card.
-- Calendar reads catch per-calendar failures; a total failure produces a card-level load error.
-- Mutations catch failures and present inline dialog errors.
-- Invalid user regex patterns return a non-match rather than breaking the board.
-- Optional weather failures clear forecast state without taking down calendar rendering.
-
-## Cross-Cutting Concerns
-
-- Interactive events, person headers, navigation controls, and dialogs use focus/keyboard handlers and labels within `src/ha-family-board-card.ts`.
-- Never hard-code user-facing card strings when an existing key belongs in `src/localize.ts` or `src/editor-i18n.ts`.
-- Use Home Assistant CSS variables with safe fallbacks; keep person identity visible in text rather than color alone.
-- Treat the browser bundle as public. Use only the authenticated `hass` object for Home Assistant operations, and never embed external credentials.
-
-<!-- GSD:architecture-end -->
+Use [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the current module map, runtime
+flow and invariants. Configuration lives in `src/config.ts`; source reads, navigation,
+preferences and wall styles have dedicated modules. Do not restore the old monolithic
+module map from `.planning/codebase/` or duplicate it here.
 
 <!-- GSD:skills-start source:skills/ -->
 
 ## Project Skills
 
-No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skills/`, `.cursor/skills/`, `.github/skills/`, or `.codex/skills/` with a `SKILL.md` index file.
+Optional environment skills are listed in [HANDOFF.md](HANDOFF.md). The repository's
+[development guide](docs/DEVELOPMENT.md) is the portable fallback. No GSD installation,
+particular plugin, reviewer model, or private skill path is a prerequisite for contributing.
 <!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
@@ -280,11 +236,3 @@ debugging, and verification directly. Do not require GSD commands, phase gates, 
 particular reviewer model, or repeated confirmation for routine implementation.
 Existing `.planning/` files remain historical context, not execution requirements.
 <!-- GSD:workflow-end -->
-
-<!-- GSD:profile-start -->
-
-## Developer Profile
-
-> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->

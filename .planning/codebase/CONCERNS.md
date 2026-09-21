@@ -1,5 +1,8 @@
 # Codebase Concerns
 
+> Historical snapshot from 2026-09-11. Start with the [current reference](../../docs/ARCHITECTURE.md).
+> Phase gates, missing-feature lists and dependency counts below are not current instructions.
+
 **Analysis Date:** 2026-09-11
 
 ## Tech Debt

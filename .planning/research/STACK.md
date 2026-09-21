@@ -1,5 +1,8 @@
 # Stack Research
 
+> Historical snapshot from 2026-09-11. Start with the [current reference](../../docs/research/README.md).
+> Phase gates, missing-feature lists and dependency counts below are not current instructions.
+
 **Domain:** Home Assistant family wall-calendar custom card
 **Researched:** 2026-09-11
 **Confidence:** HIGH

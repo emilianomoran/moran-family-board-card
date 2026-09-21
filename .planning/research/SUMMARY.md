@@ -1,5 +1,8 @@
 # Project Research Summary
 
+> Historical snapshot from 2026-09-11. Start with the [current reference](../../docs/research/README.md).
+> Phase gates, missing-feature lists and dependency counts below are not current instructions.
+
 **Project:** Moran Family Board Card
 **Domain:** Home Assistant calendar-first family wall display
 **Researched:** 2026-09-11
