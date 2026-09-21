@@ -313,6 +313,11 @@ Deployed 2026-09-20 at 19:12 CDT as `0.25.1-moran.8`, source
 `01c6c2db315fe059713f29e154d9e0c30882a9f0`. All 140 unit tests, 38 browser scenarios,
 and live HA desktop/phone-width smoke checks pass. No source appointments changed.
 
+**User verification, 2026-09-21:** in response to the physical lock/reopen check, the user
+reported using the HA app and confirmed that it refreshes. Accept the physical HA-app
+recovery check as passed; do not require a Safari test for the chosen app or mislabel the
+report as agent-operated testing. Real provider edit/cancellation timing remains open.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -323,7 +328,7 @@ and live HA desktop/phone-width smoke checks pass. No source appointments change
 | Similarity to legacy, when to design, and whether meals can be added later | Foundation first, full styling later, calendar core before optional household modules. |
 | Avatar geometry, portrait mounting, narrow menus, person scrolling, time format, and date heading | Concrete responsive requirements retained in D06; final hardware and complete mobile presentation remain open. |
 | Repeated requests to keep going and remove gates | Direct development adopted in D05. Documentation must not become another approval gate. |
-| Proving real calendars before front-end polish | Read-only pilot, source parity, routing, and recovery checks completed; real-device and propagation checks remain open. |
+| Proving real calendars before front-end polish | Read-only pilot, source parity, routing, and software recovery checks completed; HA-app lock/reopen confirmed by the user 2026-09-21. Timed provider propagation remains open. |
 | Desktop scrolling in actual HA versus a laptop preview | User confirmed scrolling worked with enough space. Inspect the actual deployed HA surface when it is the reported target. |
 | Misalignment after person toggles and ordinary resize | Reproduced, fixed, regression-tested, and deployed in `0.25.1-moran.3`. |
 | Scrolling stopped at 10 PM | Full-day configuration accepted and deployed; D08 records the distinction from package defaults. |

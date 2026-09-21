@@ -1,7 +1,8 @@
 # Calendar sync validation
 
 Status: read-only source comparison and routing audit reverified 2026-09-20.
-Real edit-to-screen latency and physical iPhone sleep/wake remain unmeasured.
+Real edit-to-screen latency remains unmeasured. Physical iPhone HA-app lock/reopen refresh
+was confirmed by the user on 2026-09-21.
 
 ## What the card reads
 
@@ -104,6 +105,15 @@ that is neither proof of a broken sync nor a passed propagation test. A Bridge c
 without verified metadata access is not reliable evidence that no edits occurred.
 
 ## Physical iPhone check
+
+**Result reported 2026-09-21:** the user used the HA app and confirmed that the calendar
+refreshes in response to the requested lock/reopen test without a manual reload. This is
+a passed user-reported physical HA-app check, not a Safari test or direct agent observation.
+Device/iOS/app version and exact lock duration were not provided. No network-switch test
+was reported. The HA-app result closes that pending acceptance item; separate Safari
+testing is not a new prerequisite for the user's chosen app.
+
+The procedure below remains available for reproducing a failure or testing another surface.
 
 Use the real HA dashboard on the intended phone/browser, not the fixed-date local harness.
 Verify initial loading, note the selected view/filters, then background and lock the phone.

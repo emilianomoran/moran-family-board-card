@@ -1,6 +1,6 @@
 # Current status and next work
 
-Last recorded: 2026-09-20. This is the current project status, not a release announcement.
+Last recorded: 2026-09-21. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
 ## What is working
@@ -15,7 +15,7 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Calendar views | Day, Timeline, Week, Month, and Agenda available. Final styling across all views is not complete. |
 | Calendar correctness | Shared-person routing, unmatched lane, intended duplicate owner copies, all-day exclusive ends, midnight segmentation, and DST tests covered. |
 | Read-only pilot | Details and navigation available; create/edit/delete/drag writes blocked, including stale handlers. |
-| Recovery | Polling, wake/focus, page restoration, reconnect, partial-source failures, and stale-response handling implemented and synthetically tested. |
+| Recovery | Polling, wake/focus, page restoration, reconnect, partial-source failures, and stale-response handling implemented and synthetically tested. Physical iPhone HA-app lock/reopen refresh confirmed by the user 2026-09-21. |
 | Basic presentation | Circular avatars, dated Day heading, locale-aware 12/24-hour axis, reachable narrow controls, and person-grid scrolling implemented. |
 | Lane alignment | Headers, all-day rows, and timed columns share sizing on resize and hide/show; `0.25.1-moran.3` deployed. |
 | Full-day range | Pilot uses hours 0–24, no trimming, and initial scroll to now. Config-only change; package defaults remain 6–22. |
@@ -30,6 +30,20 @@ in the recorded deployment work. Laptop preview servers are separate from the in
 HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
+
+### Physical iPhone HA-app recovery, user-confirmed 2026-09-21
+
+In response to the requested phone lock/reopen check, the user confirmed using the
+Home Assistant app and that the calendar refreshes. Record this as a passed physical-device
+HA-app refresh check without a manual reload, based on the user's report, not agent-operated
+device testing. It closes the pending HA-app lock/reopen check. Exact device/iOS/app versions
+and elapsed lock duration were not supplied; do not invent them. Safari, prolonged suspension,
+and network-handoff behavior are not established by this report. The intended phone surface
+is the HA app; a separate Safari check is not a new prerequisite for that use case.
+
+The remaining completion dependency is timed observation of an ordinary provider
+edit/cancellation reaching HA and the card. No code, live config, or calendar event changed
+in response to this report, and no regression rerun is claimed for this documentation update.
 
 ### Hidden-page recovery update, 2026-09-20
 
@@ -371,14 +385,12 @@ physical iPhone/Safari verification remains open.
 
 ## Next work and open decisions
 
-Acceptance dependency audit, 2026-09-20: implementation remains at the deployed r8 checkpoint,
-with the latest source parity evidence recorded above. Completion is blocked on a real-phone
-recovery result and a targeted ordinary calendar edit/cancellation with an observed save
-time. Neither input has been supplied, and direct physical-device access is not currently
-available to this task. Do not substitute more desktop emulation or repeated unchanged
-snapshot reads for those observations. This is an external verification dependency, not a
-GSD approval gate; no new design or household-module scope is implied. Resume from these
-checks when the required observation/access is available, retaining the full daily-use goal.
+Acceptance dependency audit, updated 2026-09-21: implementation remains at the recorded r8
+checkpoint. The user has now confirmed physical iPhone lock/reopen refresh in the HA app.
+The remaining dependency is a targeted ordinary calendar edit/cancellation with an observed
+save time, followed through HA to the card. Do not substitute repeated unchanged snapshot
+reads for that observation. This is an external verification dependency, not a GSD approval
+gate; no new design or household-module scope is implied. Retain the full daily-use goal.
 
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
@@ -390,8 +402,8 @@ checks when the required observation/access is available, retaining the full dai
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
-| Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. Physical suspension remains unverified. |
-| Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
+| Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
+| Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |
 | Actual provider propagation | Snapshot parity/routing reverified 2026-09-20; latency pending | 166 source occurrences / 175 intended owner copies match; one source's changed content agrees in both paths since September 17. Targeted edit/cancellation timing is still unmeasured; no test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
