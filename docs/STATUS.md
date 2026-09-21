@@ -371,6 +371,15 @@ physical iPhone/Safari verification remains open.
 
 ## Next work and open decisions
 
+Acceptance dependency audit, 2026-09-20: implementation remains at the deployed r8 checkpoint,
+with the latest source parity evidence recorded above. Completion is blocked on a real-phone
+recovery result and a targeted ordinary calendar edit/cancellation with an observed save
+time. Neither input has been supplied, and direct physical-device access is not currently
+available to this task. Do not substitute more desktop emulation or repeated unchanged
+snapshot reads for those observations. This is an external verification dependency, not a
+GSD approval gate; no new design or household-module scope is implied. Resume from these
+checks when the required observation/access is available, retaining the full daily-use goal.
+
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
 | Today recenters on current time | Deployed and HA-verified 2026-09-16 | Current date/time restored below sticky headers; loading/queued-navigation races covered. |
