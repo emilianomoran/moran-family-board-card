@@ -1657,6 +1657,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   /* ---- render -------------------------------------------------- */
   protected render() {
     if (!this._config || !this.hass) return nothing;
+    const now = this._now();
     const viewNavigation = this._renderViewSwitcher();
     const focus = this._config.show_focus ? this._renderFocus() : nothing;
     const content = html`${this._renderCalendarStatus()}${this._renderActiveView()}`;
@@ -1665,6 +1666,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         ? renderWallShell({
             title: this._config.title ?? this._t("wall_board_title"),
             calendarIdentity: this._t("wall_calendar_identity"),
+            clockLabel: formatTime(this.hass, now),
+            clockDateTime: now.toISOString(),
             viewNavigation,
             statusToggle: this._config.show_focus
               ? html`<button
@@ -4713,7 +4716,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.11 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.12 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

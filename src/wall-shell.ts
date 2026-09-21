@@ -3,6 +3,8 @@ import { css, html, type TemplateResult } from "lit";
 export interface WallShellOptions {
   title: string;
   calendarIdentity: string;
+  clockLabel: string;
+  clockDateTime: string;
   viewNavigation: unknown;
   statusToggle: unknown;
   focus: unknown;
@@ -13,6 +15,8 @@ export interface WallShellOptions {
 export function renderWallShell({
   title,
   calendarIdentity,
+  clockLabel,
+  clockDateTime,
   viewNavigation,
   statusToggle,
   focus,
@@ -23,7 +27,7 @@ export function renderWallShell({
       <header class="moran-wall-header">
         <div class="moran-wall-brand">
           <div class="moran-wall-title" title=${title}>${title}</div>
-          <div class="moran-wall-calendar-identity">${calendarIdentity}</div>
+          <time class="moran-wall-clock" datetime=${clockDateTime}>${clockLabel}</time>
         </div>
         ${viewNavigation} ${statusToggle}
       </header>
@@ -98,7 +102,7 @@ export const wallShellStyles = css`
     min-width: 0;
     max-width: 100%;
     align-items: baseline;
-    gap: 8px;
+    gap: 12px;
   }
 
   .moran-wall-shell .moran-wall-title {
@@ -110,12 +114,14 @@ export const wallShellStyles = css`
     white-space: nowrap;
   }
 
-  .moran-wall-shell .moran-wall-calendar-identity {
-    display: none;
+  .moran-wall-shell .moran-wall-clock {
+    flex: 0 0 auto;
     color: var(--moran-wall-muted);
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     line-height: 1.25;
+    white-space: nowrap;
   }
 
   .moran-wall-shell .wall-datebar > .tabs {

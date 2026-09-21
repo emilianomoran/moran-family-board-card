@@ -1,6 +1,6 @@
 {
   "name": "moran-family-board-card",
-  "version": "0.25.1-moran.11",
+  "version": "0.25.1-moran.12",
   "description": "Configurable family operations board for Home Assistant",
   "type": "module",
   "license": "MIT",

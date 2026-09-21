@@ -420,6 +420,23 @@ The r10 regression failed on excessive header height. Version `0.25.1-moran.11` 
 2026-09-21 at 10:22 CDT after 151 unit tests and 50 browser scenarios passed. STATUS.md records
 actual HA desktop/phone-width verification; screenshots and household data stay out of this repository.
 
+### D21. Calendar title and current time
+
+**Explicit browser feedback, 2026-09-21.** Replace the preview title with “Moran Calendar”,
+add about 12px spacing and show the time. Implementation interprets that spacing as the
+horizontal gap between title and clock, preserving D20's 48px header/40px tabs.
+
+The wall header renders the configured title plus a semantic time element using the same
+display clock and locale-aware 12/24-hour formatter as the calendar. Its existing minute
+tick updates the time; no extra timer, polling, source or preference is added. Narrow
+multi-view cards keep D20's hidden brand to preserve controls; single-view cards retain it.
+Title remains configurable: change the sample wall preview and installed pilot's card title,
+not other users' defaults, the dashboard/sidebar label or the package name. Legacy unchanged.
+The sample harness intentionally shows its fixed fixture time; live HA uses current time.
+
+The missing-clock regression failed against r11. Delivery and validation are recorded in
+STATUS.md. The future zoom slider remains separate and unimplemented (D19).
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -446,6 +463,7 @@ actual HA desktop/phone-width verification; screenshots and household data stay 
 | What else; continue, 2026-09-21 | Bounded Week/Month/Agenda usability pass chosen under continued read-only calendar work; D18 records the behavior and compatibility limits. No new acceptance gate. |
 | Future zoom slider, 2026-09-21 | User requested adjustable row density to zoom out and show more events. Recorded for later implementation; D19 separates the requested feature from suggested interaction details. |
 | Too many fixed rows, 2026-09-21 | Four annotated corrections accepted: single compact header, left/naturally spaced dates, collapsible Status tiles, and removal of the separate Today row. D20 records preserved navigation and superseded presentation choices. |
+| Title and time, 2026-09-21 | “Moran Calendar” with a current-time label 12px after the title; compact dimensions, locale preference and narrow behavior retained. See D21. |
 
 ## Evidence and date boundaries
 

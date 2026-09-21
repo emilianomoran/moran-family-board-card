@@ -264,7 +264,9 @@
       card.nowProvider = () => new Date(FIXED_NOW.getTime());
       const config = {
         type: "custom:moran-family-board-card",
-        title: query.get("long-title") === "1" ? "Family Board · Preview" : "Family Board",
+        title: scenario === "wall" && !query.has("checks")
+          ? "Moran Calendar"
+          : query.get("long-title") === "1" ? "Family Board · Preview" : "Family Board",
         view: "day",
         views: ["day", "timeline", "week", "month", "agenda"],
         start_hour: dailyUse ? 0 : 7,

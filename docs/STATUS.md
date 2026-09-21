@@ -40,6 +40,25 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Header title and clock — local candidate, 2026-09-21
+
+Candidate `0.25.1-moran.12` implements D21: the wall preview title is “Moran Calendar” with
+the current time 12px after it. Configurable title and existing HA 12/24-hour format/minute
+tick are reused. The sample preview retains its fixed test time. D20 compact dimensions,
+narrow multi-view hidden brand, accessible identity and single-view title remain intact.
+No calendar source, legacy behavior or zoom feature changed.
+
+The new clock regression failed against r11. Five compact-header cases now test the title,
+semantic timestamp, 12px spacing, minute advancement and 12/24-hour preferences in addition
+to prior space/navigation/disclosure checks. At 865×1048 CSS pixels the visible prototype
+measured exactly 12px title-to-clock spacing and 48px header height, with no title clipping
+or document overflow; keyboard Status disclosure still works. At 391×844 the existing
+hidden-brand behavior keeps all five modes reachable in the 48px header, without overflow.
+Page identity/content, no error overlay, screenshot and interaction checks passed; no local
+warnings/errors. Browser plugin not available; existing Chromium/CDP harness and in-app
+Playwright controls used without new dependencies. Format/types/build/whitespace, 151 unit
+tests and all 50 browser scenarios passed. Deployment pending at this source checkpoint.
+
 ### Compact calendar chrome — deployed, 2026-09-21
 
 Version `0.25.1-moran.11` implements the four annotated corrections in D20: single-row
