@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "10:52 CDT"
+time: "10:53 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -19,6 +19,8 @@ when the task originated in the separate Home Assistant operations workspace.
 - Latest development build: `0.25.1-moran.13`, fixing Timeline's unused lower panel.
   Timeline rows/bars now fill the available height with safe overlap minima and scrolling.
   See D24 and STATUS for verification/delivery. The density slider is still not implemented.
+  Source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed to personal origin's
+  `feature/moran-foundation` on 2026-09-21 at 10:53 CDT; remote HEAD matched.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
   The Timeline fix targets the laptop prototype; it has not been deployed to HA.

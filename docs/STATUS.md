@@ -5,6 +5,8 @@ See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
 Latest development build: `0.25.1-moran.13`, the verified full-height Timeline correction.
 The installed HA pilot remains r12 as recorded below; r13 is not deployed or released.
+Source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed to personal origin's
+`feature/moran-foundation` on 2026-09-21 at 10:53 CDT and verified by matching remote HEAD.
 
 ## What is working
 
