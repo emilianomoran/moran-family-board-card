@@ -16,14 +16,14 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Calendar correctness | Shared-person routing, unmatched lane, intended duplicate owner copies, all-day exclusive ends, midnight segmentation, and DST tests covered. |
 | Read-only pilot | Details and navigation available; create/edit/delete/drag writes blocked, including stale handlers. |
 | Recovery | Polling, wake/focus, page restoration, reconnect, partial-source failures, and stale-response handling implemented and synthetically tested. Physical iPhone HA-app lock/reopen refresh confirmed by the user 2026-09-21. |
-| Basic presentation | Circular avatars, dated Day heading, locale-aware 12/24-hour axis, reachable narrow controls, and person-grid scrolling implemented. |
+| Basic presentation | Circular avatars, compact header/date bar, collapsible Status tiles, locale-aware 12/24-hour axis, reachable narrow controls, and person-grid scrolling implemented. |
 | Lane alignment | Headers, all-day rows, and timed columns share sizing on resize and hide/show; `0.25.1-moran.3` deployed. |
 | Full-day range | Pilot uses hours 0–24, no trimming, and initial scroll to now. Config-only change; package defaults remain 6–22. |
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `9fdda195173ed8b9f44d0072a7a0cd194f90db1c`, version
-`0.25.1-moran.10`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:04 CDT.
+Installed application checkpoint: `96cdd790b3c7ab1f2ae0eb984e906cffef64a7a7`, version
+`0.25.1-moran.11`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:22 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -40,9 +40,9 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
-### Compact calendar chrome — local candidate, 2026-09-21
+### Compact calendar chrome — deployed, 2026-09-21
 
-Candidate `0.25.1-moran.11` implements the four annotated corrections in D20: single-row
+Version `0.25.1-moran.11` implements the four annotated corrections in D20: single-row
 48px header/40px view capsule, left-aligned proportional dates, collapsed-by-default Status
 tiles with a header disclosure, and no separate Day/Timeline heading row. Month/year and
 Today/paging move beside the date strip. Calendar data, read-only controls and legacy are
@@ -61,8 +61,23 @@ and roughly 129px from shell top to the calendar board. Keyboard Space expands a
 Status tiles, retaining focus. The user's existing browser zoom was preserved. Browser
 plugin not available; repository Chromium/CDP tests and Codex in-app Playwright controls
 provide the rendered checks without new dependencies. Formatting, types, build, whitespace,
-151 unit tests and all 50 compiled-card browser scenarios pass. Deployment remains pending
-at this source checkpoint.
+151 unit tests and all 50 compiled-card browser scenarios pass.
+
+Deployed at 10:22 CDT to the existing read-only HA preview. Served hash and repeated API
+verification, Core validation, unchanged preview configuration/74 other resources/27
+dashboard registrations, and retention of r10 for rollback passed. No calendar events,
+integrations or dashboard configuration changed; no restart, push or public release.
+
+Actual HA at 1280×720 and 390×844 measured a 48px header, 40px view capsule and 81px date bar;
+the old heading is absent, dates are left-aligned with proportional numerals, and collapsed
+Status tiles measure 0px. Calendar board height was 519px and 643px respectively, including
+its person header. Expanded Status tiles used 92px for the current data, reclaimed on collapse.
+Keyboard Space toggles the disclosure and retains focus. Phone next-day → Today and event
+details passed; fields remain disabled with Close/Cancel only. No document horizontal overflow.
+Page identity, meaningful rendering, screenshot review and no framework overlay passed.
+No Family Board warning/error; existing custom-sidebar, HA routing, config-template-card and
+Better Thermostat messages remain unrelated. Restored Today/Day, collapsed Status and normal
+viewport; the annotated user tab was preserved. No new physical-device verification is claimed.
 
 ### Week/Month/Agenda usability deployed, 2026-09-21
 
@@ -513,7 +528,7 @@ baseline milestone described above; preserve these behaviors during later presen
 | Actual provider propagation | Source parity verified; timing test waived by user 2026-09-21 | 166 source occurrences / 175 intended owner copies match; changed real content agrees in both paths. Timing remains unmeasured, not a completion blocker. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Calendar density zoom slider | User-requested future feature, 2026-09-21; not implemented | Slider adjusts row density: zoom out for more events/time on screen, zoom in for detail. Recommended: preserve the visible time/date and normal-size controls. View coverage, range/default and saved preference behavior remain open; see D19. |
-| Reclaim fixed calendar space | Implemented locally, 2026-09-21; final verification/deployment pending | Single 48px header, 40px capsule, Status disclosure, left/proportional dates, and date-bar navigation replace redundant fixed rows. See D20. |
+| Reclaim fixed calendar space | Deployed and HA-verified, 2026-09-21 | Single 48px header, 40px capsule, Status disclosure, left/proportional dates, and date-bar navigation replace redundant fixed rows. See D20. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |
 

@@ -416,8 +416,9 @@ Implementation choices under that direction:
   recorded in D06/D07/D12. Other wall targets retain their existing sizes. D19 zoom is still
   a separate future feature, not implemented by this change.
 
-The r10 regression failed on excessive header height. Candidate r11 and delivery evidence
-are recorded in STATUS.md; screenshots and household data stay out of this repository.
+The r10 regression failed on excessive header height. Version `0.25.1-moran.11` was deployed
+2026-09-21 at 10:22 CDT after 151 unit tests and 50 browser scenarios passed. STATUS.md records
+actual HA desktop/phone-width verification; screenshots and household data stay out of this repository.
 
 ## Discussion sequence and disposition
 
