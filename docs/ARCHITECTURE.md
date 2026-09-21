@@ -1,6 +1,7 @@
 # Calendar architecture and change map
 
-Status: code-backed reference, 2026-09-21 (`0.25.1-moran.13`). See [ADR 0001](adr/0001-implementation-base.md)
+Status: code-backed reference, 2026-09-21. Build/delivery checkpoints live in [STATUS](STATUS.md).
+See [ADR 0001](adr/0001-implementation-base.md)
 for the accepted implementation choice. This is the current map, not the older `.planning` proposal.
 
 ## Runtime and data ownership
@@ -57,6 +58,11 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 - Wall Timeline uses a remaining-height flex scroll container. Rows and bars grow into
   spare height, but overlapping lanes retain 48px event targets. Legacy keeps its original
   fixed lane size. Do not reintroduce a viewport-height cap inside a full-height wall shell.
+- `_maybeScrollToNow` handles Day and wall Timeline after loading and layout. Timeline
+  measures the pinned names and shares `_timelineHourWidth` with its renderer. Respect
+  the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.
+- The shared wall date strip keeps weekday and number centered within a 40px group at
+  the cell's 12px left inset. Do not center that group across the whole cell (D26).
 - Only view and hidden indices are persisted, scoped to user/dashboard/card plus config
   signature. No events, names, secrets, selected dates or scroll offsets in local storage.
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses

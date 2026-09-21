@@ -69,10 +69,12 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Compact mode** – one switch (`compact`) for smaller fonts and tighter spacing instead of adjusting three sliders.
 - **People hidden on start** – `hidden: true` per person; the column starts collapsed and a click on the header brings it back.
 
-> Fork status: **v0.25.1-moran.12 – daily-use calendar preview, based on upstream v0.25.**
+> Fork status: **daily-use calendar development fork, based on upstream v0.25.**
 > The wall layout and read-only calendar integration are installed in a private Home Assistant
 > pilot. This is a development checkpoint, not a published HACS release. The card reads calendars
 > through Home Assistant; it does not connect directly to Calendar Bridge.
+> [Current status](docs/STATUS.md) records the latest development build and the separately
+> installed HA version. A newer GitHub commit does not update the installed pilot.
 
 ### Calendar reliability preview
 
@@ -98,7 +100,11 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   behind the people/disclosure button. Opening them preserves Day's visible time; expansion
   lasts through view changes but resets on a fresh card/config, without a stored preference.
 - Wall Day/Timeline no longer have a separate heading row: month/year, Today and paging
-  share the date strip. Date cells are left-aligned with proportional, normally spaced numbers.
+  share the date strip. Weekday and number center within a shared 40px group, kept 12px
+  from the cell's left edge, with proportional, normally spaced numbers.
+- Wall Timeline fills the remaining panel with growing person rows and bars. Overlaps
+  retain readable minimum sizes; short panels scroll. Today's Timeline opens near now,
+  and Today recenters it. Refreshes and resizing preserve manual time browsing.
 - The installed wall pilot includes separate availability/next-event Status tiles, a Today
   action that recenters on now, browser-local view/person preferences, separated date cells,
   and a neutral segmented view switcher. See [verification and remaining work](docs/STATUS.md).

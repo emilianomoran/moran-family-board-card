@@ -7,8 +7,9 @@ Latest development build: `0.25.1-moran.15`, centering weekday/date text within 
 left-aligned date group. The installed HA pilot remains r12; r13–r15 are not deployed
 or released. Source, tests, built bundle and docs belong to the r15 milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Previous source `5efe9e949354d876e6b2861c613193a9b7b29550` was pushed
-on 2026-09-21 at 10:53 CDT with a matching remote HEAD.
+Latest application source: `28255844e2039963db58ba8d267d0fbeccb94fbb` (r15).
+Its push to the personal working branch was verified on 2026-09-21 by matching remote
+HEAD. Subsequent documentation commits do not change the application version.
 
 Known CI issue (ENG-05): two DST tests fail with the UTC runner; typecheck and formatting
 pass. The existing tests change timezone inside a worker, too late to affect its date
@@ -60,6 +61,32 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Freshness and delivery audit, 2026-09-21
+
+The current source, lockfile, banner and bundle agree on `0.25.1-moran.15`. A fresh
+build reproduces committed `dist/moran-family-board-card.js` without a diff. The loopback
+server on port 4173 serves the identical bundle (SHA-256
+`f1c5f1edda6f93a4a4002dfbb27e11d79e6813993478c15c09e8e896a6fd9856`). The fixture's fixed
+February date is deliberate, not stale provider data. No live HA refresh/deployment was requested.
+
+The original annotation tab was still running r11. It and the older compact review tab
+were reloaded; all three local previews now report r15, with the original Day view restored.
+The weekday label is 40px wide and centered, and the refreshed tabs have no warning/error
+logs. The HA tab was not reloaded or changed. This distinguishes a current served file from
+an already-open browser page retaining an old module.
+
+Both READMEs, the architecture/development guides, backlog, documentation index and handoff
+were reconciled with D24–D26. Current versions now live here and in the short handoff;
+general guides link here instead of duplicating stale version badges. Historical checkpoints
+remain dated history. The pre-existing untracked clipping debug note is preserved and excluded.
+
+[CI for r15](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35623731606)
+still fails at unit tests after passing typecheck and formatting; build is skipped.
+ENG-05 remains a real unresolved test-runner issue, not a stale GitHub notification.
+This cleanup does not alter application source, dependencies, CI configuration or live HA.
+Format, typecheck and all 151 Chicago-timezone unit tests were rerun successfully. The
+58-case browser result remains the r15 date-group verification below; the reproduced bundle is identical.
 
 ### Date-group alignment, local verification, 2026-09-21
 

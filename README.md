@@ -57,11 +57,13 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Fork-Status: **v0.25.1-moran.12, Kalender-Vorschau auf Basis von Upstream v0.25.**
+> Fork-Status: **Kalender-Entwicklungsstand auf Basis von Upstream v0.25.**
 > Das Wall-Layout ist in einem privaten Home-Assistant-Pilotbetrieb installiert,
 > Kalenderänderungen sind dort deaktiviert. Dies ist ein Entwicklungsstand, keine
 > veröffentlichte HACS-Version. Haushaltsmodule und ein direkter Bridge-Adapter bleiben
 > zurückgestellt. Aktuelle Entscheidungen und offene Arbeiten stehen in den verlinkten Projektdokumenten.
+> [Aktueller Stand](docs/STATUS.md) nennt den neuesten Entwicklungsbuild und die getrennt
+> installierte HA-Version. Ein neuer GitHub-Commit aktualisiert den Pilotbetrieb nicht automatisch.
 
 Der Wall-Pilot trennt jetzt den aktuellen Frei-/Belegt-Status vom nächsten Termin und zeigt
 dessen Datum und Uhrzeit separat. „Heute“ scrollt zur aktuellen Zeit; Ansicht und ausgeblendete
@@ -153,7 +155,7 @@ persons:
 | `max_columns`   | number  | `3`     | Max. nebeneinander liegende Spalten pro Person/Tag; bei mehr Überlappungen erscheint ein „+N"-Chip (1–8) |
 | `tentative_patterns` | Liste | –    | Termine mit passendem Titel-Muster als vorläufig (gestrichelt/transparent) markieren |
 | `first_day`     | string  | `monday`| Wochenstart: `monday` oder `sunday` |
-| `scroll_to_now` | boolean | `true`  | Tagesansicht beim Laden automatisch zur aktuellen Uhrzeit scrollen |
+| `scroll_to_now` | boolean | `true`  | Tagesansicht und Wall-Zeitstrahl für heute nach dem Laden zur aktuellen Uhrzeit scrollen. „Heute“ zentriert im Wall-Layout auch bei `false` oder ausgeblendeter Jetzt-Linie. Aktualisierungen und Größenänderungen im Zeitstrahl erhalten die manuelle Scrollposition. Der Legacy-Zeitstrahl bleibt unverändert. |
 | `refresh_interval` | number | `300` | Auto-Aktualisierung der Termine in Sekunden (0 = aus); zusätzlich bei Tablet-Aufwachen |
 
 Jede `calendar.*`-Entität funktioniert – egal ob `local_calendar` (lokal, ohne Cloud), Google oder CalDAV. Home Assistant liefert alle einheitlich.

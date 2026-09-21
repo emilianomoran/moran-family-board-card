@@ -535,6 +535,7 @@ refines D20 for the shared wall Day/Timeline date strip; legacy tabs are unchang
 | Timeline uses only a small container, 2026-09-21 | Full remaining height and expanding rows requested; overlap minima, scrolling, Status disclosure, read-only details and legacy compatibility preserved. See D24. Continue in the existing calendar repo. |
 | Timeline starts before the current time, 2026-09-21 | Initial/entry scroll and explicit Today recentering extended to wall Timeline; manual browsing preserved. See D25. |
 | Weekday/number alignment, 2026-09-21 | Center text over a shared axis while keeping the date group at the cell's left inset. See D26. |
+| Freshness check before commit/push, 2026-09-21 | Reconciled stale README/guide references, verified source/build/served bytes, refreshed local tabs still on older code, and retained the separate r12 HA deployment and unresolved ENG-05 CI issue. No new app feature or deployment. |
 | GitHub failure emails, 2026-09-21 | Read-only diagnosis found two UTC-sensitive DST fixture assertions, not typecheck errors. Test timezone must be established before Vitest workers start; engineering follow-up ENG-05. No CI repair was included in that diagnostic request. |
 
 ## Evidence and date boundaries

@@ -57,8 +57,8 @@ Markdown checker. The compiled-browser runner starts its own temporary loopback 
 and headless Chrome, so it does not require the interactive server on 4173. No Playwright
 dependency is currently installed; do not add one just to run the existing suite.
 
-Known local baseline at r14: **151 unit tests, 58 browser scenarios**. Count changes are
-expected as tests are added; preserve behaviors, not a frozen number. CI currently does
+See [STATUS](STATUS.md) for the current verified build and test totals. Counts change as
+tests are added; preserve behaviors, not a frozen number. CI currently does
 not run the compiled-browser suite. Never substitute a successful build for rendered QA.
 
 Known CI issue, diagnosed 2026-09-21 (ENG-05): two DST fixture tests assume Chicago while
@@ -95,6 +95,12 @@ Run the full suite before a milestone because shared date/scroll changes affect 
 Define the flow under test before editing. Reproduce the issue against the prior bundle
 when practical, then test the same flow after the change. Use a synthetic review tab if
 the user's tab contains unsaved annotations. Do not erase annotations to simplify QA.
+
+A separate review tab does not isolate stored preferences when its only difference is a
+`?review=` query parameter. Preferences use the pathname, not the query string. Record and
+restore the user's view/filters around review, especially before reloading their preview.
+Server freshness and loaded-tab freshness are separate checks: verify the new version
+banner after reload, not only the file served on disk.
 
 - Confirm URL/title, meaningful content, no framework overlay and relevant console errors.
 - Check a screenshot plus real interactions, not only DOM text or numerical assertions.
@@ -135,3 +141,9 @@ HEAD equals the intended commit. Do not force-push, merge main, tag or publish a
 The branch may include earlier verified local commits not yet on origin. Review that entire
 outgoing range, not just the last diff. A push is separate from HA deployment and a release.
 Use [OPERATIONS](OPERATIONS.md) before any live change; report the exact delivery state.
+
+Keep the current build/deployment checkpoint in STATUS and the short root handoff. Other
+guides should link there instead of keeping another version badge that can become stale.
+When adding a decision, update the documentation index's conversation coverage too.
+Rebuilding should reproduce committed `dist`; compare the served preview bundle to that
+file before blaming an old screenshot or cached tab on the current source.

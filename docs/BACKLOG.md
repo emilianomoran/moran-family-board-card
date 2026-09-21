@@ -64,6 +64,7 @@ Timeline's remaining-height correction (D24) is implemented and verified in r13;
 see STATUS for verification and delivery. It does not implement CAL-01's density slider.
 Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
 is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
+Date-label centering within the left-aligned group (D26) is implemented in r15.
 
 - Physical iPhone HA-app lock/reopen refresh: user-confirmed pass on 2026-09-21.
 - Provider edit/cancellation timing: waived on 2026-09-21. Unknown latency is not a blocker.
