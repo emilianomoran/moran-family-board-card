@@ -365,10 +365,14 @@ correct appointment. This is not approval for editing, new modules, or a complet
 - Agenda wraps title/location and puts countdown below event text. Each view uses the
   remaining panel height and owns its scrolling. Legacy presentation is unchanged.
 
-The compiled regression reproduced the missing Agenda filters against r9. Candidate r10
+The compiled regression reproduced the missing Agenda filters against r9. Version r10
 adds desktop, phone, small-phone, landscape, and embedded-panel checks for these behaviors,
 including English/German labels, source failure, read-only details, and restricted-view
 fallbacks. Delivery and final verification are recorded in STATUS.md.
+
+Deployed to the same read-only HA preview on 2026-09-21 at 10:04 CDT from local source
+`9fdda195173ed8b9f44d0072a7a0cd194f90db1c`; 151 unit tests, 45 browser scenarios, and actual
+HA desktop/phone-width interaction and visual checks pass. No push or public release.
 
 ## Discussion sequence and disposition
 

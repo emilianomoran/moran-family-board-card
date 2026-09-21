@@ -22,8 +22,8 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `a3e30486944a29694e5548e086f4790b448acdf3`, version
-`0.25.1-moran.9`, on `feature/moran-foundation`, deployed 2026-09-21 at 01:15 CDT.
+Installed application checkpoint: `9fdda195173ed8b9f44d0072a7a0cd194f90db1c`, version
+`0.25.1-moran.10`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:04 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -40,9 +40,9 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
-### Week/Month/Agenda usability verified locally, 2026-09-21
+### Week/Month/Agenda usability deployed, 2026-09-21
 
-Candidate `0.25.1-moran.10` implements D18: dated, readable Week columns with pinned
+Version `0.25.1-moran.10` implements D18: dated, readable Week columns with pinned
 headers; compact narrow Month with unique event counts and date-to-Day drilldown;
 shared person filters in Month/Agenda; wrapping Agenda titles/location/countdowns.
 Restricted Month configurations retain direct event cards when Day cannot expose all dates.
@@ -64,7 +64,22 @@ content, no framework overlay, screenshots, and clean warning/error logs passed.
 annotated prototype tab was left alone once its unsaved comment was discovered; checks used
 a temporary review tab. This is desktop browser QA, not a new physical-device claim.
 
-Deployment to the existing read-only HA preview is pending at this source checkpoint.
+Deployed at 10:04 CDT to the existing read-only HA preview. Repeated served checksum
+verification, Core validation, unchanged preview configuration/74 other resources/27
+dashboard registrations, and retention of r9 for rollback passed. No source appointments,
+integrations, or dashboard configuration changed; no restart, push, or public release.
+
+Actual HA at 1280×720 showed seven 180px Week columns, all seven complete date labels,
+45 owner event cards, and desktop Month's direct cards. At 390×844, Month's scroll/client
+widths both measured 390px; each date measured about 54.6px wide and person filters 48px
+high. Hiding one owner of a shared event preserved its unique count while another owner
+remained visible. Month date → Day retained the hidden lane; Agenda retained the filter;
+restoring it and opening an appointment showed disabled fields, only Close/Cancel, and a
+358px dialog without horizontal overflow. Agenda itself also had no horizontal overflow.
+Page identity, meaningful rendering, no error overlay, screenshot review, and interactions
+passed. No Family Board warning/error after reload; existing custom-sidebar, HA routing,
+config-template-card, and Better Thermostat messages remain unrelated. Restored Today/Day,
+all original people, and normal viewport. No new physical-device verification is claimed.
 
 ### Cross-view date continuity deployed, 2026-09-21
 
@@ -467,7 +482,7 @@ baseline milestone described above; preserve these behaviors during later presen
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
 | Keep the date across view changes | Deployed and HA-verified 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
-| Readable Week/Month/Agenda | Implemented and locally verified 2026-09-21; deployment pending | Dates and pinned headers, wrapping cards, compact Month counts/drilldown, and shared filters; legacy/restricted-view safeguards. See D18. |
+| Readable Week/Month/Agenda | Deployed and HA-verified 2026-09-21 | Dates and pinned headers, wrapping cards, compact Month counts/drilldown, and shared filters; legacy/restricted-view safeguards. See D18. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
 | Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |
