@@ -31,7 +31,11 @@ HA dashboard and do not update its bundle automatically.
 
 Delivery policy added 2026-09-21: starting at the next verified milestone, commit and push
 the current working branch, including docs and the built bundle where applicable (D22).
-The title/clock checkpoint above remains locally committed; this policy update is not a push.
+Delivery update, 2026-09-21 at 10:44 CDT: the handoff milestone
+`e3b5b7dd38fcc057f5c096643635cb83de139847` was pushed to personal origin's
+`feature/moran-foundation`; `git ls-remote` matched local HEAD. This also pushed the
+29 earlier local commits, including the r12 source checkpoint. Earlier deployment entries
+retain their original no-push statements as dated history. No merge, tag or release occurred.
 
 Milestone disposition, 2026-09-21: the dependable read-only desktop/HA-app calendar
 baseline is complete under the accepted scope. Source parity/routing, full-day display,
@@ -59,8 +63,9 @@ for credential/private-identifier patterns, with no matches. Review found no pri
 screenshots, live configuration or backup files in the outgoing file set.
 
 Re-ran format, TypeScript, build, all 151 unit tests and all 50 compiled-browser scenarios;
-all passed. The rebuild left the committed r12 bundle unchanged. Milestone push is pending
-remote confirmation; an unrelated pre-existing debug note remains untracked and excluded.
+all passed. The rebuild left the committed r12 bundle unchanged. Milestone push and remote
+confirmation passed as recorded above; an unrelated pre-existing debug note remains
+untracked and excluded.
 
 ### Header title and clock — deployed, 2026-09-21
 

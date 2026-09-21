@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "10:31 CDT"
+time: "10:44 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -19,6 +19,9 @@ when the task originated in the separate Home Assistant operations workspace.
 - Latest application: `0.25.1-moran.12`, source `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`.
   Installed in the private read-only HA preview on 2026-09-21 at 10:28 CDT. This handoff
   milestone changes documentation only, not that deployed bundle.
+- The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
+  commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
+  No main merge, release or additional HA deployment occurred. Recheck Git for later work.
 - Calendar correctness and daily use are proven to the accepted baseline. Five views,
   person routing, full-day pilot, recovery, filters and read-only details work. Final
   visual design and physical wall hardware are not complete. See [STATUS](docs/STATUS.md).
