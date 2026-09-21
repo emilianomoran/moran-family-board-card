@@ -374,6 +374,20 @@ Deployed to the same read-only HA preview on 2026-09-21 at 10:04 CDT from local 
 `9fdda195173ed8b9f44d0072a7a0cd194f90db1c`; 151 unit tests, 45 browser scenarios, and actual
 HA desktop/phone-width interaction and visual checks pass. No push or public release.
 
+### D19. Calendar density zoom slider
+
+**User-requested future feature, 2026-09-21; not implemented.** Add a zoom slider to
+change calendar row density. Zooming out reduces row height so more events/time fit on
+screen; zooming in provides more space to read event details. The user said "at some
+point," so this records future scope, not an instruction to implement or deploy it now.
+
+Implementation recommendation: change the calendar's internal layout density rather than
+browser/page zoom. Keep menus, navigation, Status tiles, and controls at their normal size.
+Preserve the visible date/time anchor during adjustment and keep event targets usable at
+the compact end. Existing Day `hour_height`/`fit_height` settings are a possible starting
+point, not an existing interactive zoom control. View coverage, slider range/default,
+reset behavior, and whether to remember density per device remain design choices.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -398,6 +412,7 @@ HA desktop/phone-width interaction and visual checks pass. No push or public rel
 | Continue and clarify the next milestone, 2026-09-20 | Dependable read-only desktop/mobile daily use; finish visible controls and discrete date navigation while retaining data integrity/recovery. Full redesign and household modules remain deferred. |
 | Continue without the remaining test, 2026-09-21 | Timed provider-change test explicitly waived, not passed. Continue concrete usability corrections; D16/D17 record the scope and date-continuity fix. |
 | What else; continue, 2026-09-21 | Bounded Week/Month/Agenda usability pass chosen under continued read-only calendar work; D18 records the behavior and compatibility limits. No new acceptance gate. |
+| Future zoom slider, 2026-09-21 | User requested adjustable row density to zoom out and show more events. Recorded for later implementation; D19 separates the requested feature from suggested interaction details. |
 
 ## Evidence and date boundaries
 

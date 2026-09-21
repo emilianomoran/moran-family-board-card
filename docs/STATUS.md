@@ -488,6 +488,7 @@ baseline milestone described above; preserve these behaviors during later presen
 | Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |
 | Actual provider propagation | Source parity verified; timing test waived by user 2026-09-21 | 166 source occurrences / 175 intended owner copies match; changed real content agrees in both paths. Timing remains unmeasured, not a completion blocker. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
+| Calendar density zoom slider | User-requested future feature, 2026-09-21; not implemented | Slider adjusts row density: zoom out for more events/time on screen, zoom in for detail. Recommended: preserve the visible time/date and normal-size controls. View coverage, range/default and saved preference behavior remain open; see D19. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |
 
