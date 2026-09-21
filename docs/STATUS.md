@@ -3,19 +3,15 @@
 Last recorded: 2026-09-21. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.15`, centering weekday/date text within each
-left-aligned date group. The installed HA pilot remains r12; r13–r15 are not deployed
-or released. Source, tests, built bundle and docs belong to the r15 milestone on
+Latest development build: `0.25.1-moran.16`, wall Day density slider (D27) and the test-runner
+timezone repair (D28/ENG-05). The installed HA pilot remains r12; r13–r16 are not deployed
+or released. Source, tests, built bundle and docs belong to the r16 milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Latest application source: `28255844e2039963db58ba8d267d0fbeccb94fbb` (r15).
-Its push to the personal working branch was verified on 2026-09-21 by matching remote
-HEAD. Subsequent documentation commits do not change the application version.
+Local verification is complete; milestone push and hosted CI verification are next.
 
-Known CI issue (ENG-05): two DST tests fail with the UTC runner; typecheck and formatting
-pass. The existing tests change timezone inside a worker, too late to affect its date
-runtime. All 151 pass when launched with `TZ=America/Chicago`; `TZ=UTC npm test`
-reproduces the two failures. This was diagnosed separately and remains unfixed. Do not
-describe this branch as CI-green or release-ready based on the local Chicago run.
+ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 151
+tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
+to the app's runtime timezone. Hosted CI must be checked separately after the push.
 
 ## What is working
 
@@ -61,6 +57,47 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Day density slider, 2026-09-21
+
+The requested CAL-01 feature starts with wall Day (D27). The header magnifying glass opens
+a native range input, 40–96px/hour; 64px is 100%. The popup is absent from other views and
+does not consume a permanent row. Manual zoom overrides fit until Reset, preserves the
+date/time/lane anchor within scroll limits, and remains session-only. New card/config or
+reload resets it; view changes, refresh and resize retain it. No preferences or HA config
+are written. English and German labels are included.
+
+Zoom review found that the blanket 48px minimum stretched short Day appointments into
+neighbors' time. Blocks now use their calculated height with a 16px title-strip floor;
+optional time text is omitted when it cannot fit. Short events still open read-only
+details, and overlap disclosure reaches Agenda. Larger touch targets remain available
+by zooming in/using Agenda; Timeline's separate 48px lane minimum is unchanged.
+Wall Day now takes its remaining container height without legacy viewport/entrance-animation
+caps, so zoom and embedded resizing do not change the space available to the calendar.
+
+Seven new compiled-browser cases pass: 1920×1080, 812×844, 390×844, 320×568, 844×390,
+a 400px card in a 1920px viewport, and reduced motion at 390×844. They cover range bounds,
+rapid-input anchors, dates/filters, refresh, resize, now-line/Today, fit/reset, new config,
+short/midnight/adjacent/concurrent events, all-day rows, read-only details, overflow Agenda,
+legacy isolation, popup containment and native keyboard/pointer/touch input.
+Run `HARNESS_ONLY=density npm run test:harness`. All 65 browser scenarios pass, including
+the seven density cases. The final container-sizing adjustment was rechecked in the
+focused density suite, including a content-sized host that must not collapse its grid.
+
+Manual flow: loopback Day preview → Calendar zoom → Home/End → Reset/Escape. At 1707×960
+and 391×844 CSS pixels, the slider changes visible hours/detail and Reset returns to 100%
+with slider focus. Header stays 48px, the phone popup remains inside the card, and the page
+does not overflow horizontally. Page identity/content, no overlay, screenshots, interaction
+state and clean warning/error logs were checked. Browser plugin absent; existing Chromium/CDP
+regressions and in-app Playwright/CUA controls supplied evidence without new dependencies.
+Physical Safari, final wall hardware and installed HA are not claimed by these checks.
+The original annotation preview was reloaded to r16 and left in Day with the zoom popup
+open at its default. Normal viewport was restored. Port 4173 serves bytes identical to
+the built bundle (SHA-256 `eae69e8def93c13b4f66af321d01eb887e0c0f4f7702a7b78272d539efc594fb`).
+
+ENG-05: `vitest.config.ts` establishes Chicago before worker creation; ineffective worker
+hooks were removed, not assertions. Format/type/build and 151 UTC-launched unit tests pass.
+Push/hosted-CI receipt will be recorded after delivery. No HA deployment or release.
 
 ### Freshness and delivery audit, 2026-09-21
 

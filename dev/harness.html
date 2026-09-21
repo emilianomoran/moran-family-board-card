@@ -775,9 +775,10 @@
             const rect = target.getBoundingClientRect();
             const compactView = target.closest('.switch');
             const compactDate = target.closest('.wall-date-tools');
-            const statusToggle = target.matches('.wall-status-toggle');
-            const minWidth = compactDate ? 28 : statusToggle ? 40 : 48;
-            const minHeight = compactView ? 34 : compactDate ? 36 : statusToggle ? 40 : 48;
+            const headerToggle = target.matches('.wall-status-toggle, .wall-density-toggle');
+            const dayEvent = target.matches('.board .event');
+            const minWidth = compactDate ? 28 : headerToggle ? 40 : 48;
+            const minHeight = compactView ? 34 : compactDate ? 36 : headerToggle ? 40 : dayEvent ? 16 : 48;
             if (rect.width < minWidth || rect.height < minHeight) {
               throw new Error(
                 `${activeView}: ${target.className || target.localName} is ${rect.width}x${rect.height}.`,
@@ -1041,7 +1042,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "timeline"
+        (query.get("checks") === "density"
+          ? import("./calendar-density-check.mjs").then(({ runCalendarDensityChecks }) =>
+              runCalendarDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline"
           ? import("./calendar-timeline-check.mjs").then(({ runCalendarTimelineChecks }) =>
               runCalendarTimelineChecks(card, hass, nextRender),
             )
@@ -1103,6 +1108,8 @@
             console.error(error);
           })
           .finally(() => {
+            // The density runner follows geometry checks with real range-input events.
+            if (query.get("checks") === "density") return;
             card.remove();
             window.stop();
           });

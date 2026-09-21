@@ -272,6 +272,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _pendingFetch?: { key: string; promise: Promise<void> };
   @state() private _browserOnline = navigator.onLine !== false;
   @state() private _statusExpanded = false;
+  @state() private _densityExpanded = false;
+  @state() private _dayHourHeight?: number; // wall Day override; never persisted or written to HA
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -322,6 +324,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
     this._config = config;
     this._statusExpanded = false;
+    this._densityExpanded = false;
+    this._dayHourHeight = undefined;
     this._daySwipe = undefined;
     this._cancelDayScroll();
     if (config.read_only) {
@@ -430,6 +434,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private _selectView(view: ViewName, explicitDate = false): void {
     if (!this._enabledViews.includes(view)) return;
+    this._densityExpanded = false;
     if (this._view !== view) {
       this._cancelDayScroll();
       this._daySwipe = undefined;
@@ -470,6 +475,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._browserOnline = navigator.onLine !== false;
     this._syncCalendarDate();
     document.addEventListener("keydown", this._onKeyDown);
+    document.addEventListener("pointerdown", this._dismissDensityOutside);
+    document.addEventListener("focusin", this._dismissDensityOutside);
+    this.renderRoot.addEventListener("focusin", this._dismissDensityOutside);
     document.addEventListener("visibilitychange", this._onVisible);
     window.addEventListener("focus", this._onVisible);
     window.addEventListener("pageshow", this._onVisible);
@@ -495,6 +503,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    this._densityExpanded = false;
     this._cancelDayScroll();
     this._daySwipe = undefined;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
@@ -503,6 +512,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._fetchedKey = "";
     this._pendingFetch = undefined;
     document.removeEventListener("keydown", this._onKeyDown);
+    document.removeEventListener("pointerdown", this._dismissDensityOutside);
+    document.removeEventListener("focusin", this._dismissDensityOutside);
+    this.renderRoot.removeEventListener("focusin", this._dismissDensityOutside);
     document.removeEventListener("visibilitychange", this._onVisible);
     window.removeEventListener("focus", this._onVisible);
     window.removeEventListener("pageshow", this._onVisible);
@@ -575,6 +587,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (!Number.isFinite(min) || min <= 0) return;
     if (Date.now() - this._lastInteract < min * 60000) return;
     if (this._dialog) return; // never yank an open dialog away
+    this._densityExpanded = false;
     const wanted = this._config.view ?? "day";
     const view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
     if (this._view !== view) this._view = view;
@@ -615,6 +628,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
 
   private _onKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === "Escape" && this._densityExpanded && !this._dialog) {
+      e.preventDefault();
+      e.stopPropagation();
+      this._densityExpanded = false;
+      this.renderRoot.querySelector<HTMLButtonElement>(".wall-density-toggle")?.focus();
+      return;
+    }
     if (e.key === "Escape" && this._dialog) {
       e.stopPropagation();
       this._closeDialog();
@@ -722,7 +742,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
    */
   private _measureFit(): void {
     this._applyFullHeight();
-    if (!this._config?.fit_height || this._view !== "day") {
+    if (
+      !this._config?.fit_height ||
+      this._view !== "day" ||
+      (this._layout === "wall" && this._dayHourHeight !== undefined)
+    ) {
       if (this._fitPx !== 0) this._fitPx = 0;
       return;
     }
@@ -755,7 +779,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _applyFullHeight(): void {
     const board = this.renderRoot?.querySelector(".board") as HTMLElement | null;
     if (!board) return;
-    if (!this._config?.full_height) {
+    // Wall already owns a bounded flex panel. Legacy viewport math samples the
+    // entrance animation and leaves a changing height cap during zoom/reflow.
+    if (this._layout === "wall" || !this._config?.full_height) {
       if (board.style.height) {
         board.style.height = "";
         board.style.maxHeight = "";
@@ -1180,6 +1206,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
   /** Pixels per minute, derived from the configurable hour height (or fit mode). */
   private get _pxPerMin(): number {
+    if (this._layout === "wall" && this._view === "day" && this._dayHourHeight !== undefined)
+      return this._dayHourHeight / 60;
     if (this._config.fit_height && this._fitPx > 0) return this._fitPx;
     const h = Math.min(
       HOUR_HEIGHT_MAX,
@@ -1691,6 +1719,99 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   /* ---- render -------------------------------------------------- */
+  private _dismissDensityOutside = (event: Event): void => {
+    if (!this._densityExpanded) return;
+    const path = event.composedPath();
+    const panel = this.renderRoot.querySelector(".wall-density-panel");
+    const toggle = this.renderRoot.querySelector(".wall-density-toggle");
+    if ((!panel || !path.includes(panel)) && (!toggle || !path.includes(toggle)))
+      this._densityExpanded = false;
+  };
+
+  private async _toggleDensity(): Promise<void> {
+    this._onInteract();
+    this._densityExpanded = !this._densityExpanded;
+    await this.updateComplete;
+    if (this._densityExpanded)
+      this.renderRoot.querySelector<HTMLInputElement>("#wall-day-density")?.focus();
+  }
+
+  private _setDayDensity(height?: number): void {
+    if (this._layout !== "wall" || this._view !== "day") return;
+    if (height !== undefined && !Number.isFinite(height)) return;
+    this._onInteract();
+    this._rememberDayScroll(this._dateForDay(this._shownDay()));
+    this._dayHourHeight =
+      height === undefined
+        ? undefined
+        : Math.min(HOUR_HEIGHT_MAX, Math.max(HOUR_HEIGHT_MIN, height));
+    // Reset immediately resumes fit_height, before restoring the time anchor.
+    this._measureFit();
+  }
+
+  private _renderDensityControl() {
+    if (this._view !== "day") return nothing;
+    const hourHeight = this._pxPerMin * 60;
+    const percent = `${Math.round((hourHeight / DEFAULT_HOUR_HEIGHT) * 100)}%`;
+    return html`
+      <button
+        class="wall-density-toggle"
+        title=${this._t("calendar_zoom")}
+        aria-label=${this._t("calendar_zoom")}
+        aria-expanded=${this._densityExpanded}
+        aria-controls="wall-density-panel"
+        @click=${this._toggleDensity}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          aria-hidden="true"
+        >
+          <circle cx="10" cy="10" r="6"></circle>
+          <path d="m15 15 6 6M7 10h6M10 7v6"></path>
+        </svg>
+      </button>
+      <div
+        id="wall-density-panel"
+        class="wall-density-panel"
+        role="group"
+        aria-label=${this._t("calendar_zoom")}
+        ?hidden=${!this._densityExpanded}
+      >
+        <div class="wall-density-heading">
+          <label for="wall-day-density">${this._t("calendar_zoom")}</label>
+          <output for="wall-day-density">${percent}</output>
+          <button
+            @click=${async () => {
+              this._setDayDensity();
+              await this.updateComplete;
+              this.renderRoot.querySelector<HTMLInputElement>("#wall-day-density")?.focus();
+            }}
+            ?disabled=${this._dayHourHeight === undefined}
+          >
+            ${this._t("reset_zoom")}
+          </button>
+        </div>
+        <input
+          id="wall-day-density"
+          type="range"
+          min=${HOUR_HEIGHT_MIN}
+          max=${HOUR_HEIGHT_MAX}
+          step="1"
+          .value=${String(Math.round(hourHeight))}
+          aria-valuetext=${percent}
+          @input=${(event: Event) =>
+            this._setDayDensity((event.target as HTMLInputElement).valueAsNumber)}
+        />
+        <div class="wall-density-hints" aria-hidden="true">
+          <span>${this._t("zoom_more_hours")}</span><span>${this._t("zoom_more_detail")}</span>
+        </div>
+      </div>
+    `;
+  }
+
   protected render() {
     if (!this._config || !this.hass) return nothing;
     const now = this._now();
@@ -1705,6 +1826,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             clockLabel: formatTime(this.hass, now),
             clockDateTime: now.toISOString(),
             viewNavigation,
+            densityControl: this._renderDensityControl(),
             statusToggle: this._config.show_focus
               ? html`<button
                   class="wall-status-toggle"
@@ -2241,7 +2363,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                               e,
                             )}</span
                           >
-                          ${h > 32 || dragging
+                          ${h > (this._layout === "wall" ? 42 : 32) || dragging
                             ? html`<span class="etime"
                                 >${formatMinutes(this.hass, sMin)}–${formatMinutes(
                                   this.hass,
@@ -4759,7 +4881,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.15 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.16 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

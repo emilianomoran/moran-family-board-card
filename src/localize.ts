@@ -83,6 +83,10 @@ const EN: Dict = {
   status_now: "Now",
   status_next: "Next",
   status_tiles: "Status tiles",
+  calendar_zoom: "Calendar zoom",
+  reset_zoom: "Reset",
+  zoom_more_hours: "More hours",
+  zoom_more_detail: "More detail",
 };
 
 const DE: Dict = {
@@ -164,6 +168,10 @@ const DE: Dict = {
   status_now: "Jetzt",
   status_next: "Als Nächstes",
   status_tiles: "Status-Kacheln",
+  calendar_zoom: "Kalenderzoom",
+  reset_zoom: "Zurücksetzen",
+  zoom_more_hours: "Mehr Stunden",
+  zoom_more_detail: "Mehr Details",
 };
 
 const TABLE: Record<string, Dict> = { en: EN, de: DE };

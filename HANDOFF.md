@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "11:12 CDT"
+time: "11:31 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -16,24 +16,20 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.15`, centering weekday text over its date number
-  in a shared 40px group that stays at the 12px left cell inset (D26). Both Day and
-  Timeline use it. r14 opens wall Timeline near now and makes Today recenter it;
-  manual browsing survives refresh, ticks, filters and resizing (D25).
-  r13's full-height rows/bars remain (D24); the density slider is not implemented.
-  Source, built bundle, tests and docs form the r15 milestone on the working branch.
-  Application source `28255844e2039963db58ba8d267d0fbeccb94fbb` is pushed and was verified
-  against remote HEAD. The 2026-09-21 freshness audit reproduced its bundle and matched
-  the loopback server's bytes. Later docs-only commits retain r15. No release or main merge.
-  The stale r11 annotation tab was refreshed; all local previews now load r15. See
-  DEVELOPMENT for the shared-preference caveat when reviewing in a separate query-string tab.
-- Known CI failure, diagnosed 2026-09-21: two DST assertions assume Chicago while CI
-  launches tests in UTC. `TZ=America/Chicago npm test` passes all 151; UTC still fails two.
-  In-worker timezone mutation is ineffective. ENG-05 owns the test-runner repair;
-  it is not implemented by these UI corrections. Do not claim hosted CI is green.
+- Latest development build: `0.25.1-moran.16`, wall Day zoom (D27). The magnifying glass
+  opens a 40–96px/hour slider (64 = 100%) without another fixed row. Time/lane anchors
+  survive changes; Reset restores configured height and fit. It is session-only, retained
+  across views but reset on config/reload; other views and legacy have no slider yet.
+  Short Day events use duration-scaled title strips rather than stretching across neighbors.
+  Day uses remaining flex height; r13–r15 Timeline/date improvements remain intact.
+  Source, bundle, tests and docs are verified locally for the milestone; see STATUS for
+  the push/CI receipt. No main merge, release or HA deployment is part of this work.
+- ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
+  `TZ=UTC npm test` passes all 151; no DST assertion or app runtime timezone was changed.
+  Do not restore ineffective in-worker timezone hooks. Hosted CI is checked after push.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r15 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r16 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -55,9 +51,10 @@ when the task originated in the separate Home Assistant operations workspace.
    [status](docs/STATUS.md). [Decisions](docs/DECISIONS.md) explain the why.
 2. Use [DEVELOPMENT](docs/DEVELOPMENT.md) to start the synthetic preview and run checks.
    No HA access or real appointments are needed for ordinary feature development.
-3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. The strongest
-   named future feature is **CAL-01: density zoom slider**. It is requested for later,
-   not implemented, and the Timeline sizing correction does not start it.
+3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
+   first Day slice is implemented.** Next candidates are feedback-driven usability across
+   views, saved per-device zoom or Timeline/Week density. Those are not already built;
+   define their semantics before extending the Day scale. Meals/lists remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
    [OPERATIONS](docs/OPERATIONS.md) and the private workspace's current safety rules.
 5. Update the owning docs and this handoff before the next milestone push. Verify the
@@ -65,10 +62,10 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## Evidence and remaining limits
 
-The r15 local checks pass: 151 unit tests launched in America/Chicago and all 58 compiled
-browser scenarios, including the five updated date/chrome cases. Desktop/phone-width
-alignment and date selection were also reviewed interactively. The UTC/hosted-CI exception
-above remains open. Actual HA review remains at r12. The user confirmed physical
+The r16 local checks pass: 151 unit tests launched from UTC and all 65 browser scenarios,
+including seven new density cases with native touch, pointer and keyboard input. Hosted
+CI and delivery receipts are in STATUS. Desktop/phone-width zoom was also reviewed
+interactively. Actual HA review remains at r12. The user confirmed physical
 iPhone HA-app lock/reopen refresh.
 They waived the timed provider-edit/cancellation test. Do not reopen that as a gate or
 claim measured latency. No real appointment was mutated to test the card.

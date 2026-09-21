@@ -503,10 +503,48 @@ text; the group retains the existing 12px left inset. Do not center the group ac
 whole cell, change natural numeral spacing, or alter today/selection treatments. This
 refines D20 for the shared wall Day/Timeline date strip; legacy tabs are unchanged.
 
+### D27. Start density zoom with wall Day
+
+**Implementation choice, 2026-09-21, under the user's request to continue the next phase.**
+Deliver CAL-01's first slice in Day instead of inventing density semantics for all five
+views at once. A 40px magnifying-glass button in the existing header opens a compact
+slider; it adds no permanent row. The supported scale is 40–96 pixels/hour in 1px steps,
+shown as 63–150% relative to the package's 64px/hour default. This is row density, not
+browser zoom. The user requested the feature; these initial values/placement are agent
+implementation choices, not separately approved final visual design.
+
+Capture the time just below pinned rows and the horizontal lane offset before each
+change; restore after layout, clamped at the scrollable range's ends. Do not recenter to
+now on ordinary zoom input. Today still explicitly recenters. Reuse the existing Day
+anchor for rapid inputs, filters and navigation. Wall Day fills its bounded flex container;
+legacy viewport-height calculations must not cap it during reflow.
+
+Manual zoom temporarily overrides `fit_height`. Reset restores configured `hour_height`
+and fit behavior. Keep the override across dates, refresh, resizing and view switches in
+the current card; new config/card/page reload resets it. No local-storage schema change,
+calendar write or HA config mutation. Other views and legacy have no slider in this slice.
+
+Short Day blocks follow their calculated duration down to the existing 16px title strip,
+rather than a blanket 48px target that visually extends them over neighboring appointments.
+Prioritize titles and omit the optional time line when it cannot fit. Keyboard details and
+overflow-to-Agenda remain available; zoom in or use Agenda for larger short-event targets.
+Timeline's 48px overlap targets are unchanged. Native range keyboard/touch input, Escape
+with focus return, outside-pointer/focus dismissal and reduced motion are tested.
+Per-device persistence and Timeline/Week density remain backlog choices, not built features.
+
+### D28. Set the DST fixture timezone before test workers start
+
+**Engineering repair, 2026-09-21.** ENG-05's failures came from starting Vitest workers
+in UTC and then trying to mutate their timezone in `beforeAll`. `vitest.config.ts` now
+sets America/Chicago in the parent before worker creation. Remove the ineffective hooks,
+retain every DST assertion, and verify with `TZ=UTC npm test` plus the hosted CI run.
+This affects tests only: no app timezone change, dependency update or fixture weakening.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue the next phase, 2026-09-21 | Implement the requested zoom feature's wall Day slice (D27) and repair the diagnosed test-runner issue (D28). Keep all decisions in this repo; verify and push the milestone without GSD gates. No HA deployment or release implied. |
 | Skylight UI/features, existing HA cards, and a possible custom website | Calendar-first HA fork selected. Original research remains linked from the documentation index. |
 | Dedicated repo, phased plan, and implementation-base comparison | Repo created; ADR accepted; foundation reviewed. GSD was later retired. |
 | Where ADRs live and what the prototype was being checked against | ADR and foundation acceptance records retained and linked. Current status replaces stale phase progress as the entry point. |

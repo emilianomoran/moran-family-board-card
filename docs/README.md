@@ -35,6 +35,7 @@ Updated 2026-09-21. Private access/configuration remains outside this repo by de
 - D19–D23: future zoom, compact chrome, title/clock, milestone pushes and this handoff.
 - D24: full-height Timeline; continue in the existing calendar repository.
 - D25–D26: Timeline initial/Today centering and centered text within left-aligned date groups.
+- D27–D28: first Day density-slider slice and deterministic DST test-runner timezone.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.

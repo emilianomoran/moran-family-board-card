@@ -65,6 +65,13 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   the cell's 12px left inset. Do not center that group across the whole cell (D26).
 - Only view and hidden indices are persisted, scoped to user/dashboard/card plus config
   signature. No events, names, secrets, selected dates or scroll offsets in local storage.
+- Wall Day density uses `_dayHourHeight` as an optional in-memory override. `_setDayDensity`
+  remembers the old time/lane anchor before changing scale; Reset resumes fit measurement
+  before restoring it. Keep `_maybeScrollToNow` from superseding this anchor. Only wall Day
+  reads the override; config/reload resets it. No preference schema change (D27).
+- Wall Day uses flex remaining height, not `_applyFullHeight`'s legacy viewport cap.
+  Duration-scaled Day blocks have a 16px floor; do not restore the blanket 48px minimum
+  that makes compact appointments overlap. Timeline retains its separate 48px lane minimum.
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses
   a fixed date. Header time reuses `formatTime` and the minute tick, not a second timer.
 
@@ -80,4 +87,6 @@ series/occurrence identity. Extract components only when a real feature needs th
 The main controller still owns substantial rendering/state code. Status lookahead depends
 on the active loaded range; all-day events are excluded from busy selection. Time helpers
 use browser Date/Intl with HA language and time-format preferences; do not claim cross-zone
-travel semantics beyond tested behavior. Final density and wall hardware remain open.
+travel semantics beyond tested behavior. Density outside Day, saved zoom and final wall
+hardware remain open. DST tests set Chicago in the parent Vitest config before workers;
+the runtime still uses the user's browser/HA display context (D28).

@@ -1,16 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { adjacentVisibleDate, dateInMonth, daySwipeStep } from "./calendar-navigation";
-declare const process: { env: Record<string, string | undefined> };
 
 describe("adjacent visible date", () => {
-  const previousTimezone = process.env.TZ;
-  beforeAll(() => {
-    process.env.TZ = "America/Chicago";
-  });
-  afterAll(() => {
-    if (previousTimezone === undefined) delete process.env.TZ;
-    else process.env.TZ = previousTimezone;
-  });
   it.each([
     [2026, 1, 18, 1, true, 2026, 1, 19],
     [2026, 1, 18, -1, true, 2026, 1, 17],

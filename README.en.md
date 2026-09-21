@@ -78,6 +78,12 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 
 ### Calendar reliability preview
 
+- Wall Day includes **Calendar zoom** behind the header's magnifying glass. Move left for
+  more hours or right for more detail (40–96px/hour; 100% = 64px/hour). Date, visible time
+  and people stay anchored, clamped at the schedule's ends. Reset restores configured
+  `hour_height` and `fit_height`. Zoom survives view changes in this card but is not saved
+  across reload/config changes. Short events prioritize titles; use details or Agenda for
+  more space. Other views and legacy are unchanged. Check STATUS for deployment state.
 - Wall Week shows date numbers and readable, wrapping event cards with pinned date/person
   headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled

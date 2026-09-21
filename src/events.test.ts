@@ -1,5 +1,4 @@
-import { afterAll, beforeAll, describe, it, expect } from "vitest";
-declare const process: { env: Record<string, string | undefined> };
+import { describe, it, expect } from "vitest";
 import {
   parseRawEvent,
   splitIntoSegments,
@@ -45,15 +44,6 @@ const seg = (
 });
 
 describe("local calendar dates across daylight saving", () => {
-  const previousTimezone = process.env.TZ;
-  beforeAll(() => {
-    process.env.TZ = "America/Chicago";
-  });
-  afterAll(() => {
-    if (previousTimezone === undefined) delete process.env.TZ;
-    else process.env.TZ = previousTimezone;
-  });
-
   it("advances local days rather than elapsed 24-hour blocks", () => {
     const marchSecond = new Date(2026, 2, 2);
     expect(addLocalDays(marchSecond, 7).getDate()).toBe(9);

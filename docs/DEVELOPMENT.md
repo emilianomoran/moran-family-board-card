@@ -61,12 +61,14 @@ See [STATUS](STATUS.md) for the current verified build and test totals. Counts c
 tests are added; preserve behaviors, not a frozen number. CI currently does
 not run the compiled-browser suite. Never substitute a successful build for rendered QA.
 
-Known CI issue, diagnosed 2026-09-21 (ENG-05): two DST fixture tests assume Chicago while
-CI launches Vitest in UTC. Their `beforeAll` environment assignment is too late for worker
-timezone initialization. For the existing local baseline, launch with
-`TZ=America/Chicago npm test`. `TZ=UTC npm test` still reproduces the two failures; do not
-claim CI is green based on the Chicago run. Repair the runner before a release candidate;
-do not weaken the DST assertions or change the app's runtime timezone.
+For hosted checks, pass `--repo emilianomoran/moran-family-board-card` to `gh run list/view`.
+This checkout also has an upstream remote; implicit repository selection can show upstream's
+runs instead of this fork. Verify the run's `headSha` matches the milestone commit.
+
+`vitest.config.ts` sets America/Chicago before creating workers, so DST fixtures behave
+consistently on UTC CI and local hosts (D28/ENG-05). `TZ=UTC npm test` is a useful regression
+check. Do not move timezone mutation back into worker hooks, weaken DST assertions, or
+change the app's runtime timezone. Hosted CI evidence belongs in STATUS, not a local-pass assumption.
 
 ### Focused browser suites
 
@@ -75,6 +77,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `density` | Wall Day range/anchors, fit/reset, short/overlap details, navigation/legacy isolation; real keyboard, pointer and touch range input |
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
 | `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |

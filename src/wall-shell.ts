@@ -6,6 +6,7 @@ export interface WallShellOptions {
   clockLabel: string;
   clockDateTime: string;
   viewNavigation: unknown;
+  densityControl: unknown;
   statusToggle: unknown;
   focus: unknown;
   content: TemplateResult;
@@ -18,6 +19,7 @@ export function renderWallShell({
   clockLabel,
   clockDateTime,
   viewNavigation,
+  densityControl,
   statusToggle,
   focus,
   content,
@@ -29,7 +31,7 @@ export function renderWallShell({
           <div class="moran-wall-title" title=${title}>${title}</div>
           <time class="moran-wall-clock" datetime=${clockDateTime}>${clockLabel}</time>
         </div>
-        ${viewNavigation} ${statusToggle}
+        ${viewNavigation} ${densityControl} ${statusToggle}
       </header>
       ${focus} ${content}
     </section>
@@ -82,6 +84,8 @@ export const wallShellStyles = css`
   }
 
   .moran-wall-shell .moran-wall-header {
+    position: relative;
+    z-index: 10;
     box-sizing: border-box;
     display: flex;
     flex: 0 0 auto;
@@ -387,7 +391,8 @@ export const wallShellStyles = css`
     display: none;
   }
 
-  .moran-wall-shell .moran-wall-header .wall-status-toggle {
+  .moran-wall-shell .moran-wall-header .wall-status-toggle,
+  .moran-wall-shell .moran-wall-header .wall-density-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -404,14 +409,87 @@ export const wallShellStyles = css`
     cursor: pointer;
   }
 
-  .moran-wall-shell .wall-status-toggle[aria-expanded="true"] {
+  .moran-wall-shell .wall-status-toggle[aria-expanded="true"],
+  .moran-wall-shell .wall-density-toggle[aria-expanded="true"] {
     color: var(--moran-wall-accent);
     background: color-mix(in srgb, var(--moran-wall-accent) 12%, var(--moran-wall-canvas));
   }
 
-  .moran-wall-shell .wall-status-toggle svg {
+  .moran-wall-shell .wall-status-toggle svg,
+  .moran-wall-shell .wall-density-toggle svg {
     width: 22px;
     height: 22px;
+  }
+
+  .moran-wall-shell .wall-density-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    inset-inline-end: 8px;
+    box-sizing: border-box;
+    width: 296px;
+    max-width: calc(100% - 16px);
+    padding: 12px 16px;
+    border: 1px solid var(--moran-wall-divider);
+    border-radius: 16px;
+    background: var(--moran-wall-canvas);
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--moran-wall-text) 16%, transparent);
+  }
+
+  .moran-wall-shell .wall-density-panel[hidden] {
+    display: none;
+  }
+
+  .moran-wall-shell .wall-density-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+
+  .moran-wall-shell .wall-density-heading label {
+    flex: 1;
+  }
+
+  .moran-wall-shell .wall-density-heading output {
+    font-variant-numeric: tabular-nums;
+    color: var(--moran-wall-muted);
+  }
+
+  .moran-wall-shell .wall-density-heading button {
+    min-height: 36px;
+    padding: 4px 8px;
+    color: var(--moran-wall-accent);
+    background: var(--moran-wall-surface);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .moran-wall-shell .wall-density-heading button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .moran-wall-shell .wall-density-panel input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    margin: 4px 0 0;
+    padding: 0;
+    accent-color: var(--moran-wall-accent);
+    cursor: pointer;
+  }
+
+  .moran-wall-shell .wall-density-panel input:focus-visible {
+    outline: 2px solid var(--moran-wall-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .moran-wall-shell .wall-density-hints {
+    display: flex;
+    justify-content: space-between;
+    color: var(--moran-wall-muted);
+    font-size: 12px;
   }
 
   .moran-wall-shell .fname,
@@ -663,9 +741,15 @@ export const wallShellStyles = css`
   }
 
   /* Brief appointments must prioritize the title over the optional time line. */
+  .moran-wall-shell .board .event {
+    /* Do not stretch a 30-minute appointment across an hour at compact density.
+       Very short events retain a 16px title strip and keyboard/Agenda access. */
+    min-height: 16px;
+  }
+
   .moran-wall-shell .event.wall-short {
     gap: 2px;
-    padding: 4px 8px;
+    padding: 2px 8px;
   }
 
   .moran-wall-shell .event.wall-short .etitle {
@@ -687,6 +771,15 @@ export const wallShellStyles = css`
 
   .moran-wall-shell .event.slim .etitle {
     flex: 0 0 auto;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .moran-wall-shell .board .event.overflow {
+    padding-block: 0;
+  }
+
+  .moran-wall-shell .board .event.overflow .etitle {
     font-size: 13px;
     line-height: 1;
   }

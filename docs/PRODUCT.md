@@ -56,9 +56,13 @@ This replaces the early screenshot/concept, not the entire product design:
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
+- Wall Day has a header zoom disclosure, not another fixed row. Its slider changes hour
+  density while anchoring time/people. Manual zoom overrides fit until Reset, and is
+  session-only. Short Day events retain title strips and details rather than stretching
+  over neighboring events; Agenda offers larger targets. Initial choices are in D27.
 
-See D18–D21 for exact scope. Older blanket 48px target rules do not override the explicitly
-requested compact header controls. Other targets retain their tested sizes.
+See D18–D21 and D27 for exact scope. Older blanket 48px target rules do not override the
+compact header controls or duration-scaled Day title strips. Other targets retain their tested sizes.
 
 ## Status tiles are not presence or unlimited availability
 

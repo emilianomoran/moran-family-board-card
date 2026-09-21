@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { runNativeDensityChecks } from "./calendar-density-native-check.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const chromeCandidates = [
@@ -109,6 +110,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "density", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "calendar density:",
+  })),
+  {name: "wall", checks: "density", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "calendar density:"},
+  {name: "wall", checks: "density", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "calendar density:"},
   ...[1920, 390].map((width) => ({
     name: "wall", checks: "timeline", chromeHeight: 64, width, reducedMotion: true,
     expectedGeometryMarker: "calendar timeline:",
@@ -287,6 +296,8 @@ try {
 
     const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}${panelWidth ? `&panel=${panelWidth}` : ""}${feed ? `&feed=${feed}` : ""}`;
     await cdp.send("Page.navigate", { url });
+    // Background targets update activeElement but suppress real focus transitions.
+    if (checks === "density") await cdp.send("Page.bringToFront");
 
     if (checks === "pan") {
       const evaluate = async (expression) =>
@@ -520,8 +531,6 @@ try {
       await delay(100);
     }
 
-    webSocket.close();
-    await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
     if (!result) throw new Error(`${name} ${width}px browser check timed out.`);
     if (result.status !== "pass") {
       throw new Error(`${name} ${width}px browser check failed: ${result.details}`);
@@ -531,6 +540,9 @@ try {
         `${name} browser check did not report expected geometry marker: ${expectedGeometryMarker}`,
       );
     }
+    if (checks === "density") await runNativeDensityChecks(cdp, delay);
+    webSocket.close();
+    await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
     console.log(
       `${name}: ${width}x${height}${panelWidth ? ` in ${panelWidth}px panel` : ""} America/Chicago browser check passed (${result.details})`,
     );

@@ -8,23 +8,24 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 
 | ID | Priority / state | Outcome and completion criteria | Source |
 |---|---|---|---|
-| CAL-01 | Next feature candidate; requested for later, not started | A slider changes calendar row density. Zoom out shows more time/events; zoom in improves detail. Keep navigation readable, preserve visible date/time and lane position, avoid hiding short/overlapping appointments, support keyboard/touch, and test the selected range. | D19 |
+| CAL-01 | Day slice implemented in r16; follow-up scope open | Wall Day slider changes row density with anchored scrolling, Reset/fit behavior and keyboard/touch support. Per-device persistence and Timeline/Week density remain candidates, not implemented. | D19, D27 |
 | CAL-02 | Next usability milestone; broad design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Keep D18–D21 fixes; implement concrete feedback without demanding a complete redesign first. | D06, D07, D18 |
 | CAL-03 | Hardware-dependent; open | Validate the actual portrait/landscape wall installation. Record resolution, device pixel ratio, browser/kiosk wrapper, distance and touch reach. Confirm full-day access, reload/wake and legibility. Desktop emulation cannot certify physical hardware. | D06 |
 
 ### CAL-01 implementation handoff
 
 The request is a **row-density slider**, not browser zoom or a second calendar view.
-Suggested first slice: Day view, where `hour_height`, `_pxPerMin`, fit measurement and
-scroll anchors already exist. This is a recommendation; view coverage is not settled.
+First slice is implemented for wall Day using `hour_height`, `_pxPerMin`, fit measurement
+and scroll anchors. Header popup, 40–96px/hour (64 = 100%), session-only override; Reset
+restores configured height/fit. Values and placement are initial implementation choices.
 
 Before choosing values, inspect `src/config.ts`, `_measureFit`, `_rememberDayScroll`,
 `_restoreDayScroll` and Day event positioning in `src/ha-family-board-card.ts`.
 Reuse existing scroll/context safeguards. Test dense overlaps, short events, all-day rows,
 midnight edges, hidden lanes, resize, Today, reduced motion and read-only details.
 
-Open choices: slider range/default, reset behavior, interaction with `fit_height`, coverage
-of Timeline/Week, placement and per-device persistence. If saving density, extend the existing
+Remaining choices: coverage of Timeline/Week, refinement from user feedback and per-device
+persistence. If saving density, extend the existing
 preference schema with migration/invalidation tests; never store appointments. Do not add
 this work during a documentation-only request.
 
@@ -40,7 +41,7 @@ These are agent recommendations or unresolved questions, not already approved fe
 | ENG-02 | Medium; coverage gap | Add visual-editor configuration round-trip tests before significant editor work. Preserve unknown fields and shared config normalization; inspect current coverage first. |
 | ENG-03 | Medium; measured work only | Reduce controller coupling or redundant processing when a feature/performance measurement warrants it. Extract focused seams, not a React rewrite or a speculative new state framework. |
 | ENG-04 | Before public release; proposed | Decide whether to run the existing compiled-browser suite in CI. CI currently covers format/types/unit/build; the harness is a local Chromium/CDP runner requiring a compatible Node runtime and Chrome. |
-| ENG-05 | High; diagnosed 2026-09-21, repair not yet implemented | Fix the test runner's UTC/Chicago mismatch. Two DST tests fail under `TZ=UTC npm test`; all 151 pass when America/Chicago is supplied before Vitest starts. In-worker `beforeAll` timezone mutation is ineffective. Set test timezone before worker creation, retain real DST assertions, verify a UTC-host run and hosted CI. This is test infrastructure, not a runtime timezone change. |
+| ENG-05 | Repair implemented in r16; CI evidence in STATUS | Set America/Chicago in Vitest configuration before workers start; remove ineffective in-worker hooks. All DST assertions retained. `TZ=UTC npm test` passes. This changes test infrastructure, not runtime timezone. See D28. |
 | REL-01 | Separate authorization required | Public GitHub/HACS release, clean installation/update and cache/rollback checks. Milestone pushes are authorized; tags, releases and merges to main are not. |
 
 ## Deferred product extensions
@@ -61,7 +62,7 @@ Status timing, fresh read-only details, hidden-page recovery, compact chrome and
 are implemented. [STATUS](STATUS.md) contains the tests and deployment checkpoints.
 
 Timeline's remaining-height correction (D24) is implemented and verified in r13;
-see STATUS for verification and delivery. It does not implement CAL-01's density slider.
+see STATUS for verification and delivery. CAL-01's wall Day slider follows separately in r16.
 Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
 is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
 Date-label centering within the left-aligned group (D26) is implemented in r15.
