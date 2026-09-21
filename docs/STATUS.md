@@ -22,8 +22,8 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `e7868ccd585bc07dad5279c551e953d669f79a8f`, version
-`0.25.1-moran.7`, on `feature/moran-foundation`, deployed 2026-09-20 at 18:59 CDT.
+Installed application checkpoint: `01c6c2db315fe059713f29e154d9e0c30882a9f0`, version
+`0.25.1-moran.8`, on `feature/moran-foundation`, deployed 2026-09-20 at 19:12 CDT.
 The private pilot uses a dated bundle.
 This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
 in the recorded deployment work. Laptop preview servers are separate from the installed
@@ -31,17 +31,28 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
-### Hidden-page recovery candidate, 2026-09-20
+### Hidden-page recovery update, 2026-09-20
 
 The rendered r7 regression exposed a hidden clock tick starting a calendar read despite
-the paused poll. Wake could reuse that background request. The r8 candidate moves the
+the paused poll. Wake could reuse that background request. The r8 update moves the
 hidden-page guard to the shared read entry point, covering clock, HA-update, and forced-read
 triggers. Desktop/phone recovery checks now assert no new reads while hidden, a fresh wake
 snapshot, and rejection of late pre-sleep data. See D15. All 140 unit tests and 38 browser
 scenarios pass, as do formatting, TypeScript, build, and whitespace checks. Visible local
 review confirmed date navigation, meaningful content, no error overlay, and no browser
 warnings/errors. Browser plugin not available; repository Chromium tests and Codex in-app
-controls were used. Live promotion is pending; the installed checkpoint above remains r7.
+controls were used. Deployed at 19:12 CDT; repeated served checksum verification, unchanged
+dashboard/74 other resources/27 dashboard registrations, and Core validation passed.
+The prior r7 asset is retained; no calendar mutation, restart, push, or release occurred.
+
+Actual HA reload identifies r8. Desktop 1280×720 date navigation loaded five next-day
+timed blocks, preserved visible clock time, and retained 0px lane misalignment. At 390×844,
+event details are read-only, contain no Save/Delete, and fit without horizontal overflow
+(358px client/scroll width). Page identity, meaningful content, no error overlay, and
+screenshots passed. No Family Board warning/error observed; existing custom-sidebar, HA
+routing, config-template-card, and Better Thermostat messages remain unrelated. Restored
+Today/Day and normal viewport. The hidden lifecycle remains synthetic evidence; physical
+iPhone recovery and ordinary provider edit/cancellation timing remain unverified.
 
 ### Event-details reliability update, 2026-09-20
 
@@ -359,6 +370,7 @@ physical iPhone/Safari verification remains open.
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
+| Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. Physical suspension remains unverified. |
 | Physical iPhone/Safari sleep and wake | Verification pending | Confirm recovery after backgrounding, lock/unlock, and reconnect on the real device. Phone-sized desktop tests are not this evidence. |
 | Actual provider propagation | Snapshot parity/routing reverified 2026-09-17; latency pending | 166 source occurrences / 175 intended owner copies match. Still measure an ordinary edit/cancellation reaching HA and the card; see the sync validation procedure. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |

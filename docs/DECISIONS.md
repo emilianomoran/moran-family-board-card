@@ -302,6 +302,10 @@ The compiled-card regression failed against r7 on the hidden clock tick and pass
 the fix at desktop and phone widths. Full candidate/deployment evidence belongs in STATUS.md;
 synthetic lifecycle tests still do not certify physical iPhone recovery.
 
+Deployed 2026-09-20 at 19:12 CDT as `0.25.1-moran.8`, source
+`01c6c2db315fe059713f29e154d9e0c30882a9f0`. All 140 unit tests, 38 browser scenarios,
+and live HA desktop/phone-width smoke checks pass. No source appointments changed.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
