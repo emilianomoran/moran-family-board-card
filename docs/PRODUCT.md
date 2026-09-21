@@ -50,6 +50,9 @@ This replaces the early screenshot/concept, not the entire product design:
 - Day keeps person columns. Narrow Month provides counts and date-to-Day drilldown;
   restricted configurations keep appointments reachable. Week has pinned date/person
   headers; Agenda wraps long content. Month and Agenda share person filters.
+- Timeline fills the remaining wall panel with growing person rows and event bars.
+  Overlapping lanes keep 48px event targets; short panels scroll instead of clipping.
+  Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
 
 See D18–D21 for exact scope. Older blanket 48px target rules do not override the explicitly
 requested compact header controls. Other targets retain their tested sizes.

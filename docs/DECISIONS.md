@@ -465,6 +465,21 @@ This is a documentation milestone, not authorization to start the zoom feature, 
 the application, deploy a new bundle or publish a release. Follow D22 for the verified
 milestone commit/push and keep the installed application checkpoint unchanged.
 
+### D24. Timeline fills the remaining wall panel
+
+**Explicit annotated feedback, 2026-09-21.** Timeline used only a short content-sized
+container and left the lower screen unused. Apply the wall shell's remaining-height
+scroll container contract to Timeline too. Person rows and event bars expand with the
+available space; dense overlaps keep 48px targets and scroll vertically rather than
+compressing into one another. Names remain pinned during horizontal time scrolling.
+
+Status expansion/collapse and container resizing must redistribute space without losing
+horizontal position. Keep date navigation, read-only details and legacy Timeline sizing.
+This is a bounded layout correction, not the future density slider. The supplied screenshot
+shows older chrome; preserve the current compact header and title instead of restoring it.
+The user also reconfirmed that work belongs in the existing dedicated calendar repo, not
+a new repo or the HA operations workspace. No new repository is needed.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -494,6 +509,7 @@ milestone commit/push and keep the installed application checkpoint unchanged.
 | Title and time, 2026-09-21 | “Moran Calendar” with a current-time label 12px after the title; compact dimensions, locale preference and narrow behavior retained. See D21. |
 | Commit and push at milestones, 2026-09-21 | Starting at the next verified milestone, commit and push the current working branch without another routine gate; releases and main-branch merges remain separate. See D22. |
 | Self-contained repo context, 2026-09-21 | Root handoff, portable agent instructions, product brief, prioritized backlog, code map, setup/testing, sanitized operations and research index added. No prior chat or private HA access required for local feature work. See D23. |
+| Timeline uses only a small container, 2026-09-21 | Full remaining height and expanding rows requested; overlap minima, scrolling, Status disclosure, read-only details and legacy compatibility preserved. See D24. Continue in the existing calendar repo. |
 
 ## Evidence and date boundaries
 

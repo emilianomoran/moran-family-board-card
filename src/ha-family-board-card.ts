@@ -2292,7 +2292,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._isRealToday(day) &&
       nowMin >= startMin &&
       nowMin <= endMin;
-    const LANE = 30;
+    const wall = this._layout === "wall";
+    const LANE = wall ? 54 : 30;
 
     return html`
       ${this._layout === "wall"
@@ -2351,7 +2352,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                 </div>
                 <div
                   class="tlcanvas ${canCreate ? "creatable" : ""}"
-                  style="width:${width}px;height:${lanes * LANE + 8}px;
+                  style="width:${width}px;height:${wall ? "auto" : `${lanes * LANE + 8}px`};
+                         min-height:${lanes * LANE + 8}px;
                          background-image:repeating-linear-gradient(90deg, var(--fb-hourline) 0 1px, transparent 1px ${hourPx}px),
                          repeating-linear-gradient(90deg, var(--fb-halfhour) 0 1px, transparent 1px ${hourPx /
                   2}px)"
@@ -2378,7 +2380,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                           }}
                           @keydown=${(k: KeyboardEvent) => this._onItemKey(k, e)}
                           style="left:${(s - startMin) * px + 1.5}px;width:${w}px;
-                                 top:${e.col * LANE + 4}px;height:${LANE - 6}px;
+                                 top:${wall
+                            ? `calc(4px + (100% - 8px) * ${e.col / lanes})`
+                            : `${e.col * LANE + 4}px`};
+                                 height:${wall
+                            ? `calc((100% - 8px) / ${lanes} - 6px)`
+                            : `${LANE - 6}px`};
                                  border-left:3px ${tent ? "dashed" : "solid"} ${c};
                                  background:${c}40;
                                  background:color-mix(in srgb, ${c} 32%, var(--card-background-color, #fff))"
@@ -4716,7 +4723,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.12 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.13 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

@@ -33,6 +33,7 @@ Updated 2026-09-21. Private access/configuration remains outside this repo by de
 - D09–D13: Status tiles, durable records, daily use, view capsule and pilot delivery.
 - D14–D18: details, recovery, waived timing test, cross-view continuity and readability.
 - D19–D23: future zoom, compact chrome, title/clock, milestone pushes and this handoff.
+- D24: full-height Timeline; continue in the existing calendar repository.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.

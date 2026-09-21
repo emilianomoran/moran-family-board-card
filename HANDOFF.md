@@ -1,7 +1,7 @@
 ---
 project: moran-family-board-card
 date: 2026-09-21
-time: "10:44 CDT"
+time: "10:52 CDT"
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -16,9 +16,12 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest application: `0.25.1-moran.12`, source `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`.
-  Installed in the private read-only HA preview on 2026-09-21 at 10:28 CDT. This handoff
-  milestone changes documentation only, not that deployed bundle.
+- Latest development build: `0.25.1-moran.13`, fixing Timeline's unused lower panel.
+  Timeline rows/bars now fill the available height with safe overlap minima and scrolling.
+  See D24 and STATUS for verification/delivery. The density slider is still not implemented.
+- Installed HA version remains `0.25.1-moran.12`, source
+  `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
+  The Timeline fix targets the laptop prototype; it has not been deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -42,7 +45,7 @@ when the task originated in the separate Home Assistant operations workspace.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. The strongest
    named future feature is **CAL-01: density zoom slider**. It is requested for later,
-   not implemented, and this documentation task does not start it.
+   not implemented, and the Timeline sizing correction does not start it.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
    [OPERATIONS](docs/OPERATIONS.md) and the private workspace's current safety rules.
 5. Update the owning docs and this handoff before the next milestone push. Verify the
@@ -50,8 +53,9 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## Evidence and remaining limits
 
-The r12 checks passed: 151 unit tests and 50 compiled-browser scenarios, plus actual HA
-desktop/phone-width review. The user confirmed physical iPhone HA-app lock/reopen refresh.
+The r13 checks passed: 151 unit tests and 56 compiled-browser scenarios, plus local
+desktop/phone-width review. Actual HA review remains at r12. The user confirmed physical
+iPhone HA-app lock/reopen refresh.
 They waived the timed provider-edit/cancellation test. Do not reopen that as a gate or
 claim measured latency. No real appointment was mutated to test the card.
 

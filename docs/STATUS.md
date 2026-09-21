@@ -3,6 +3,9 @@
 Last recorded: 2026-09-21. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
+Latest development build: `0.25.1-moran.13`, the verified full-height Timeline correction.
+The installed HA pilot remains r12 as recorded below; r13 is not deployed or released.
+
 ## What is working
 
 The calendar-first, read-only wall preview is installed in a private Home Assistant
@@ -47,6 +50,33 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Full-height Timeline, verified locally, 2026-09-21
+
+D24 corrects Timeline's content-sized legacy wrapper in wall mode. The wrapper fills the
+remaining panel; its grid, person rows and bars expand with it. Each overlapping event
+retains a 48px minimum, with vertical scrolling on short/dense panels. Sticky names/time
+axis, read-only details, filters, date selection and legacy dimensions are retained.
+The requested density slider is not part of this change.
+
+The new regression failed against r12 with approximately 600px of unused panel height
+at the annotated 865×1048 size. Six focused scenarios now pass: that size, 1920×1080,
+390×844, 320×568, 844×390, and a 400px card inside a desktop viewport. Coverage includes
+container-height changes, eight concurrent appointments, empty days, Status disclosure,
+person toggles, pinned labels/time, horizontal scroll retention and read-only details.
+
+Manual in-app checks on the loopback synthetic preview measured Timeline and shell bottoms
+at 1048px (865px wide) and 844px (391px wide), with no document overflow. Keyboard Status
+disclosure resizes the grid without moving its horizontal position. Event activation on
+the narrow view opens disabled read-only fields. The Browser plugin is absent; the existing
+Chromium/CDP suite and in-app Playwright controls are used without new dependencies.
+Flow: synthetic preview → Timeline → scroll time, expand/collapse Status, open an event →
+filled panel, pinned names, retained scroll and read-only details. Page URL/title, meaningful
+content, no error overlay, screenshot review and relevant warning/error checks passed.
+Normal viewport and collapsed Status were restored; the user's annotation tab was untouched.
+Format/type/build/whitespace checks, all 151 unit tests and all 56 compiled-browser scenarios
+passed. Run `HARNESS_ONLY=timeline npm run test:harness` for the focused checks.
+No HA deployment, calendar write, release or physical-device claim is included in this milestone.
 
 ### Self-contained project handoff, 2026-09-21
 

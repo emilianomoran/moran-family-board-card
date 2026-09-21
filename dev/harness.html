@@ -1041,7 +1041,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "chrome"
+        (query.get("checks") === "timeline"
+          ? import("./calendar-timeline-check.mjs").then(({ runCalendarTimelineChecks }) =>
+              runCalendarTimelineChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "chrome"
           ? import("./calendar-chrome-check.mjs").then(({ runCalendarChromeChecks }) =>
               runCalendarChromeChecks(card, hass, nextRender),
             )

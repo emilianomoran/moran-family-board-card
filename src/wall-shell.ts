@@ -714,7 +714,7 @@ export const wallShellStyles = css`
   }
 
   /* Each view uses the remaining panel height and owns its own scrolling. */
-  .moran-wall-shell > :is(.weekwrap, .monthwrap, .agenda) {
+  .moran-wall-shell > :is(.tlwrap, .weekwrap, .monthwrap, .agenda) {
     box-sizing: border-box;
     flex: 1 1 auto;
     min-height: 0;
@@ -722,6 +722,31 @@ export const wallShellStyles = css`
     width: 100%;
     overflow: auto;
     scrollbar-width: thin;
+  }
+
+  .moran-wall-shell > .tlwrap {
+    position: relative;
+    margin-top: 0;
+  }
+
+  .moran-wall-shell .tlgrid {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  .moran-wall-shell .tlhead {
+    flex: 0 0 auto;
+  }
+
+  /* Grow the rows into unused space, but never shrink overlapping event lanes.
+     Short panels scroll vertically; the time axis and person names stay sticky. */
+  .moran-wall-shell .tlrow {
+    flex: 1 0 auto;
+  }
+
+  .moran-wall-shell .tlnow span {
+    white-space: nowrap;
   }
 
   .moran-wall-shell .weekgrid {

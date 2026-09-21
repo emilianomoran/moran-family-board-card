@@ -57,7 +57,7 @@ Markdown checker. The compiled-browser runner starts its own temporary loopback 
 and headless Chrome, so it does not require the interactive server on 4173. No Playwright
 dependency is currently installed; do not add one just to run the existing suite.
 
-Known passing baseline at r12: **151 unit tests, 50 browser scenarios**. Count changes are
+Known passing baseline at r13: **151 unit tests, 56 browser scenarios**. Count changes are
 expected as tests are added; preserve behaviors, not a frozen number. CI currently does
 not run the compiled-browser suite. Never substitute a successful build for rendered QA.
 
@@ -69,6 +69,7 @@ assuming new filter names. Useful current filters:
 | Filter | Primary coverage |
 |---|---|
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
+| `timeline` | Remaining height, growing rows/bars, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |
 | `presentation` | Week/Month/Agenda readability, filters, counts, drilldown and fallbacks |
 | `views` | Date continuity across all views and month boundaries |

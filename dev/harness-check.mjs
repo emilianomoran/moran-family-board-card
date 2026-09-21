@@ -109,6 +109,12 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[865,1048], [1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "timeline", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "calendar timeline:",
+  })),
+  {name: "wall", checks: "timeline", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "calendar timeline:"},
   ...[[812,844], [865,1048], [390,844], [320,568], [1920,1080]].map(([width,height]) => ({
     name: "wall", checks: "chrome", chromeHeight: 64, width, height,
     expectedGeometryMarker: "calendar chrome:",
