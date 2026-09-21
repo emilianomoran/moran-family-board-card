@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { adjacentVisibleDate, daySwipeStep } from "./calendar-navigation";
+import { adjacentVisibleDate, dateInMonth, daySwipeStep } from "./calendar-navigation";
 declare const process: { env: Record<string, string | undefined> };
 
 describe("adjacent visible date", () => {
@@ -32,6 +32,31 @@ describe("adjacent visible date", () => {
       ny,
       nm,
       nd,
+      0,
+    ]);
+    expect(date.getTime()).toBe(before);
+  });
+
+  it.each([
+    [31, 2026, 3, true, 30],
+    [31, 2026, 1, true, 28],
+    [31, 2028, 1, true, 29],
+    [11, 2027, 0, true, 11],
+    [8, 2026, 2, true, 8],
+    [1, 2026, 10, true, 1],
+    [31, 2026, 4, false, 29],
+    [31, 2026, 1, false, 27],
+    [1, 2026, 7, false, 3],
+    [1, 2026, 10, false, 2],
+    [11, 2026, 3, false, 10],
+  ])("carries day %i into %i/%i (weekends %s)", (day, year, month, weekends, expected) => {
+    const date = new Date(2026, 0, day as number, 12);
+    const before = date.getTime();
+    const result = dateInMonth(date, year as number, month as number, weekends as boolean);
+    expect([result.getFullYear(), result.getMonth(), result.getDate(), result.getHours()]).toEqual([
+      year,
+      month,
+      expected,
       0,
     ]);
     expect(date.getTime()).toBe(before);

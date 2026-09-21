@@ -3,6 +3,8 @@
 Status: read-only source comparison and routing audit reverified 2026-09-20.
 Real edit-to-screen latency remains unmeasured. Physical iPhone HA-app lock/reopen refresh
 was confirmed by the user on 2026-09-21.
+The user waived the timed edit/cancellation test as a completion requirement on 2026-09-21.
+The procedure below is optional future diagnostics, not an outstanding gate or a passed test.
 
 ## What the card reads
 

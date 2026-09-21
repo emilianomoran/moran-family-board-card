@@ -30,7 +30,7 @@ import {
 import { readCalendarBatch, type CalendarRange, type CalendarReadResult } from "./calendar-source";
 import { renderWallShell, wallShellStyles } from "./wall-shell";
 import { preferencesKey, readPreferences, writePreferences } from "./preferences";
-import { adjacentVisibleDate, daySwipeStep } from "./calendar-navigation";
+import { adjacentVisibleDate, dateInMonth, daySwipeStep } from "./calendar-navigation";
 import {
   localize,
   formatTime,
@@ -426,11 +426,24 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private _selectView(view: ViewName): void {
+  private _selectView(view: ViewName, explicitDate = false): void {
     if (!this._enabledViews.includes(view)) return;
     if (this._view !== view) {
       this._cancelDayScroll();
       this._daySwipe = undefined;
+      if (this._layout === "wall") {
+        const date = this._dateForDay(this._shownDay());
+        if (view === "month") {
+          const now = this._now();
+          this._monthOffset =
+            (date.getFullYear() - now.getFullYear()) * 12 + date.getMonth() - now.getMonth();
+        } else if (this._view === "month" && !explicitDate) {
+          const { year, month } = this._monthGrid();
+          this._setSelectedDate(
+            dateInMonth(date, year, month, this._config.show_weekends !== false),
+          );
+        }
+      }
     }
     if (this._view !== view) this._scrolledKey = "";
     this._view = view;
@@ -1474,6 +1487,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
   private _thisMonth = () => {
     this._monthOffset = 0;
+    if (this._layout === "wall") {
+      this._weekOffset = 0;
+      this._day = this._todayIndex();
+    }
   };
 
   private _shownDay(): number {
@@ -1604,8 +1621,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     ev.stopPropagation();
     this._stepDay(ev.key === "ArrowLeft" ? -1 : 1);
   };
-  /** Jump to the day view for a specific date (from the month grid). */
-  private _goToDate(date: Date): void {
+  private _setSelectedDate(date: Date): void {
     const today = startOfDay(this._now());
     const toWeekStart = (d: Date) => {
       const s = startOfDay(d);
@@ -1615,7 +1631,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const weeks = localDayDifference(toWeekStart(date), toWeekStart(today)) / 7;
     this._weekOffset = weeks;
     this._day = (date.getDay() - this._firstDayJs + 7) % 7;
-    this._selectView("day");
+  }
+
+  /** A clicked month date takes precedence over implicit view-switch anchoring. */
+  private _goToDate(date: Date): void {
+    this._setSelectedDate(date);
+    this._selectView("day", true);
   }
 
   /* ---- render -------------------------------------------------- */
@@ -4557,7 +4578,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.8 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.9 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

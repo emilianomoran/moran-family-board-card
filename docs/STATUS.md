@@ -31,6 +31,22 @@ HA dashboard and do not update its bundle automatically.
 
 ## Verification completed
 
+### Cross-view date continuity candidate, 2026-09-21
+
+The regression reproduced a wall Month jump back to the current month after browsing
+future dates. The r9 candidate shares date context across all five views, retains person
+filters, gives explicit month-cell selection priority, and clamps shorter/weekday-only
+months without escaping the displayed month. Legacy behavior stays unchanged. See D17.
+
+Formatting, TypeScript, build, whitespace, 151 unit tests, and all 40 browser scenarios pass.
+The two new compiled-card cases cover 1920px and 390px, preferred-day retention, shorter
+months, weekday-only/Sunday-first configuration, Today, filters, and legacy behavior.
+Visible local review followed Week forward three weeks → March → next month → Day April 11;
+page identity, meaningful content, no error overlay, screenshot, and no warning/error passed.
+Browser plugin not available; existing repository Chromium/CDP tests and Codex in-app
+Playwright controls were used. Run `HARNESS_ONLY=views npm run test:harness` for the focused
+regression. Live deployment is pending; installed checkpoint above is still r8.
+
 ### Physical iPhone HA-app recovery, user-confirmed 2026-09-21
 
 In response to the requested phone lock/reopen check, the user confirmed using the
@@ -41,9 +57,9 @@ and elapsed lock duration were not supplied; do not invent them. Safari, prolong
 and network-handoff behavior are not established by this report. The intended phone surface
 is the HA app; a separate Safari check is not a new prerequisite for that use case.
 
-The remaining completion dependency is timed observation of an ordinary provider
-edit/cancellation reaching HA and the card. No code, live config, or calendar event changed
-in response to this report, and no regression rerun is claimed for this documentation update.
+Timed observation of an ordinary provider edit/cancellation was still pending when this
+report arrived; the user subsequently waived it as a completion requirement on 2026-09-21.
+No code, live config, or calendar event changed in response to the phone report.
 
 ### Hidden-page recovery update, 2026-09-20
 
@@ -385,12 +401,10 @@ physical iPhone/Safari verification remains open.
 
 ## Next work and open decisions
 
-Acceptance dependency audit, updated 2026-09-21: implementation remains at the recorded r8
-checkpoint. The user has now confirmed physical iPhone lock/reopen refresh in the HA app.
-The remaining dependency is a targeted ordinary calendar edit/cancellation with an observed
-save time, followed through HA to the card. Do not substitute repeated unchanged snapshot
-reads for that observation. This is an external verification dependency, not a GSD approval
-gate; no new design or household-module scope is implied. Retain the full daily-use goal.
+Acceptance update, 2026-09-21: the user confirmed physical iPhone lock/reopen refresh in
+the HA app and explicitly waived the timed edit/cancellation test, requesting continued
+development. Remove that test as a blocker without claiming a measured latency result.
+Continue practical calendar usability; preserve the read-only boundary and existing views.
 
 | Item | State | Acceptance or unresolved question |
 |---|---|---|
@@ -401,10 +415,11 @@ gate; no new design or household-module scope is implied. Retain the full daily-
 | iOS-like view-switcher capsule | Deployed and HA-verified 2026-09-16 | Neutral inset pill, subtle separators, all five views, light/dark and narrow-width checks. Date cells unchanged; see D12. |
 | Fantastical-inspired discrete day navigation | Deployed and HA-verified 2026-09-20 | Date heading owns one-day swipe/keyboard paging; arrows step one visible day. Grid owns person scrolling. Time/lane context retained, no animated carousel. See D07. |
 | Preserve time when hiding/restoring a person | Deployed and HA-verified 2026-09-20 | Native mouse/keyboard checks retain visible time and focus at desktop/phone widths; clamp only at actual range boundaries. |
+| Keep the date across view changes | r9 candidate verified locally 2026-09-21 | All five wall views retain date context and filters; explicit date clicks win; month-end/weekday-only boundaries covered. See D17. |
 | Fresh and accessible read-only event details | Deployed and HA-verified 2026-09-20 | Exact occurrence refresh, explicit stale/missing warnings, editable-draft isolation, modal focus/scroll containment, narrow date fields. Source edits/failures tested synthetically only. |
 | Defer all hidden-page calendar reads | Deployed 2026-09-20 | Shared guard covers clock/HA/forced triggers; compiled regression verifies fresh wake and late-response rejection at desktop/phone widths. User confirmed HA-app lock/reopen refresh 2026-09-21. |
 | Physical iPhone HA-app lock/reopen | User-confirmed pass 2026-09-21 | Calendar refreshes without manual reload in the HA app. This does not establish Safari, prolonged suspension, or network-handoff behavior. |
-| Actual provider propagation | Snapshot parity/routing reverified 2026-09-20; latency pending | 166 source occurrences / 175 intended owner copies match; one source's changed content agrees in both paths since September 17. Targeted edit/cancellation timing is still unmeasured; no test mutation is authorized. |
+| Actual provider propagation | Source parity verified; timing test waived by user 2026-09-21 | 166 source occurrences / 175 intended owner copies match; changed real content agrees in both paths. Timing remains unmeasured, not a completion blocker. No test mutation is authorized. |
 | Portrait wall display | Requirement raised; final hardware/layout open | Record actual resolution, browser, orientation, and kiosk wrapper before calling the physical setup verified. |
 | Full visual design | Deferred until calendar behavior is dependable | Refine consistent navigation, density, and all five views; the old operations-rail concept is not the current acceptance target. |
 | Meals, lists, chores, logistics, Bridge editing | Deferred | Keep extension boundaries; do not expand current calendar work into these modules without an explicit scope decision. |

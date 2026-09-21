@@ -1,7 +1,7 @@
 # Project documentation
 
 This repository owns the Family Board product record: decisions, discussion outcomes,
-requirements, known behavior, implementation, and tests. Updated 2026-09-20.
+requirements, known behavior, implementation, and tests. Updated 2026-09-21.
 
 ## Start here
 

@@ -318,6 +318,32 @@ reported using the HA app and confirmed that it refreshes. Accept the physical H
 recovery check as passed; do not require a Safari test for the chosen app or mislabel the
 report as agent-operated testing. Real provider edit/cancellation timing remains open.
 
+### D16. Continue without a timed provider-change test
+
+**Explicit user direction, 2026-09-21.** After confirming HA-app lock/reopen refresh,
+the user said the remaining edit/cancellation timing test is not needed and asked to
+continue. Remove that test as a completion requirement. Do not mislabel it as passed or
+reintroduce it as an approval gate. Existing source-parity/changed-content evidence stands;
+exact latency remains unknown. Continue practical calendar usability under the read-only
+scope. This does not authorize calendar mutations, publication, or household modules.
+
+### D17. View changes keep the browsing date
+
+**Implementation correction under continued calendar work, 2026-09-21.** Wall views used
+independent week/month offsets: browse to a future week, select Month, and the calendar
+jumps back to the current month. Changing presentation should not discard navigation.
+
+Entering Month follows the selected date. Leaving Month carries the preferred day into
+the displayed month, clamped to its final date when necessary. Weekday-only configurations
+stay within that month; weekend anchors use the preceding weekday unless that crosses the
+month's start. Browsing months without leaving Month retains the original preferred day.
+An explicitly clicked month cell takes precedence. This month resets context to today.
+Person filters remain intact; legacy independent Month navigation is unchanged. No new
+date persistence, calendar writes, visual redesign, or provider behavior is introduced.
+
+The regression failed against r8; the candidate passes 151 unit tests and 40 compiled-card
+browser scenarios. Delivery state and live verification are recorded in STATUS.md.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
@@ -328,7 +354,7 @@ report as agent-operated testing. Real provider edit/cancellation timing remains
 | Similarity to legacy, when to design, and whether meals can be added later | Foundation first, full styling later, calendar core before optional household modules. |
 | Avatar geometry, portrait mounting, narrow menus, person scrolling, time format, and date heading | Concrete responsive requirements retained in D06; final hardware and complete mobile presentation remain open. |
 | Repeated requests to keep going and remove gates | Direct development adopted in D05. Documentation must not become another approval gate. |
-| Proving real calendars before front-end polish | Read-only pilot, source parity, routing, and software recovery checks completed; HA-app lock/reopen confirmed by the user 2026-09-21. Timed provider propagation remains open. |
+| Proving real calendars before front-end polish | Read-only pilot, source parity, routing, and software recovery checks completed; HA-app lock/reopen confirmed by the user 2026-09-21. Provider timing test subsequently waived; exact latency remains unmeasured. |
 | Desktop scrolling in actual HA versus a laptop preview | User confirmed scrolling worked with enough space. Inspect the actual deployed HA surface when it is the reported target. |
 | Misalignment after person toggles and ordinary resize | Reproduced, fixed, regression-tested, and deployed in `0.25.1-moran.3`. |
 | Scrolling stopped at 10 PM | Full-day configuration accepted and deployed; D08 records the distinction from package defaults. |
@@ -340,6 +366,7 @@ report as agent-operated testing. Real provider edit/cancellation timing remains
 | Continue calendar work; defer an image-annotation preview | Accepted local improvements promoted to the existing read-only HA pilot under D13; no image preview or public release created. |
 | Later request to view the reference screenshot for annotations | Opened in an isolated temporary loopback page; original image unchanged and no private image copied into this repo. |
 | Continue and clarify the next milestone, 2026-09-20 | Dependable read-only desktop/mobile daily use; finish visible controls and discrete date navigation while retaining data integrity/recovery. Full redesign and household modules remain deferred. |
+| Continue without the remaining test, 2026-09-21 | Timed provider-change test explicitly waived, not passed. Continue concrete usability corrections; D16/D17 record the scope and date-continuity fix. |
 
 ## Evidence and date boundaries
 

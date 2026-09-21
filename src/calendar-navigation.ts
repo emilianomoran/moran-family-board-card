@@ -9,6 +9,17 @@ export function adjacentVisibleDate(date: Date, direction: -1 | 1, showWeekends 
   return next;
 }
 
+/** Carry a preferred day into a month, clamping without escaping a weekday-only month. */
+export function dateInMonth(date: Date, year: number, month: number, showWeekends = true): Date {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const next = new Date(year, month, Math.min(date.getDate(), lastDay));
+  if (showWeekends || (next.getDay() !== 0 && next.getDay() !== 6)) return next;
+  const previousWeekday = adjacentVisibleDate(next, -1, false);
+  return previousWeekday.getMonth() === next.getMonth()
+    ? previousWeekday
+    : adjacentVisibleDate(next, 1, false);
+}
+
 /** Commit one day only after a deliberate horizontal gesture; taps/vertical motion do nothing. */
 export function daySwipeStep(dx: number, dy: number): -1 | 0 | 1 {
   if (!Number.isFinite(dx) || !Number.isFinite(dy)) return 0;
