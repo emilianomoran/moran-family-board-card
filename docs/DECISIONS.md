@@ -643,10 +643,38 @@ implementation choice, not final design approval. Dates without a valid Day dest
 are labeled groups rather than dead buttons; hidden weekends no longer jump to a weekday.
 Legacy behavior remains unchanged. No new fixed toolbar, dependency, HA write or release.
 
+### D33. Make calendar tabs usable from the keyboard
+
+**Bounded CAL-02 correction under “Continue”, 2026-09-22.** In the r20 preview, Right Arrow
+on the Month view tab left focus unchanged, and all five view buttons were separate Tab
+stops. The date strip had the same gap. This is a navigation/accessibility repair, not a
+new visual design or calendar policy.
+
+Wall view/date groups use one entry stop. Left/Right moves focus and wraps within the
+visible group; Home/End reaches its edges. Enter/Space selects using existing click paths.
+Focus alone does not select, save a preference, fetch calendars or change the time scroll.
+Tab exits the group; re-entry targets the selected option. Off-screen focus scrolls only
+its own track. Modified shortcuts and vertical arrows keep their browser behavior; RTL
+tracks reverse left/right focus order. Day heading arrows retain their separate date-paging
+behavior. The date strip does not page beyond its current week on wrap.
+
+The choice of manual activation follows the [WAI-ARIA tabs pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)
+(checked 2026-09-22): switching calendar views may require a source read. Groups have
+localized accessible names and reference a labeled, focusable calendar panel. Focus remains
+transient; legacy controls, saved view/filter/zoom data and provider reads are otherwise unchanged.
+Native keyboard/mouse/touch and responsive checks are required; this is not a screen-reader
+or physical-device certification.
+
+**Tooling clarification, 2026-09-22:** the user already had the Chrome extension installed.
+Both it and the in-app browser were connected. The earlier optional “Browser plugin”
+recommendation was unnecessary; a missing specifically named skill was not missing browser
+access. Continue with available browser controls, without another install prerequisite.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Chrome extension clarification and continue after r20, 2026-09-22 | Existing browser access verified; no additional plugin needed. D33 repairs keyboard navigation of view/date tabs under CAL-02, with no redesign or live deployment. |
 | Continue after r19, 2026-09-22 | CAL-02 review exposed unreachable Month overflow in restricted configurations. D32 adds in-place expansion, keyboard/touch access, readable narrow fallback and truthful date targets; verify/document/push without live deployment. |
 | Continue after the r18 push, 2026-09-22 | Extend the suggested Week-density slice with independent saved list scale, fixed headings/target floors and date-row anchoring (D31); verify, document and push. No live deployment or release implied. |
 | Continue after the r17 push, 2026-09-22 | Implement scoped saved Day/Timeline zoom with the existing opt-out, migration and Reset semantics (D30), then verify/document/push. No HA deployment, release or Week zoom implied. |

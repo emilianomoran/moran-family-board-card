@@ -6,6 +6,7 @@ import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runNativeDensityChecks } from "./calendar-density-native-check.mjs";
 import { runNativeMonthOverflowChecks } from "./calendar-month-overflow-check.mjs";
+import { runNativeTabNavigationChecks } from "./calendar-tab-navigation-check.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const chromeCandidates = [
@@ -111,6 +112,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "tabs", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "calendar tab navigation:",
+  })),
+  {name: "wall", checks: "tabs", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "calendar tab navigation:"},
+  {name: "wall", checks: "tabs", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "calendar tab navigation:"},
   ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "month-overflow", chromeHeight: 64, width, height,
     expectedGeometryMarker: "month overflow:",
@@ -328,9 +337,11 @@ try {
     }
 
     const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}${panelWidth ? `&panel=${panelWidth}` : ""}${feed ? `&feed=${feed}` : ""}`;
+    // Background targets suppress real focus transitions and :focus styling.
+    // Activate the isolated headless tab before loading the card so focus cannot
+    // create an extra wake/refetch after fixture listeners have been installed.
+    await cdp.send("Page.bringToFront");
     await cdp.send("Page.navigate", { url });
-    // Background targets update activeElement but suppress real focus transitions.
-    if (["density", "timeline-density", "week-density", "zoom-preferences"].includes(checks)) await cdp.send("Page.bringToFront");
 
     if (checks === "pan") {
       const evaluate = async (expression) =>
@@ -575,6 +586,7 @@ try {
     }
     if (["density", "timeline-density", "week-density"].includes(checks)) await runNativeDensityChecks(cdp, delay);
     if (checks === "month-overflow") await runNativeMonthOverflowChecks(cdp, delay);
+    if (checks === "tabs") await runNativeTabNavigationChecks(cdp, delay);
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
     console.log(

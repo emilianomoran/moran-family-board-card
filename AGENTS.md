@@ -24,6 +24,9 @@ own the current product record.
   changes. Distinguish sample harness, optional live proxy, and deployed HA evidence.
 - For UI changes, verify desktop and narrow card containers, not just viewport width.
   Preserve the user's annotation surface where possible and reset temporary preview changes.
+- Use the browser access already connected. A missing optional tool/skill name does not
+  mean the user's Chrome extension is missing. Chrome-extension and in-app controls were
+  verified on 2026-09-22; do not request another installation without a specific unmet need.
 - Documentation-only work does not require a new app version or HA deployment. Missing
   private HA access does not block local implementation or synthetic verification.
 

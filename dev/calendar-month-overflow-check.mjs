@@ -98,8 +98,9 @@ export async function runMonthOverflowChecks(card, hass, nextRender) {
   assert(getComputedStyle(last).whiteSpace !== "nowrap", "Expanded title still truncates.");
   assert(last.scrollWidth <= last.clientWidth + 1, "Expanded title clips its text.");
   assert(
-    chips().every((c) => c.getBoundingClientRect().height >= 48),
-    "Expanded appointments lost usable target heights.",
+    // Translated entrance frames can report 47.999969px for a 48px layout box.
+    chips().every((c) => c.offsetHeight >= 48 && c.getBoundingClientRect().height >= 48 - 0.001),
+    `Expanded appointments lost usable target heights: ${chips().map(c => c.getBoundingClientRect().height).join(", ")}.`,
   );
   assert(more().getBoundingClientRect().height >= 48, "Overflow disclosure is too short.");
   assert(

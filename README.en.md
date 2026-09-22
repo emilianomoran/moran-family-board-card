@@ -78,6 +78,11 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 
 ### Calendar reliability preview
 
+- Wall view/date tabs support Left/Right and Home/End to move focus; Enter/Space selects.
+  Tab leaves each group, and returning targets its selected option. Off-screen tabs are
+  revealed without moving the calendar. Arrow focus alone does not load another view/date.
+  Date arrows wrap within the displayed week; use the existing date-navigation buttons
+  to page further. Legacy keyboard behavior is unchanged.
 - Wall Day and Timeline include **Calendar zoom** behind the header's magnifying glass.
   Move left for more hours or right for more detail. Day changes hour height (40–96px;
   100% = 64px); Timeline changes hour width (48–240px; 100% = 96px), keeping person-row heights.

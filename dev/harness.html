@@ -1043,7 +1043,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "month-overflow"
+        (query.get("checks") === "tabs"
+          ? import("./calendar-tab-navigation-check.mjs").then(({ runTabNavigationChecks }) =>
+              runTabNavigationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "month-overflow"
           ? import("./calendar-month-overflow-check.mjs").then(({ runMonthOverflowChecks }) =>
               runMonthOverflowChecks(card, hass, nextRender),
             )
@@ -1126,7 +1130,7 @@
           })
           .finally(() => {
             // The density runner follows geometry checks with real range-input events.
-            if (["density", "timeline-density", "week-density", "month-overflow"].includes(query.get("checks"))) return;
+            if (["density", "timeline-density", "week-density", "month-overflow", "tabs"].includes(query.get("checks"))) return;
             card.remove();
             window.stop();
           });

@@ -72,6 +72,11 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.
 - The shared wall date strip keeps weekday and number centered within a 40px group at
   the cell's 12px left inset. Do not center that group across the whole cell (D26).
+- Wall tabs use transient `_viewTabFocus` / `_dayTabFocus` for a roving entry stop (D33).
+  `_onTabKeyDown` moves focus only; native Enter/Space uses the existing click handlers.
+  Leaving a group restores the selected entry stop. Only the tab track is scrolled; never
+  use broad `scrollIntoView` here. Each active view's existing scroller is the labeled
+  `calendar-panel`, not a new flex wrapper. All IDs are scoped to this card's shadow root.
 - Only view, hidden indices and optional validated Day/Timeline/Week scales are persisted,
   scoped to user/dashboard/card plus config signature. No events, names, secrets, selected
   dates or scroll offsets in local storage. `remember_preferences` controls all three.

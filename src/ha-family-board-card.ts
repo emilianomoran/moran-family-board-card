@@ -239,6 +239,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _layout: FamilyBoardLayout = "default";
   @state() private _events: BoardEvent[] = [];
   @state() private _view: ViewName = "day";
+  @state() private _viewTabFocus?: ViewName;
+  @state() private _dayTabFocus?: number;
   @state() private _day: number = (new Date().getDay() + 6) % 7;
   @state() private _weekOffset = 0;
   @state() private _monthOffset = 0;
@@ -337,6 +339,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       throw new Error("Bitte mindestens eine Person unter 'persons' konfigurieren.");
     }
     this._config = config;
+    this._viewTabFocus = undefined;
+    this._dayTabFocus = undefined;
     this._statusExpanded = false;
     this._expandedMonthDate = undefined;
     this._densityExpanded = false;
@@ -476,6 +480,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (!this._enabledViews.includes(view)) return;
     this._densityExpanded = false;
     if (this._view !== view) {
+      this._dayTabFocus = undefined;
       this._expandedMonthDate = undefined;
       this._weekScrollAnchor = undefined;
       this._cancelDayScroll();
@@ -2063,14 +2068,31 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   private _renderViewSwitcher() {
+    const wall = this._layout === "wall";
     return this._enabledViews.length > 1
-      ? html`<div class="switch" role="tablist">
+      ? html`<div
+          class="switch"
+          role="tablist"
+          aria-label=${wall ? this._t("calendar_views") : nothing}
+          @keydown=${this._onTabKeyDown}
+          @focusout=${this._onTabFocusOut}
+        >
           ${this._enabledViews.map(
             (view) =>
               html`<button
                 role="tab"
+                id=${wall ? `view-tab-${view}` : nothing}
+                aria-controls=${wall ? "calendar-panel" : nothing}
+                tabindex=${wall
+                  ? (this._viewTabFocus ?? this._view) === view
+                    ? "0"
+                    : "-1"
+                  : nothing}
                 aria-selected=${this._view === view}
                 class=${this._view === view ? "on" : ""}
+                @focus=${() => {
+                  if (wall) this._viewTabFocus = view;
+                }}
                 @click=${() => this._selectView(view)}
               >
                 ${this._t(view)}
@@ -2078,6 +2100,60 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           )}
         </div>`
       : nothing;
+  }
+
+  /** Manual activation avoids a calendar read on every arrow-key focus move. */
+  private _onTabKeyDown = (event: KeyboardEvent): void => {
+    if (this._layout !== "wall" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+      return;
+    const track = event.currentTarget as HTMLElement;
+    const tabs = [...track.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const index = tabs.indexOf(event.target as HTMLButtonElement);
+    if (index < 0) return;
+    const rtl = getComputedStyle(track).direction === "rtl";
+    let target: number;
+    switch (event.key) {
+      case "Home":
+        target = 0;
+        break;
+      case "End":
+        target = tabs.length - 1;
+        break;
+      case "ArrowLeft":
+        target = (index + (rtl ? 1 : -1) + tabs.length) % tabs.length;
+        break;
+      case "ArrowRight":
+        target = (index + (rtl ? -1 : 1) + tabs.length) % tabs.length;
+        break;
+      default:
+        return; // Native Enter/Space click and Tab/vertical scrolling remain intact.
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const button = tabs[target];
+    button.focus({ preventScroll: true });
+    // Reveal only this track: scrollIntoView can displace the HA page or time grid.
+    const outer = track.getBoundingClientRect();
+    const rect = button.getBoundingClientRect();
+    if (rect.left < outer.left) track.scrollLeft -= outer.left - rect.left;
+    else if (rect.right > outer.right) track.scrollLeft += rect.right - outer.right;
+  };
+
+  private _onTabFocusOut = (event: FocusEvent): void => {
+    if (this._layout !== "wall") return;
+    const track = event.currentTarget as HTMLElement;
+    if (event.relatedTarget instanceof Node && track.contains(event.relatedTarget)) return;
+    // Re-enter at the selected tab, not an unactivated preview from earlier arrow keys.
+    if (track.classList.contains("switch")) this._viewTabFocus = undefined;
+    else this._dayTabFocus = undefined;
+  };
+
+  private get _tabPanelLabelledBy(): string | typeof nothing {
+    if (this._layout !== "wall") return nothing;
+    const labels = this._enabledViews.length > 1 ? [`view-tab-${this._view}`] : [];
+    if (this._view === "day" || this._view === "timeline")
+      labels.push(`date-tab-${this._shownDay()}`);
+    return labels.length ? labels.join(" ") : nothing;
   }
 
   private _renderActiveView() {
@@ -2252,16 +2328,36 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
     const wall = this._layout === "wall";
     const tabs = html`
-      <div class="tabs" role="tablist">
+      <div
+        class="tabs"
+        role="tablist"
+        aria-label=${wall ? this._t("calendar_dates") : nothing}
+        @keydown=${this._onTabKeyDown}
+        @focusout=${this._onTabFocusOut}
+      >
         ${this._visibleDays.map((d) => {
           const date = this._dateForDay(d);
           return html`
             <button
               role="tab"
-              aria-selected=${d === this._day}
+              id=${wall ? `date-tab-${d}` : nothing}
+              aria-controls=${wall ? "calendar-panel" : nothing}
+              tabindex=${wall
+                ? (this._dayTabFocus ?? this._shownDay()) === d
+                  ? "0"
+                  : "-1"
+                : nothing}
+              @focus=${() => {
+                if (wall) this._dayTabFocus = d;
+              }}
+              aria-selected=${d === (wall ? this._shownDay() : this._day)}
               aria-label=${wall ? `${full[d]}, ${formatShortDate(this.hass, date)}` : nothing}
               aria-current=${wall && this._isRealToday(d) ? "date" : nothing}
-              class="${d === this._day ? "on" : ""} ${this._isRealToday(d) ? "today" : ""}"
+              class="${d === (wall ? this._shownDay() : this._day) ? "on" : ""} ${this._isRealToday(
+                d,
+              )
+                ? "today"
+                : ""}"
               @click=${() => {
                 if (wall && this._view === "day") this._navigateDay(date);
                 else this._day = d;
@@ -2340,6 +2436,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       ${this._renderDayTabs()}
       <div
         class="board ${this._layout === "wall" ? "wall-pan-board" : ""}"
+        id=${this._layout === "wall" ? "calendar-panel" : nothing}
+        role=${this._layout === "wall" ? "tabpanel" : nothing}
+        aria-labelledby=${this._tabPanelLabelledBy}
+        tabindex=${this._layout === "wall" ? "0" : nothing}
         style="--fb-wall-visible-lanes:${this._persons.length -
         hiddenLanes};--fb-wall-hidden-lanes:${hiddenLanes}"
         @pointerdown=${this._onWallBoardPointerDown}
@@ -2662,7 +2762,15 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             ${this._weekNav()}
           </div>`}
       ${this._renderDayTabs()}
-      <div class="tlwrap" @wheel=${this._onTimelinePan} @touchstart=${this._onTimelinePan}>
+      <div
+        class="tlwrap"
+        @wheel=${this._onTimelinePan}
+        @touchstart=${this._onTimelinePan}
+        id=${wall ? "calendar-panel" : nothing}
+        role=${wall ? "tabpanel" : nothing}
+        aria-labelledby=${this._tabPanelLabelledBy}
+        tabindex=${wall ? "0" : nothing}
+      >
         <div class="tlgrid" style="min-width:calc(var(--fb-tl-label, 150px) + ${width}px)">
           <div class="tlhead">
             <div class="tlcorner"></div>
@@ -2876,6 +2984,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       <div class="weekhead">${this._weekNav()}</div>
       <div
         class="weekwrap"
+        id=${wall ? "calendar-panel" : nothing}
+        role=${wall ? "tabpanel" : nothing}
+        aria-labelledby=${this._tabPanelLabelledBy}
+        aria-label=${wall && this._enabledViews.length === 1 ? this._t("week") : nothing}
+        tabindex=${wall ? "0" : nothing}
         @wheel=${this._onWeekPan}
         @pointerdown=${this._onWeekPan}
         @keydown=${this._onWeekPan}
@@ -3004,7 +3117,16 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     return html`
       <div class="weekhead">${this._weekNav()}</div>
       ${this._renderPersonFilters()}
-      <div class="agenda">
+      <div
+        class="agenda"
+        id=${this._layout === "wall" ? "calendar-panel" : nothing}
+        role=${this._layout === "wall" ? "tabpanel" : nothing}
+        aria-labelledby=${this._tabPanelLabelledBy}
+        aria-label=${this._layout === "wall" && this._enabledViews.length === 1
+          ? this._t("agenda")
+          : nothing}
+        tabindex=${this._layout === "wall" ? "0" : nothing}
+      >
         ${groups.length === 0
           ? html`<div class="agenda-empty">
               ${this._loading
@@ -3157,6 +3279,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         this._config.show_weekends !== false
           ? "compact-month"
           : ""}"
+        id=${wall ? "calendar-panel" : nothing}
+        role=${wall ? "tabpanel" : nothing}
+        aria-labelledby=${this._tabPanelLabelledBy}
+        aria-label=${wall && this._enabledViews.length === 1 ? this._t("month") : nothing}
+        tabindex=${wall ? "0" : nothing}
       >
         <div class="monthhead">${short.map((s) => html`<div class="mhcell">${s}</div>`)}</div>
         <div class="monthgrid ${wall && this._expandedMonthDate !== undefined ? "expanded" : ""}">
@@ -5183,7 +5310,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.20 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.21 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

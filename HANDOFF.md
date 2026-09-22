@@ -15,7 +15,14 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.20`, repairing unreachable Month overflow (D32).
+- Latest development build: `0.25.1-moran.21`, repairing wall view/date keyboard tabs (D33).
+  Left/Right wraps focus; Home/End reaches group edges; Enter/Space selects using the existing
+  handlers. Tab exits and re-entry targets the selected option. Focus alone causes no fetch,
+  preference save or calendar movement; only its track scrolls to reveal it. Groups have
+  localized labels and a focusable labeled panel. Legacy remains unchanged. New `tabs` checks
+  cover native keyboard/mouse/touch, restricted calendars, locale and narrow/embedded cards.
+  Local and hosted verification/delivery receipts belong to STATUS; do not infer HA deployment.
+- Previous development build r20 repaired unreachable Month overflow (D32).
   Wall Month's native `+N more events` disclosure expands one date in place; “Show less”
   collapses it. Full titles/details remain reachable without Day, filters and refresh stay
   authoritative, and details restore focus. Expansion is transient and adds no calendar reads.
@@ -45,7 +52,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r20 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r21 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -69,7 +76,7 @@ when the task originated in the separate Home Assistant operations workspace.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
-   feedback-driven usability/presentation across views. D32's Month-overflow gap is repaired;
+   feedback-driven usability/presentation across views. D32's Month-overflow and D33's keyboard-tab gaps are repaired;
    do not reimplement it or treat the wider restricted grid as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
@@ -79,6 +86,14 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R21 passes 192 UTC-launched unit tests and all 98 compiled-browser scenarios, plus build,
+types and formatting. Manual desktop/phone checks confirmed focus versus selection and
+contained tab rings; previews are refreshed, saved Day retained and normal viewport restored.
+The frontend-testing skill is useful
+guidance, not an installation prerequisite: the user's Chrome extension and the in-app
+browser are connected. Do not repeat the unnecessary “install a Browser plugin” suggestion.
+See STATUS for r21 verification and source/push/hosted-check state.
 
 R20's new `month-overflow` suite reproduced r19's inert overflow, then checks expansion,
 collapse, one-date/Today reset, aligned headings, long titles, details/focus, source refresh

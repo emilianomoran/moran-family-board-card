@@ -97,6 +97,12 @@ Ohne gültigen Sprung zur Tagesansicht lässt sich das breitere Monatsraster auf
 horizontal verschieben. Ausgeblendete Wochenendtage führen nicht mehr zu einem anderen Wochentag.
 Die Datumssumme zählt eindeutige Termine; der Überlauf zählt die angezeigten Personenkopien.
 
+Wall-Ansichts- und Datumstabs lassen sich mit Links/Rechts sowie Pos1/Ende fokussieren;
+Enter/Leertaste wählt aus. Tab verlässt die Gruppe; beim Zurückkehren ist die gewählte
+Option erreichbar. Der Fokus allein wechselt weder Ansicht noch Datum. Verdeckte Tabs
+werden im eigenen Streifen sichtbar, ohne den Kalender zu verschieben. Datumstabs bleiben
+beim Umlauf in der angezeigten Woche; die bisherigen Navigationstasten blättern weiter.
+
 ## Installation (HACS Custom Repository)
 
 1. HACS öffnen → Drei-Punkte-Menü → **Benutzerdefinierte Repositories**.

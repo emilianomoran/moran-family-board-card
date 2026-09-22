@@ -1169,13 +1169,14 @@ export const wallShellStyles = css`
   .moran-wall-shell button:focus-within,
   .moran-wall-shell [role="button"]:focus-within,
   .moran-wall-shell [role="tab"]:focus-within,
-  .moran-wall-shell [tabindex="0"]:focus-within {
+  .moran-wall-shell [tabindex="0"]:where(:not([role="tabpanel"])):focus-within {
     outline-color: var(--moran-wall-accent, #1296ed) !important;
     outline-style: solid !important;
     outline-width: 2px !important;
     outline-offset: 2px !important;
   }
 
+  .moran-wall-shell [role="tabpanel"]:focus,
   .moran-wall-shell .switch > button:focus,
   .moran-wall-shell .switch > button:focus-visible,
   .moran-wall-shell .switch > button:focus-within,

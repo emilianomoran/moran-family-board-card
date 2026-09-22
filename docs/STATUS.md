@@ -3,13 +3,11 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.20`, repairing wall Month overflow and restricted
-narrow date cells (D32). The installed HA pilot remains r12; r13–r20 are not deployed or
-released. Source, tests, built bundle and docs belong to this milestone on
-`feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Application source `b4467679a5743c33086fae6c53bb00878140cc8b` was pushed to personal origin
-on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source.
-Later docs-only receipts retain the same build. Earlier receipts below remain historical.
+Latest development build: `0.25.1-moran.21`, repairing wall view/date keyboard navigation
+(D33). The installed HA pilot remains r12; r13–r21 are not deployed or released. Source,
+tests, built bundle and docs belong to this milestone on `feature/moran-foundation`;
+Git/remote history is the delivery source of truth. Local verification passed;
+the source push and hosted checks are pending. Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -62,6 +60,53 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Keyboard view/date tabs, 2026-09-22
+
+D33 repairs view/date groups that ignored arrow keys and exposed every option as a Tab
+stop. R21 adds transient roving focus, Left/Right wrap and Home/End. Enter/Space activates
+via existing click handlers; focus alone does not select, fetch, save or move the time grid.
+Tab exits, re-entry reaches the selected tab, and off-screen focus reveals only its own
+track. Browser shortcuts and vertical scrolling are preserved; RTL reverses left/right.
+The separate Day heading still pages dates; date-tab wrap stays inside the displayed week.
+
+Groups have English/German accessible names and reference the existing active calendar
+scroller as a labeled/focusable panel. Panel focus rings are inset; focusing a child no
+longer also outlines that whole panel. Legacy rendering/input and saved preference payloads
+are unchanged. No new dependency, permanent toolbar, provider write or HA configuration change.
+
+The new regression failed against r20, then passed seven responsive cases: 1920×1080,
+812×844, 390×844, 320×568, 844×390, a 400px embedded card and reduced motion. Tests cover
+group entry/exit, wrap/Home/End, all five panel labels, focus rings, no source reads on
+focus, scroll isolation, card reattachment, Sunday-first weekdays, view subsets/single view, German, RTL and
+legacy. Each case ends with native Enter/Space/Tab/Shift-Tab plus mouse and touch activation.
+Foregrounding the harness target is required to test real `:focus` styling; background
+Chromium otherwise reports `activeElement` without real focus. Each isolated target is
+activated before navigation to avoid extra wake reads. No assertion was removed. Existing
+responsive checks caught and verified the repair of a focus-ring specificity conflict:
+the panel exclusion uses `:where` so view-capsule rings retain their inset override.
+
+Formatting, typecheck, 192 UTC-launched unit tests, build and all 98 compiled-browser
+scenarios passed. A pre-existing Month assertion measured 47.999969px for a 48px
+layout box during translated animation; it now requires both a 48px `offsetHeight` and
+rendered height within 0.001px. This corrects rounding, not the target-size requirement.
+
+Manual flow: Day → End focuses Agenda without activation → Enter selects → Left/Tab exits
+→ Shift-Tab returns to selected Agenda. Day's date End focuses Sunday while Wednesday stays
+selected; Enter then changes the actual date. Checked at 1707×960 and 391×844 CSS pixels,
+including clipped-date reveal with no page overflow. Page/title, meaningful content,
+no error overlay, clean warning/error logs and screenshots passed. Normal viewport and
+Day/Today were restored. The connected in-app Playwright/CUA controls and existing Chromium
+harness supplied evidence; no extra browser plugin was needed. The frontend-testing skill
+guided the native-input/responsive checks. Physical Safari, screen-reader speech and final
+wall hardware remain untested; these local checks are not live HA evidence.
+
+The served 4173 bundle matches dist, SHA-256
+`d2ea03cad90cbef63feabccd80d550885aac623aa6f03605681ef48ebe8ff017`.
+The unrelated untracked clipping debug note remains excluded from this milestone.
+Eleven updated Markdown files have no broken local links, and the staged credential-pattern
+scan returned zero matches. Main and review previews were refreshed to r21; Day/Today and
+normal viewport are restored. No HA deployment, main merge, tag or release occurred.
 
 ### Reachable Month overflow, 2026-09-22
 
@@ -918,8 +963,10 @@ physical iPhone/Safari verification remains open.
 ## Next work and open decisions
 
 The [current backlog](BACKLOG.md) owns pending features, proposals and completion criteria.
-CAL-01 (the requested future density zoom slider) is the clearest named feature candidate;
-CAL-02 covers broader presentation work. Neither starts as part of this handoff task.
+CAL-01's Day/Timeline/Week sliders and saved preferences are implemented through r19.
+R20 and r21 repair bounded CAL-02 access/navigation gaps. Continue from concrete feedback
+or a reproduced usability defect; broader design, Month/Agenda zoom and household modules
+are not silently included. Do not restart the completed density milestone.
 
 Preserve the accepted read-only baseline. The user confirmed physical HA-app lock/reopen
 refresh on 2026-09-21 and explicitly waived timed provider-edit/cancellation testing.

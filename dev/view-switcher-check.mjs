@@ -107,7 +107,7 @@ export async function runViewSwitcherChecks(card, nextRender) {
           root.activeElement === selected &&
             parseFloat(focus.outlineWidth) >= 2 &&
             parseFloat(focus.outlineOffset) < 0,
-          "View keyboard focus is missing or clipped.",
+          `View keyboard focus is missing or clipped: ${views[index]}, active=${root.activeElement?.textContent?.trim()}, width=${focus.outlineWidth}, offset=${focus.outlineOffset}, focused=${selected.matches(':focus')}, document=${document.hasFocus()}.`,
         );
       }
     }

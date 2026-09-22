@@ -79,6 +79,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `tabs` | Manual view/date activation, roving entry/exit, wrap/Home/End, track-only visibility, panel labels/focus, locale, RTL, restricted views/weekdays, legacy, native keyboard/mouse/touch |
 | `density` | Wall Day range/anchors, fit/reset, short/overlap details, navigation/legacy isolation; real keyboard, pointer and touch range input |
 | `timeline-density` | Timeline hour-width/row anchors, independent view scales, Reset/Today, delayed reads, hidden/obsolete frames, dense/all-day/midnight events and native keyboard/pointer/touch input |
 | `week-density` | List spacing/type, date-row anchors, fixed headings, target floors, long/all-day/midnight events, delayed/hidden/obsolete reads, two real reloads, independent Reset and native range input |
@@ -128,6 +129,13 @@ If supported browser tools exist, use them. Otherwise run the checked-in runner.
 agent plugin is required. Shadow-root host locators can time out in the in-app browser;
 role locators and read-only open-shadow DOM inspection have worked. Never use DOM evaluation
 to bypass normal user interactions in a manual QA claim.
+
+The user confirmed an installed Chrome extension on 2026-09-22, and its connection plus
+the in-app browser were verified. A missing optional `browser` skill name is not evidence
+that another extension/plugin is needed. The harness brings each isolated headless target
+to the foreground before navigation: background targets can update `activeElement` while
+suppressing `:focus` styling and native focus transitions. Activating it before fixture
+listeners load avoids an extra wake read.
 
 ## Three different preview surfaces
 

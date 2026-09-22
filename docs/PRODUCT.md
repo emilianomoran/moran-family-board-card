@@ -39,6 +39,10 @@ rail is not an acceptance target. There is no standalone React implementation to
 This replaces the early screenshot/concept, not the entire product design:
 
 - One 48px header; neutral iOS-like view capsule capped at 40px with 34px pills.
+- Wall view/date tabs have one keyboard entry stop per group. Left/Right and Home/End
+  move focus; Enter/Space selects. Tab leaves the group and re-entry targets its selection.
+  Focus reveals off-screen options without moving the calendar or fetching data. Date-key
+  wrap stays within the displayed week; the separate heading controls still page dates (D33).
 - Configured preview title “Moran Calendar”, current time 12px after it. At or below the
   700px container breakpoint, multi-view cards hide title/time to retain controls;
   accessible identity remains. Single-view cards retain the brand.
