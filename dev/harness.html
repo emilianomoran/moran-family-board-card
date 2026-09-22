@@ -1042,7 +1042,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "density"
+        (query.get("checks") === "timeline-density"
+          ? import("./calendar-timeline-density-check.mjs").then(({ runTimelineDensityChecks }) =>
+              runTimelineDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "density"
           ? import("./calendar-density-check.mjs").then(({ runCalendarDensityChecks }) =>
               runCalendarDensityChecks(card, hass, nextRender),
             )
@@ -1109,7 +1113,7 @@
           })
           .finally(() => {
             // The density runner follows geometry checks with real range-input events.
-            if (query.get("checks") === "density") return;
+            if (["density", "timeline-density"].includes(query.get("checks"))) return;
             card.remove();
             window.stop();
           });

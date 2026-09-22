@@ -835,6 +835,20 @@ export const wallShellStyles = css`
     flex: 0 0 auto;
   }
 
+  .moran-wall-shell .tlhour {
+    white-space: nowrap;
+  }
+
+  /* Midnight labels must stay inside the time area, not behind pinned names or
+     wrapped beyond the end of a fully zoomed-out day. Interior labels stay centered. */
+  .moran-wall-shell .tlhour:first-child {
+    transform: none;
+  }
+
+  .moran-wall-shell .tlhour:last-child {
+    transform: translateX(-100%);
+  }
+
   /* Grow the rows into unused space, but never shrink overlapping event lanes.
      Short panels scroll vertically; the time axis and person names stay sticky. */
   .moran-wall-shell .tlrow {

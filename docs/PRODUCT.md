@@ -1,6 +1,6 @@
 # Moran Calendar product brief
 
-Status: current requirements summary, 2026-09-21. This describes the product contract,
+Status: current requirements summary, 2026-09-22. This describes the product contract,
 not a new design approval or a list of unfinished features. Delivery is in [STATUS](STATUS.md);
 future work is in [BACKLOG](BACKLOG.md); rationale is in [DECISIONS](DECISIONS.md).
 
@@ -56,12 +56,15 @@ This replaces the early screenshot/concept, not the entire product design:
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
-- Wall Day has a header zoom disclosure, not another fixed row. Its slider changes hour
-  density while anchoring time/people. Manual zoom overrides fit until Reset, and is
-  session-only. Short Day events retain title strips and details rather than stretching
+- Wall Day and Timeline share a header zoom disclosure, not another fixed row. Each keeps
+  independent, session-only density: Day hour height, Timeline hour width. Both anchor
+  the visible time/people within scroll limits; Reset restores the active view's configuration.
+  Manual Day zoom overrides fit until Reset. Short Day events retain title strips and details rather than stretching
   over neighboring events; Agenda offers larger targets. Initial choices are in D27.
+  Timeline keeps its row heights/overlap targets and pins both midnight labels inside the
+  time area. Compact zoom uses two-hour labels over an hourly grid (D29).
 
-See D18–D21 and D27 for exact scope. Older blanket 48px target rules do not override the
+See D18–D21, D27 and D29 for exact scope. Older blanket 48px target rules do not override the
 compact header controls or duration-scaled Day title strips. Other targets retain their tested sizes.
 
 ## Status tiles are not presence or unlimited availability

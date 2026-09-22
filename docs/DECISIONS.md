@@ -530,7 +530,8 @@ Prioritize titles and omit the optional time line when it cannot fit. Keyboard d
 overflow-to-Agenda remain available; zoom in or use Agenda for larger short-event targets.
 Timeline's 48px overlap targets are unchanged. Native range keyboard/touch input, Escape
 with focus return, outside-pointer/focus dismissal and reduced motion are tested.
-Per-device persistence and Timeline/Week density remain backlog choices, not built features.
+At this r16 checkpoint, per-device persistence and Timeline/Week density remain backlog
+choices. Timeline is subsequently implemented in D29; Week/persistence remain open.
 
 ### D28. Set the DST fixture timezone before test workers start
 
@@ -540,10 +541,32 @@ sets America/Chicago in the parent before worker creation. Remove the ineffectiv
 retain every DST assertion, and verify with `TZ=UTC npm test` plus the hosted CI run.
 This affects tests only: no app timezone change, dependency update or fixture weakening.
 
+### D29. Extend the density control to wall Timeline
+
+**Implementation choice under “Continue”, 2026-09-22.** Continue CAL-01 without a new GSD
+gate. Reuse the header zoom disclosure for Timeline's horizontal hour scale: 48–240px/hour,
+with the existing default 96px as 100%. These bounds reuse supported `hour_width` geometry;
+they are an agent implementation choice, not a separately approved final design.
+
+Keep the time immediately after the pinned names anchored while scaling, plus the vertical
+person-row position. Clamp at scrollable ends, including when the entire day fits. Coalesced
+slider input uses the original anchor; delayed reads/hidden panels defer restoration, and
+new dates/views/configs must not receive obsolete scroll frames. Today intentionally
+recenters; ordinary refresh/filter/resize must not substitute centering for manual browsing.
+
+Day and Timeline remember independent overrides only within the mounted card. Timeline Reset
+restores configured `hour_width`; Day Reset retains its height/fit semantics. No saved preference
+schema or HA configuration changes. Week and other views remain outside this zoom slice.
+Timeline row heights/overlap lanes still retain their 48px target floor. Below 64px/hour,
+labels use two-hour intervals while grid lines stay hourly. Midnight labels stay inside the
+time axis instead of clipping behind names or wrapping at its end.
+This is local prototype/source work, not an HA deployment or a public release.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue, 2026-09-22 | Extend CAL-01 to Timeline with independent horizontal density and anchored scrolling (D29); verify, document and push on the existing branch. No live deployment or release implied. |
 | Continue the next phase, 2026-09-21 | Implement the requested zoom feature's wall Day slice (D27) and repair the diagnosed test-runner issue (D28). Keep all decisions in this repo; verify and push the milestone without GSD gates. No HA deployment or release implied. |
 | Skylight UI/features, existing HA cards, and a possible custom website | Calendar-first HA fork selected. Original research remains linked from the documentation index. |
 | Dedicated repo, phased plan, and implementation-base comparison | Repo created; ADR accepted; foundation reviewed. GSD was later retired. |

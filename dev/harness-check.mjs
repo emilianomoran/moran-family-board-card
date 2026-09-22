@@ -111,6 +111,14 @@ class CdpClient {
 
 const scenarios = [
   ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "timeline-density", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "timeline density:",
+  })),
+  {name: "wall", checks: "timeline-density", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "timeline density:"},
+  {name: "wall", checks: "timeline-density", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "timeline density:"},
+  ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "density", chromeHeight: 64, width, height,
     expectedGeometryMarker: "calendar density:",
   })),
@@ -297,7 +305,7 @@ try {
     const url = `http://127.0.0.1:${address.port}/dev/harness.html?scenario=${name}&checks=${checks}&chrome=${chromeHeight}${panelWidth ? `&panel=${panelWidth}` : ""}${feed ? `&feed=${feed}` : ""}`;
     await cdp.send("Page.navigate", { url });
     // Background targets update activeElement but suppress real focus transitions.
-    if (checks === "density") await cdp.send("Page.bringToFront");
+    if (checks === "density" || checks === "timeline-density") await cdp.send("Page.bringToFront");
 
     if (checks === "pan") {
       const evaluate = async (expression) =>
@@ -540,7 +548,7 @@ try {
         `${name} browser check did not report expected geometry marker: ${expectedGeometryMarker}`,
       );
     }
-    if (checks === "density") await runNativeDensityChecks(cdp, delay);
+    if (checks === "density" || checks === "timeline-density") await runNativeDensityChecks(cdp, delay);
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
     console.log(

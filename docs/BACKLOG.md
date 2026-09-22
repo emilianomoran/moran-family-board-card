@@ -1,6 +1,6 @@
 # Calendar backlog
 
-Status: current queue, consolidated 2026-09-21. Priority below is a recommended order,
+Status: current queue, consolidated 2026-09-22. Priority below is a recommended order,
 not new user authorization. [Decisions](DECISIONS.md) own product choices;
 [STATUS](STATUS.md) owns delivery evidence. No GSD phases or mandatory gates.
 
@@ -8,23 +8,26 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 
 | ID | Priority / state | Outcome and completion criteria | Source |
 |---|---|---|---|
-| CAL-01 | Day slice implemented in r16; follow-up scope open | Wall Day slider changes row density with anchored scrolling, Reset/fit behavior and keyboard/touch support. Per-device persistence and Timeline/Week density remain candidates, not implemented. | D19, D27 |
+| CAL-01 | Day and Timeline implemented through r17; follow-up scope open | Independent Day height and Timeline hour-width sliders, anchored scrolling, Reset and native keyboard/touch support. Per-device persistence and Week density remain candidates, not implemented. | D19, D27, D29 |
 | CAL-02 | Next usability milestone; broad design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Keep D18–D21 fixes; implement concrete feedback without demanding a complete redesign first. | D06, D07, D18 |
 | CAL-03 | Hardware-dependent; open | Validate the actual portrait/landscape wall installation. Record resolution, device pixel ratio, browser/kiosk wrapper, distance and touch reach. Confirm full-day access, reload/wake and legibility. Desktop emulation cannot certify physical hardware. | D06 |
 
 ### CAL-01 implementation handoff
 
 The request is a **row-density slider**, not browser zoom or a second calendar view.
-First slice is implemented for wall Day using `hour_height`, `_pxPerMin`, fit measurement
+The first slice is implemented for wall Day using `hour_height`, `_pxPerMin`, fit measurement
 and scroll anchors. Header popup, 40–96px/hour (64 = 100%), session-only override; Reset
 restores configured height/fit. Values and placement are initial implementation choices.
+The Timeline extension uses `hour_width` (48–240px/hour; 96 = 100%) with independent
+session state and left-edge clock-time/vertical-lane anchors. Reset restores configured
+width. The same popup serves either view, adding no permanent row. See D29.
 
 Before choosing values, inspect `src/config.ts`, `_measureFit`, `_rememberDayScroll`,
 `_restoreDayScroll` and Day event positioning in `src/ha-family-board-card.ts`.
 Reuse existing scroll/context safeguards. Test dense overlaps, short events, all-day rows,
 midnight edges, hidden lanes, resize, Today, reduced motion and read-only details.
 
-Remaining choices: coverage of Timeline/Week, refinement from user feedback and per-device
+Remaining choices: coverage of Week, refinement from user feedback and per-device
 persistence. If saving density, extend the existing
 preference schema with migration/invalidation tests; never store appointments. Do not add
 this work during a documentation-only request.
@@ -63,7 +66,8 @@ Status timing, fresh read-only details, hidden-page recovery, compact chrome and
 are implemented. [STATUS](STATUS.md) contains the tests and deployment checkpoints.
 
 Timeline's remaining-height correction (D24) is implemented and verified in r13;
-see STATUS for verification and delivery. CAL-01's wall Day slider follows separately in r16.
+see STATUS for verification and delivery. CAL-01's wall Day slider follows in r16 and
+Timeline density in r17. These are source/prototype features; use STATUS for installed state.
 Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
 is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
 Date-label centering within the left-aligned group (D26) is implemented in r15.

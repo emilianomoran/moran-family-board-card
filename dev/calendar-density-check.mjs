@@ -53,7 +53,7 @@ export async function runCalendarDensityChecks(card, hass, nextRender) {
   const grid = () => root.querySelector(".body");
   const toggle = () => root.querySelector(".wall-density-toggle");
   const panel = () => root.querySelector(".wall-density-panel");
-  const slider = () => root.querySelector("#wall-day-density");
+  const slider = () => root.querySelector("#wall-calendar-density");
   const reset = () => panel().querySelector("button");
   const minute = () => {
     const sticky = [...board().querySelectorAll(".header-row, .allday-row")].reduce(
@@ -195,7 +195,7 @@ export async function runCalendarDensityChecks(card, hass, nextRender) {
     "Date paging reset zoom/time.",
   );
   await view("Timeline");
-  assert(!toggle() && card._pxPerMin * 60 === 64, "Day zoom leaked into Timeline.");
+  assert(toggle() && card._timelineHourWidth === 96, "Day zoom leaked into Timeline.");
   await view("Day");
   assert(
     card._pxPerMin * 60 === 80 && panel().hidden,

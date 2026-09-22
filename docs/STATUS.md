@@ -1,15 +1,15 @@
 # Current status and next work
 
-Last recorded: 2026-09-21. This is the current project status, not a release announcement.
+Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.16`, wall Day density slider (D27) and the test-runner
-timezone repair (D28/ENG-05). The installed HA pilot remains r12; r13–r16 are not deployed
-or released. Source, tests, built bundle and docs belong to the r16 milestone on
+Latest development build: `0.25.1-moran.17`, adding independent wall Timeline density (D29)
+to the Day slider (D27). The installed HA pilot remains r12; r13–r17 are not deployed or
+released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Application source: `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105`, pushed to the personal working
-branch on 2026-09-21; `git ls-remote` matched local HEAD. Later documentation-only receipts
-retain this application build. No merge, tag or release occurred.
+The previous r16 source `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105` and its documentation
+receipt `f2794e2baa5961bf955ed6ff4d4f139fed42270f` were pushed with successful CI/Validate.
+The r17 delivery receipt is recorded below after verification. No merge, tag or release.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 151
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
@@ -61,6 +61,45 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Timeline density extension, 2026-09-22
+
+D29 extends the existing header popup to Timeline: 48–240px/hour, 96px = 100%.
+Day and Timeline retain independent session-only scales; Timeline Reset restores configured
+`hour_width`. No added toolbar row, provider writes, saved preference changes, dependencies
+or HA deployment. The time after pinned names and vertical row position are retained within
+scroll bounds. Zooming until the entire day fits legitimately clamps to the start.
+Today still recenters; ordinary refresh, filters and resize preserve manual browsing.
+
+The new `timeline-density` suite covers desktop, tablet, phone, short landscape, embedded
+400px cards and reduced motion. It exercises range bounds, repeated/coalesced input,
+clock/axis geometry, independent scales, configured Reset, Today, popup/focus containment,
+vertical overflow, delayed reads, hidden panels, obsolete date/view frames, newer scrolling,
+dense overlaps, all-day/midnight events, read-only details and legacy isolation. Native
+keyboard, pointer and touch checks reuse the Day range-input driver.
+
+Manual review caught clipped/wrapped midnight labels when all 24 hours fit. The wall-only
+axis styles now keep the first/last labels inside the time area, with regression assertions.
+Below 64px/hour, labels use two-hour intervals to avoid crowding; hourly grid lines remain.
+Interior labels remain centered; legacy styles and Timeline's 48px overlap-lane floor are unchanged.
+
+Local verification: formatting, typecheck, 151 UTC-launched unit tests and all 72
+compiled-browser cases passed. After the final compact-label refinement, all seven
+`timeline-density` and eight `timeline` cases passed again against the rebuilt bundle.
+Manual flow: loopback Timeline → browse time → Calendar zoom → Home/End → Reset/Escape
+and Today, at 1707×960 and 391×844 CSS pixels. The phone check held its left-edge time at
+831.67 minutes while changing 50% to 250%; header stayed 48px and popup/page remained contained.
+Page identity, meaningful content, absence of an error overlay, light/dark screenshots,
+keyboard focus and clean warning/error logs were checked. Browser plugin unavailable;
+the existing Chromium/CDP suite and in-app Playwright/CUA supplied evidence without new dependencies.
+Temporary viewport settings and the saved Day preference were restored. The original
+preview and both review copies were reloaded to r17; the separate Timeline review is left
+at 100% with its popup open. The HA tab was not touched. Physical Safari, wall hardware and installed HA
+are not claimed by this local verification.
+
+The loopback port 4173 serves identical bytes to the final bundle, SHA-256
+`1b2c465dcadff2d0d838919c6b8cb9149171ceb3376c7356fafda54b2f1b68f3`.
+Milestone push and hosted-check receipts are recorded after delivery below.
 
 ### Day density slider, 2026-09-21
 

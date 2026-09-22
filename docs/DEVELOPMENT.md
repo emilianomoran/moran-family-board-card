@@ -1,6 +1,6 @@
 # Develop and verify the calendar
 
-Status: current how-to, 2026-09-21. Audience: a developer or agent with a fresh clone,
+Status: current how-to, 2026-09-22. Audience: a developer or agent with a fresh clone,
 no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) first.
 
 ## Start the synthetic prototype
@@ -78,6 +78,7 @@ assuming new filter names. Useful current filters:
 | Filter | Primary coverage |
 |---|---|
 | `density` | Wall Day range/anchors, fit/reset, short/overlap details, navigation/legacy isolation; real keyboard, pointer and touch range input |
+| `timeline-density` | Timeline hour-width/row anchors, independent view scales, Reset/Today, delayed reads, hidden/obsolete frames, dense/all-day/midnight events and native keyboard/pointer/touch input |
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
 | `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |

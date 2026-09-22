@@ -71,11 +71,13 @@ Personen bleiben lokal im Browser gespeichert. Getrennte Datumszellen und der ne
 Ansichtsumschalter sind ebenfalls installiert. Nachweise und verbleibende Geräteprüfungen:
 [Aktueller Stand](docs/STATUS.md).
 
-Der aktuelle Entwicklungsbuild bietet in der Wall-Tagesansicht **Kalenderzoom** über die
-Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details (40–96px/Stunde; 100% = 64px).
+Der aktuelle Entwicklungsbuild bietet in Wall-Tag und -Timeline **Kalenderzoom** über die
+Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die Stundenhöhe
+(40–96px; 100% = 64px), Timeline die Stundenbreite (48–240px; 100% = 96px), nicht die Personenzeilenhöhe.
 Datum, Uhrzeitposition und Personenspalten bleiben erhalten, soweit der Scrollbereich es
-zulässt. „Zurücksetzen“ stellt `hour_height` und `fit_height` wieder her. Der Zoom gilt nur
-für die aktuelle Karte/Sitzung; andere Ansichten und Legacy bleiben unverändert.
+zulässt. „Zurücksetzen“ stellt `hour_height`/`fit_height` in Tag oder `hour_width` in Timeline
+wieder her. Beide Ansichten behalten ihren Zoom unabhängig für die aktuelle Karte/Sitzung;
+andere Ansichten und Legacy bleiben unverändert.
 Kurze Termine zeigen vorrangig den Titel; Details und Agenda bieten mehr Platz.
 Der [aktuelle Stand](docs/STATUS.md) trennt Entwicklungsbuild und installierten Pilotbetrieb.
 

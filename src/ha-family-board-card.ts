@@ -94,6 +94,9 @@ const FALLBACK_COLORS = [
 const DEFAULT_HOUR_HEIGHT = 64; // px per hour in the day view
 const HOUR_HEIGHT_MIN = 40;
 const HOUR_HEIGHT_MAX = 96;
+const DEFAULT_HOUR_WIDTH = 96; // px per hour in Timeline
+const HOUR_WIDTH_MIN = 48;
+const HOUR_WIDTH_MAX = 240;
 
 // HA weather condition -> mdi icon
 const WEATHER_ICON: Record<string, string> = {
@@ -263,6 +266,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _daySwipe?: { pointerId: number; x: number; y: number; date: number };
   private _dayScrollAnchor?: { minute: number; left: number; date: number };
   private _dayScrollFrame?: number;
+  private _timelineScrollAnchor?: { minute: number; top: number; date: number };
+  private _timelineScrollFrame?: number;
   private _raw: RawEvent[] = [];
   private _calendarResults: CalendarReadResult[] = [];
   private _fetchedKey = "";
@@ -274,6 +279,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _statusExpanded = false;
   @state() private _densityExpanded = false;
   @state() private _dayHourHeight?: number; // wall Day override; never persisted or written to HA
+  @state() private _timelineZoomWidth?: number; // independent, session-only Timeline override
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -326,8 +332,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._statusExpanded = false;
     this._densityExpanded = false;
     this._dayHourHeight = undefined;
+    this._timelineZoomWidth = undefined;
     this._daySwipe = undefined;
     this._cancelDayScroll();
+    this._cancelTimelineScroll();
     if (config.read_only) {
       this._dialog = undefined;
       this._drag = undefined;
@@ -437,6 +445,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._densityExpanded = false;
     if (this._view !== view) {
       this._cancelDayScroll();
+      this._cancelTimelineScroll();
       this._daySwipe = undefined;
       if (this._layout === "wall") {
         const date = this._dateForDay(this._shownDay());
@@ -493,6 +502,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._ro = new ResizeObserver(() =>
         requestAnimationFrame(() => {
           this._measureFit();
+          this._restoreTimelineScroll();
           // A hidden/zero-width panel may not have been measurable on first render.
           this._maybeScrollToNow();
         }),
@@ -505,6 +515,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     super.disconnectedCallback();
     this._densityExpanded = false;
     this._cancelDayScroll();
+    this._cancelTimelineScroll();
     this._daySwipe = undefined;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
     this._scrollToNowFrame = undefined;
@@ -693,6 +704,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (changed.has("_dialog")) this._manageDialogFocus(changed.get("_dialog") as DialogState);
     this._measureFit();
     this._restoreDayScroll();
+    this._restoreTimelineScroll();
     this._maybeScrollToNow();
     if (this._layout === "wall" && (changed.has("_view") || changed.has("_config"))) {
       const track = this.renderRoot.querySelector<HTMLElement>(".switch");
@@ -798,12 +810,18 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   private get _timelineHourWidth(): number {
-    return Math.min(240, Math.max(48, Number(this._config.hour_width) || 96));
+    if (this._layout === "wall" && this._timelineZoomWidth !== undefined)
+      return this._timelineZoomWidth;
+    return Math.min(
+      HOUR_WIDTH_MAX,
+      Math.max(HOUR_WIDTH_MIN, Number(this._config.hour_width) || DEFAULT_HOUR_WIDTH),
+    );
   }
 
   /** Reveal now on entry to Day / wall Timeline, or on an explicit Today action. */
   private _maybeScrollToNow(): void {
-    if (!this.isConnected || !this._config || this._dayScrollAnchor) return;
+    if (!this.isConnected || !this._config || this._dayScrollAnchor || this._timelineScrollAnchor)
+      return;
     const day = this._shownDay();
     const view = this._view;
     const timeline = this._layout === "wall" && view === "timeline";
@@ -1550,6 +1568,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
   private _thisWeek = () => {
     this._cancelDayScroll();
+    this._cancelTimelineScroll();
     this._weekOffset = 0;
     this._day = this._todayIndex();
     if (this._layout === "wall" && (this._view === "day" || this._view === "timeline")) {
@@ -1580,6 +1599,84 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (this._dayScrollFrame !== undefined) cancelAnimationFrame(this._dayScrollFrame);
     this._dayScrollFrame = undefined;
   };
+
+  private _cancelTimelineScroll = (): void => {
+    this._timelineScrollAnchor = undefined;
+    if (this._timelineScrollFrame !== undefined) cancelAnimationFrame(this._timelineScrollFrame);
+    this._timelineScrollFrame = undefined;
+  };
+
+  private _onTimelinePan = (): void => {
+    if (!this._timelineScrollAnchor) return;
+    this._cancelTimelineScroll();
+    // A user can browse while a zoom is waiting for data. Do not replace that
+    // newer choice with either the old anchor or automatic Today centering.
+    this._scrolledKey = `timeline|${this._now().toDateString()}|${this._shownDay()}|${this._timelineHourWidth / 60}`;
+  };
+
+  /** Anchor the clock time just after the pinned names, independently of vertical lanes. */
+  private _rememberTimelineScroll(): void {
+    if (this._timelineScrollFrame !== undefined) cancelAnimationFrame(this._timelineScrollFrame);
+    this._timelineScrollFrame = undefined;
+    const board = this.renderRoot.querySelector<HTMLElement>(".tlwrap");
+    const hours = board?.querySelector<HTMLElement>(".tlhours");
+    if (!board || !hours || !board.clientWidth || !board.clientHeight) return;
+    board.scrollTo({ left: board.scrollLeft, top: board.scrollTop, behavior: "instant" });
+    const labelWidth = board.querySelector<HTMLElement>(".tlcorner")?.offsetWidth ?? 0;
+    const minute =
+      this._dayWindow(this._shownDay()).startMin +
+      (board.getBoundingClientRect().left + labelWidth - hours.getBoundingClientRect().left) /
+        (this._timelineHourWidth / 60);
+    this._timelineScrollAnchor = {
+      minute: this._timelineScrollAnchor?.minute ?? minute,
+      top: this._timelineScrollAnchor?.top ?? board.scrollTop,
+      date: this._dateForDay(this._shownDay()).getTime(),
+    };
+    this._scrollToNowRequested = false;
+    if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
+    this._scrollToNowFrame = undefined;
+  }
+
+  private _restoreTimelineScroll(): void {
+    const anchor = this._timelineScrollAnchor;
+    if (!anchor) return;
+    if (this._view !== "timeline" || this._dateForDay(this._shownDay()).getTime() !== anchor.date) {
+      this._cancelTimelineScroll();
+      return;
+    }
+    if (this._loading || this._timelineScrollFrame !== undefined) return;
+    this._timelineScrollFrame = requestAnimationFrame(() => {
+      this._timelineScrollFrame = undefined;
+      if (
+        this._timelineScrollAnchor !== anchor ||
+        this._loading ||
+        !this.isConnected ||
+        this._view !== "timeline" ||
+        this._dateForDay(this._shownDay()).getTime() !== anchor.date
+      )
+        return;
+      const board = this.renderRoot.querySelector<HTMLElement>(".tlwrap");
+      const hours = board?.querySelector<HTMLElement>(".tlhours");
+      // Keep the anchor for the ResizeObserver retry if the panel became hidden.
+      if (!board || !hours || !board.clientWidth || !board.clientHeight) return;
+      const labelWidth = board.querySelector<HTMLElement>(".tlcorner")?.offsetWidth ?? 0;
+      const timeLeft =
+        hours.getBoundingClientRect().left - board.getBoundingClientRect().left + board.scrollLeft;
+      const scale = this._timelineHourWidth / 60;
+      board.scrollTo({
+        left: Math.max(
+          0,
+          timeLeft +
+            (anchor.minute - this._dayWindow(this._shownDay()).startMin) * scale -
+            labelWidth,
+        ),
+        top: anchor.top,
+        behavior: "instant",
+      });
+      this._scrolledKey = `timeline|${this._now().toDateString()}|${this._shownDay()}|${scale}`;
+      this._timelineScrollAnchor = undefined;
+    });
+  }
 
   /** Keep a clock-time anchor, not a raw pixel offset: all-day rows and trimmed hours vary. */
   private _rememberDayScroll(date: Date): void {
@@ -1733,7 +1830,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._densityExpanded = !this._densityExpanded;
     await this.updateComplete;
     if (this._densityExpanded)
-      this.renderRoot.querySelector<HTMLInputElement>("#wall-day-density")?.focus();
+      this.renderRoot.querySelector<HTMLInputElement>("#wall-calendar-density")?.focus();
   }
 
   private _setDayDensity(height?: number): void {
@@ -1749,10 +1846,27 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._measureFit();
   }
 
+  private _setDensity(value?: number): void {
+    if (this._view === "day") {
+      this._setDayDensity(value);
+      return;
+    }
+    if (this._layout !== "wall" || this._view !== "timeline") return;
+    if (value !== undefined && !Number.isFinite(value)) return;
+    this._onInteract();
+    this._rememberTimelineScroll();
+    this._timelineZoomWidth =
+      value === undefined ? undefined : Math.min(HOUR_WIDTH_MAX, Math.max(HOUR_WIDTH_MIN, value));
+    this.requestUpdate(); // restore even when a repeated input leaves the scale unchanged
+  }
+
   private _renderDensityControl() {
-    if (this._view !== "day") return nothing;
-    const hourHeight = this._pxPerMin * 60;
-    const percent = `${Math.round((hourHeight / DEFAULT_HOUR_HEIGHT) * 100)}%`;
+    if (this._view !== "day" && this._view !== "timeline") return nothing;
+    const timeline = this._view === "timeline";
+    const hourSize = timeline ? this._timelineHourWidth : this._pxPerMin * 60;
+    const defaultSize = timeline ? DEFAULT_HOUR_WIDTH : DEFAULT_HOUR_HEIGHT;
+    const override = timeline ? this._timelineZoomWidth : this._dayHourHeight;
+    const percent = `${Math.round((hourSize / defaultSize) * 100)}%`;
     return html`
       <button
         class="wall-density-toggle"
@@ -1781,29 +1895,29 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         ?hidden=${!this._densityExpanded}
       >
         <div class="wall-density-heading">
-          <label for="wall-day-density">${this._t("calendar_zoom")}</label>
-          <output for="wall-day-density">${percent}</output>
+          <label for="wall-calendar-density">${this._t("calendar_zoom")}</label>
+          <output for="wall-calendar-density">${percent}</output>
           <button
             @click=${async () => {
-              this._setDayDensity();
+              this._setDensity();
               await this.updateComplete;
-              this.renderRoot.querySelector<HTMLInputElement>("#wall-day-density")?.focus();
+              this.renderRoot.querySelector<HTMLInputElement>("#wall-calendar-density")?.focus();
             }}
-            ?disabled=${this._dayHourHeight === undefined}
+            ?disabled=${override === undefined}
           >
             ${this._t("reset_zoom")}
           </button>
         </div>
         <input
-          id="wall-day-density"
+          id="wall-calendar-density"
           type="range"
-          min=${HOUR_HEIGHT_MIN}
-          max=${HOUR_HEIGHT_MAX}
+          min=${timeline ? HOUR_WIDTH_MIN : HOUR_HEIGHT_MIN}
+          max=${timeline ? HOUR_WIDTH_MAX : HOUR_HEIGHT_MAX}
           step="1"
-          .value=${String(Math.round(hourHeight))}
+          .value=${String(Math.round(hourSize))}
           aria-valuetext=${percent}
           @input=${(event: Event) =>
-            this._setDayDensity((event.target as HTMLInputElement).valueAsNumber)}
+            this._setDensity((event.target as HTMLInputElement).valueAsNumber)}
         />
         <div class="wall-density-hints" aria-hidden="true">
           <span>${this._t("zoom_more_hours")}</span><span>${this._t("zoom_more_detail")}</span>
@@ -2440,9 +2554,20 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const hourPx = this._timelineHourWidth;
     const px = hourPx / 60;
     const width = (endMin - startMin) * px;
+    const wall = this._layout === "wall";
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
     const hours: number[] = [];
-    for (let h = startMin / 60; h <= endMin / 60; h++) hours.push(h);
+    for (let h = startMin / 60; h <= endMin / 60; h++) {
+      // Keep the hourly grid, but give labels breathing room at compact density.
+      if (
+        !wall ||
+        hourPx >= 64 ||
+        h === startMin / 60 ||
+        h === endMin / 60 ||
+        (h - startMin / 60) % 2 === 0
+      )
+        hours.push(h);
+    }
     const now = this._now();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     const showNow =
@@ -2450,7 +2575,6 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._isRealToday(day) &&
       nowMin >= startMin &&
       nowMin <= endMin;
-    const wall = this._layout === "wall";
     const LANE = wall ? 54 : 30;
 
     return html`
@@ -2466,7 +2590,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             ${this._weekNav()}
           </div>`}
       ${this._renderDayTabs()}
-      <div class="tlwrap">
+      <div class="tlwrap" @wheel=${this._onTimelinePan} @touchstart=${this._onTimelinePan}>
         <div class="tlgrid" style="min-width:calc(var(--fb-tl-label, 150px) + ${width}px)">
           <div class="tlhead">
             <div class="tlcorner"></div>
@@ -4881,7 +5005,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.16 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.17 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

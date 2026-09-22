@@ -1,6 +1,6 @@
 # Calendar architecture and change map
 
-Status: code-backed reference, 2026-09-21. Build/delivery checkpoints live in [STATUS](STATUS.md).
+Status: code-backed reference, 2026-09-22. Build/delivery checkpoints live in [STATUS](STATUS.md).
 See [ADR 0001](adr/0001-implementation-base.md)
 for the accepted implementation choice. This is the current map, not the older `.planning` proposal.
 
@@ -72,6 +72,13 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 - Wall Day uses flex remaining height, not `_applyFullHeight`'s legacy viewport cap.
   Duration-scaled Day blocks have a 16px floor; do not restore the blanket 48px minimum
   that makes compact appointments overlap. Timeline retains its separate 48px lane minimum.
+- Wall Timeline uses independent `_timelineZoomWidth`, read through `_timelineHourWidth`.
+  The shared `_setDensity`/popup delegates to the active view. `_rememberTimelineScroll`
+  captures time after pinned names plus vertical scroll before changing scale; `_restoreTimelineScroll`
+  restores after render/load or a measurable ResizeObserver retry. Rapid input retains the
+  original anchor. Config/disconnect/view/Today cancel obsolete anchors; a changed date
+  invalidates them. Restore records the once-per-entry key so ordinary zoom is not recentered.
+  Neither zoom state changes `preferences.ts` or provider data (D29).
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses
   a fixed date. Header time reuses `formatTime` and the minute tick, not a second timer.
 
@@ -87,6 +94,6 @@ series/occurrence identity. Extract components only when a real feature needs th
 The main controller still owns substantial rendering/state code. Status lookahead depends
 on the active loaded range; all-day events are excluded from busy selection. Time helpers
 use browser Date/Intl with HA language and time-format preferences; do not claim cross-zone
-travel semantics beyond tested behavior. Density outside Day, saved zoom and final wall
+travel semantics beyond tested behavior. Density outside Day/Timeline, saved zoom and final wall
 hardware remain open. DST tests set Chicago in the parent Vitest config before workers;
 the runtime still uses the user's browser/HA display context (D28).
