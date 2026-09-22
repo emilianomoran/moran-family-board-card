@@ -8,7 +8,7 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 
 | ID | Priority / state | Outcome and completion criteria | Source |
 |---|---|---|---|
-| CAL-01 | Day and Timeline implemented through r17; follow-up scope open | Independent Day height and Timeline hour-width sliders, anchored scrolling, Reset and native keyboard/touch support. Per-device persistence and Week density remain candidates, not implemented. | D19, D27, D29 |
+| CAL-01 | Day, Timeline and browser-local persistence implemented through r18; follow-up scope open | Independent scales, anchored scrolling, Reset, native keyboard/touch support and scoped reload persistence with opt-out. Week density and feedback-driven refinement remain candidates. | D19, D27, D29, D30 |
 | CAL-02 | Next usability milestone; broad design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Keep D18–D21 fixes; implement concrete feedback without demanding a complete redesign first. | D06, D07, D18 |
 | CAL-03 | Hardware-dependent; open | Validate the actual portrait/landscape wall installation. Record resolution, device pixel ratio, browser/kiosk wrapper, distance and touch reach. Confirm full-day access, reload/wake and legibility. Desktop emulation cannot certify physical hardware. | D06 |
 
@@ -16,21 +16,24 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 
 The request is a **row-density slider**, not browser zoom or a second calendar view.
 The first slice is implemented for wall Day using `hour_height`, `_pxPerMin`, fit measurement
-and scroll anchors. Header popup, 40–96px/hour (64 = 100%), session-only override; Reset
+and scroll anchors. Header popup, 40–96px/hour (64 = 100%); Reset
 restores configured height/fit. Values and placement are initial implementation choices.
 The Timeline extension uses `hour_width` (48–240px/hour; 96 = 100%) with independent
-session state and left-edge clock-time/vertical-lane anchors. Reset restores configured
+state and left-edge clock-time/vertical-lane anchors. Reset restores configured
 width. The same popup serves either view, adding no permanent row. See D29.
+R18 saves manual overrides under the existing `remember_preferences` option (D30).
+Browser-local, per HA user/dashboard/card, not cross-device sync. Reset clears only the
+active scale; changed density defaults invalidate only that view. Older view/filter records
+migrate; blocked storage and opt-out keep the calendar usable without persistence.
 
 Before choosing values, inspect `src/config.ts`, `_measureFit`, `_rememberDayScroll`,
 `_restoreDayScroll` and Day event positioning in `src/ha-family-board-card.ts`.
 Reuse existing scroll/context safeguards. Test dense overlaps, short events, all-day rows,
 midnight edges, hidden lanes, resize, Today, reduced motion and read-only details.
 
-Remaining choices: coverage of Week, refinement from user feedback and per-device
-persistence. If saving density, extend the existing
-preference schema with migration/invalidation tests; never store appointments. Do not add
-this work during a documentation-only request.
+Remaining choices: coverage of Week and refinement from user feedback. Preserve preference
+migration/invalidation tests when extending scales; never store appointments. Do not add
+features during a documentation-only request.
 
 ## Proposals and engineering follow-ups
 
@@ -67,7 +70,8 @@ are implemented. [STATUS](STATUS.md) contains the tests and deployment checkpoin
 
 Timeline's remaining-height correction (D24) is implemented and verified in r13;
 see STATUS for verification and delivery. CAL-01's wall Day slider follows in r16 and
-Timeline density in r17. These are source/prototype features; use STATUS for installed state.
+Timeline density in r17, with saved zoom in r18. These are source/prototype features;
+use STATUS for installed state.
 Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
 is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
 Date-label centering within the left-aligned group (D26) is implemented in r15.

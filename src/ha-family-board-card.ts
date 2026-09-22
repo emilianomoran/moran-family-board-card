@@ -30,6 +30,14 @@ import {
 import { readCalendarBatch, type CalendarRange, type CalendarReadResult } from "./calendar-source";
 import { renderWallShell, wallShellStyles } from "./wall-shell";
 import { preferencesKey, readPreferences, writePreferences } from "./preferences";
+import {
+  DEFAULT_HOUR_HEIGHT,
+  HOUR_HEIGHT_MIN,
+  HOUR_HEIGHT_MAX,
+  DEFAULT_HOUR_WIDTH,
+  HOUR_WIDTH_MIN,
+  HOUR_WIDTH_MAX,
+} from "./calendar-density";
 import { adjacentVisibleDate, dateInMonth, daySwipeStep } from "./calendar-navigation";
 import {
   localize,
@@ -91,12 +99,6 @@ const FALLBACK_COLORS = [
   "#F472B6",
   "#60A5FA",
 ];
-const DEFAULT_HOUR_HEIGHT = 64; // px per hour in the day view
-const HOUR_HEIGHT_MIN = 40;
-const HOUR_HEIGHT_MAX = 96;
-const DEFAULT_HOUR_WIDTH = 96; // px per hour in Timeline
-const HOUR_WIDTH_MIN = 48;
-const HOUR_WIDTH_MAX = 240;
 
 // HA weather condition -> mdi icon
 const WEATHER_ICON: Record<string, string> = {
@@ -278,8 +280,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _browserOnline = navigator.onLine !== false;
   @state() private _statusExpanded = false;
   @state() private _densityExpanded = false;
-  @state() private _dayHourHeight?: number; // wall Day override; never persisted or written to HA
-  @state() private _timelineZoomWidth?: number; // independent, session-only Timeline override
+  @state() private _dayHourHeight?: number; // optional wall Day override; browser-local only
+  @state() private _timelineZoomWidth?: number; // independent Timeline override
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -410,6 +412,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const key = preferencesKey(this._config, window.location.pathname, this.hass?.user?.id);
     if (key === this._preferencesKey) return;
     this._preferencesKey = key;
+    this._dayHourHeight = undefined;
+    this._timelineZoomWidth = undefined;
+    this._densityExpanded = false;
+    this._cancelDayScroll();
+    this._cancelTimelineScroll();
     const wanted = this._config.view ?? "day";
     this._view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
     this._hiddenP = this._persons.flatMap((p, i) => (p.hidden ? [i] : []));
@@ -421,10 +428,15 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         key,
         this._enabledViews,
         this._persons.length,
+        this._config,
       );
       if (saved) {
         this._view = saved.view;
         this._hiddenP = saved.hidden;
+        this._dayHourHeight = saved.zoom?.day;
+        this._timelineZoomWidth = saved.zoom?.timeline;
+        // Canonicalize v1 records and retire overrides whose configured defaults changed.
+        this._savePreferences();
       }
     } catch {
       // Accessing localStorage itself can throw in a restricted browser.
@@ -434,7 +446,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _savePreferences(): void {
     if (!this._preferencesKey) return;
     try {
-      writePreferences(window.localStorage, this._preferencesKey, this._view, this._hiddenP);
+      writePreferences(
+        window.localStorage,
+        this._preferencesKey,
+        this._view,
+        this._hiddenP,
+        this._config,
+        { day: this._dayHourHeight, timeline: this._timelineZoomWidth },
+      );
     } catch {
       // Preferences are optional; a storage failure must not break interactions.
     }
@@ -1844,6 +1863,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         : Math.min(HOUR_HEIGHT_MAX, Math.max(HOUR_HEIGHT_MIN, height));
     // Reset immediately resumes fit_height, before restoring the time anchor.
     this._measureFit();
+    this._savePreferences();
+    this.requestUpdate();
   }
 
   private _setDensity(value?: number): void {
@@ -1857,6 +1878,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._rememberTimelineScroll();
     this._timelineZoomWidth =
       value === undefined ? undefined : Math.min(HOUR_WIDTH_MAX, Math.max(HOUR_WIDTH_MIN, value));
+    this._savePreferences();
     this.requestUpdate(); // restore even when a repeated input leaves the scale unchanged
   }
 
@@ -5005,7 +5027,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.17 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.18 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

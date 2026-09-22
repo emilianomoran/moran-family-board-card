@@ -83,7 +83,10 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   100% = 64px); Timeline changes hour width (48–240px; 100% = 96px), keeping person-row heights.
   Date, visible time and people stay anchored within scroll limits. Reset restores
   `hour_height`/`fit_height` in Day or `hour_width` in Timeline. The views keep independent
-  zoom during this card session, not across reload/config changes. Short Day events
+  zoom across reloads when `remember_preferences` is enabled (the wall default), scoped
+  to this browser and HA user/dashboard/card. Reset clears only the active saved override;
+  changing its density defaults invalidates that scale. Opt-out keeps zoom session-only.
+  No appointments or scroll/date positions are stored; there is no cross-device sync. Short Day events
   prioritize titles; use details or Agenda for more space. Other views and legacy are
   unchanged. Check STATUS for deployment state.
 - Wall Week shows date numbers and readable, wrapping event cards with pinned date/person
@@ -286,7 +289,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
-| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Retain selected view and hidden people in this browser for the HA user/card. No calendar payloads are stored. Changing lane definitions, enabled views, or view defaults resets the saved choices. Blocked storage falls back to normal unsaved use. |
+| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Retain selected view, hidden people and independent wall Day/Timeline zoom in this browser for the HA user/dashboard/card. No calendar payloads are stored. Changing lane definitions, enabled views, or view defaults resets the saved choices; changing density defaults resets only that view's zoom. Reset clears its zoom override. Blocked storage falls back to normal unsaved use. |
 | `preferences_key` | string | title-based identity | Distinguish otherwise identical cards on the same dashboard path; not a credential or security boundary. |
 | `time_grid` | number | `30` | Time axis grid in minutes |
 | `start_hour` | number | `6` | First visible hour |

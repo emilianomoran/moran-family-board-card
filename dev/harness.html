@@ -109,7 +109,7 @@
       const query = new URLSearchParams(window.location.search);
       document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
       const scenario = query.get("scenario") ?? "legacy";
-      const dailyUse = query.get("daily") === "1" || ["daily", "navigation", "pan"].includes(query.get("checks"));
+      const dailyUse = query.get("daily") === "1" || ["daily", "navigation", "pan", "zoom-preferences"].includes(query.get("checks"));
       let feed = query.get("feed") ?? "healthy";
       if (scenario !== "legacy" && scenario !== "wall") {
         throw new Error("Use scenario=legacy or scenario=wall.");
@@ -1042,7 +1042,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "timeline-density"
+        (query.get("checks") === "zoom-preferences"
+          ? import("./calendar-zoom-preferences-check.mjs").then(({ runZoomPreferencesChecks }) =>
+              runZoomPreferencesChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline-density"
           ? import("./calendar-timeline-density-check.mjs").then(({ runTimelineDensityChecks }) =>
               runTimelineDensityChecks(card, hass, nextRender),
             )

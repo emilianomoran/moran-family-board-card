@@ -57,14 +57,19 @@ This replaces the early screenshot/concept, not the entire product design:
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
 - Wall Day and Timeline share a header zoom disclosure, not another fixed row. Each keeps
-  independent, session-only density: Day hour height, Timeline hour width. Both anchor
-  the visible time/people within scroll limits; Reset restores the active view's configuration.
+  independent density: Day hour height, Timeline hour width. With `remember_preferences`
+  enabled (wall default), each manual scale survives reload in this browser for this HA
+  user/dashboard/card. Opt-out keeps it session-only. Both anchor the visible time/people
+  within scroll limits; Reset clears only the active view's saved override and restores its configuration.
   Manual Day zoom overrides fit until Reset. Short Day events retain title strips and details rather than stretching
   over neighboring events; Agenda offers larger targets. Initial choices are in D27.
   Timeline keeps its row heights/overlap targets and pins both midnight labels inside the
   time area. Compact zoom uses two-hour labels over an hourly grid (D29).
 
-See D18–D21, D27 and D29 for exact scope. Older blanket 48px target rules do not override the
+Changing configured density defaults invalidates only that view's saved scale (D30).
+No appointments, browsing dates or scroll positions are stored; zoom is not device/account sync.
+
+See D18–D21 and D27–D30 for exact scope. Older blanket 48px target rules do not override the
 compact header controls or duration-scaled Day title strips. Other targets retain their tested sizes.
 
 ## Status tiles are not presence or unlimited availability

@@ -3,15 +3,15 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.17`, adding independent wall Timeline density (D29)
-to the Day slider (D27). The installed HA pilot remains r12; r13–r17 are not deployed or
+Latest development build: `0.25.1-moran.18`, adding browser-local saved Day/Timeline zoom (D30)
+to the existing sliders (D27/D29). The installed HA pilot remains r12; r13–r18 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Application source: `068ab453c512e9be2d46d63a4915f21e854464b9`, pushed to personal origin
-on 2026-09-22; `git ls-remote` matched local HEAD. Hosted CI and Validate succeeded for
-this exact source. Later documentation-only receipts retain this build. No merge, tag or release.
+R18 delivery is recorded below after verification. The previous r17 source
+`068ab453c512e9be2d46d63a4915f21e854464b9` was pushed and passed hosted CI/Validate.
+No merge, tag or release is included in this milestone.
 
-ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 151
+ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 180
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
 to the app's runtime timezone. Hosted [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117304)
 and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117313)
@@ -62,7 +62,44 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Saved Day/Timeline zoom, 2026-09-22
+
+D30 extends the existing `remember_preferences` option, on by default in wall mode.
+Manual Day height and Timeline width persist independently per browser/HA user/dashboard/card.
+Reset clears only the active override. Changed Day height/fit or Timeline width defaults
+invalidate only that scale and preserve the other scale plus view/filters. Opt-out and
+blocked/full storage keep the UI usable without saving. Opt-out does not delete the old record.
+
+Payload v2 retains the v1 identity namespace, migrates old view/filter choices and rewrites
+only allowlisted UI fields. Invalid scales/default fingerprints are dropped; no event data,
+raw names, credentials, dates or scroll offsets are stored. Older builds ignore v2 on
+downgrade and use configured defaults. This is not cross-device or live cross-tab sync.
+No new toolbar row, dependency, provider write or HA configuration change.
+
+Formatting, typecheck, build and 180 UTC-launched unit tests pass (29 new persistence tests).
+Five new `zoom-preferences` browser cases pass at 1920×1080, 390×844, 320×568, a 400px embedded
+card and reduced motion. Each includes two actual reloads plus remount/order, migration,
+independent Reset, changed defaults, identity isolation, malformed payloads, opt-out and
+blocked/quota storage. The full 77-case compiled-browser suite passed, including existing
+native touch/pointer/keyboard density, five-view, calendar integrity and recovery coverage.
+
+Manual flow: local review → Day 150% → Timeline 250% → actual reload → verify both →
+Reset Day → reload → confirm Day 100% and Timeline 250% → Reset Timeline → reload → 100%.
+Desktop 1707×960 and phone-width 391×844 CSS pixels were checked with native keyboard and
+button interaction. Header remains 48px, popup fits, no horizontal page overflow. URL/title,
+rendered content, no error overlay, screenshots and clean warning/error logs were checked.
+The frontend-testing skill shaped the reload/Reset and responsive checks; Browser plugin
+unavailable, so existing Chromium/CDP and in-app Playwright/CUA provided evidence.
+Original Day/default-zoom preferences and viewport were restored. Local previews were
+reloaded to r18; the separate HA tab was untouched. Physical Safari/final wall hardware
+and installed HA behavior are not claimed by these checks.
+
+Port 4173 serves the same bytes as the built bundle, SHA-256
+`c0317170b17977ccc176f8df6b840c11b3740a9c81e37695c63d42bc71f5b104`.
+
 ### Timeline density extension, 2026-09-22
+
+Historical r17 checkpoint; D30 subsequently supersedes its session-only persistence rule.
 
 D29 extends the existing header popup to Timeline: 48–240px/hour, 96px = 100%.
 Day and Timeline retain independent session-only scales; Timeline Reset restores configured
@@ -109,6 +146,8 @@ local links; the staged credential-pattern scan found no matches. The unrelated 
 debug note remains excluded. No HA deployment, main merge, tag or release.
 
 ### Day density slider, 2026-09-21
+
+Historical r16 checkpoint; D29 adds Timeline and D30 supersedes session-only persistence.
 
 The requested CAL-01 feature starts with wall Day (D27). The header magnifying glass opens
 a native range input, 40–96px/hour; 64px is 100%. The popup is absent from other views and

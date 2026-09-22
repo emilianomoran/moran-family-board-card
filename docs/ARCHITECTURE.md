@@ -30,7 +30,8 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 | Unique calendar reads, 20-second bounded wait, partial/missing/error outcomes | `src/calendar-source.ts` | `src/calendar-source.test.ts`; integrity/recovery harness |
 | Shared-person routing, display title cleanup, occurrence identity, all-day and overlap math | `src/events.ts` | `src/events.test.ts`, `src/event-details.test.ts` |
 | Day stepping, weekday restrictions, month clamping, swipe threshold | `src/calendar-navigation.ts` | `src/calendar-navigation.test.ts`; navigation/view-context harness |
-| Scoped view/hidden-person persistence and invalidation | `src/preferences.ts` | `src/preferences.test.ts`; daily-use harness |
+| Scoped view/hidden-person/zoom persistence and invalidation | `src/preferences.ts` | `src/preferences.test.ts`; daily-use and zoom-preferences harness |
+| Shared Day/Timeline density defaults and bounds | `src/calendar-density.ts` | preference validation plus density browser suites |
 | Locale labels and time/date formatting | `src/localize.ts`, `src/editor-i18n.ts` | `src/localize.test.ts`; locale browser cases |
 | Wall header, clock, Status disclosure placement, responsive/view CSS | `src/wall-shell.ts` | chrome, presentation and view-switcher harness |
 | Controller, data generations, selection, dialogs, view templates, scroll anchors | `src/ha-family-board-card.ts` | all compiled-card scenarios |
@@ -63,12 +64,21 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.
 - The shared wall date strip keeps weekday and number centered within a 40px group at
   the cell's 12px left inset. Do not center that group across the whole cell (D26).
-- Only view and hidden indices are persisted, scoped to user/dashboard/card plus config
-  signature. No events, names, secrets, selected dates or scroll offsets in local storage.
+- Only view, hidden indices and optional validated Day/Timeline scales are persisted,
+  scoped to user/dashboard/card plus config signature. No events, names, secrets, selected
+  dates or scroll offsets in local storage. `remember_preferences` controls all three.
+- Preference payload v2 keeps the stable v1 key namespace to discover older records.
+  Restore accepts v1/v2, migrates view/filters, allowlists fields and rewrites the accepted
+  record. Each zoom value carries a hash of its configured defaults: Day height/fit,
+  Timeline width. Mismatches discard only that scale, durably when storage is writable.
+  Reset omits only the active override; it does not store the fitted/effective scale.
+  Missing HA user, opt-out or inaccessible storage uses unsaved behavior. No cross-tab or
+  cross-device synchronization; older builds ignore v2 on downgrade (D30).
 - Wall Day density uses `_dayHourHeight` as an optional in-memory override. `_setDayDensity`
   remembers the old time/lane anchor before changing scale; Reset resumes fit measurement
   before restoring it. Keep `_maybeScrollToNow` from superseding this anchor. Only wall Day
-  reads the override; config/reload resets it. No preference schema change (D27).
+  reads the override. Config/reload restores only a matching browser preference;
+  otherwise it uses configuration/fit. D30 supersedes D27's session-only rule.
 - Wall Day uses flex remaining height, not `_applyFullHeight`'s legacy viewport cap.
   Duration-scaled Day blocks have a 16px floor; do not restore the blanket 48px minimum
   that makes compact appointments overlap. Timeline retains its separate 48px lane minimum.
@@ -78,7 +88,7 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   restores after render/load or a measurable ResizeObserver retry. Rapid input retains the
   original anchor. Config/disconnect/view/Today cancel obsolete anchors; a changed date
   invalidates them. Restore records the once-per-entry key so ordinary zoom is not recentered.
-  Neither zoom state changes `preferences.ts` or provider data (D29).
+  D30 persists the manual scales, never these scroll anchors or provider data.
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses
   a fixed date. Header time reuses `formatTime` and the minute tick, not a second timer.
 
@@ -94,6 +104,6 @@ series/occurrence identity. Extract components only when a real feature needs th
 The main controller still owns substantial rendering/state code. Status lookahead depends
 on the active loaded range; all-day events are excluded from busy selection. Time helpers
 use browser Date/Intl with HA language and time-format preferences; do not claim cross-zone
-travel semantics beyond tested behavior. Density outside Day/Timeline, saved zoom and final wall
+travel semantics beyond tested behavior. Density outside Day/Timeline and final wall
 hardware remain open. DST tests set Chicago in the parent Vitest config before workers;
 the runtime still uses the user's browser/HA display context (D28).

@@ -26,10 +26,10 @@ const EN: Dict = {
   l_max_columns: "Max. columns per day",
   l_first_day: "Week starts on",
   l_scroll_to_now: "Auto-scroll to now",
-  l_remember_preferences: "Remember view and hidden people on this browser",
+  l_remember_preferences: "Remember view, hidden people and zoom on this browser",
   l_preferences_key: "Preferences ID (optional)",
   h_remember_preferences:
-    "On by default in wall mode. Browser-local and per HA user; no events are saved. Changing lane definitions resets saved filters.",
+    "On by default in wall mode. Browser-local and per HA user; no events are saved. Wall Day/Timeline zoom is independent. Changing density defaults resets that view's saved zoom; Reset clears its override.",
   h_preferences_key:
     "Give otherwise identical cards on the same dashboard path different IDs to keep their preferences separate.",
   l_color_by: "Color by",
@@ -173,10 +173,10 @@ const DE: Dict = {
   l_max_columns: "Max. Spalten pro Tag",
   l_first_day: "Wochenstart",
   l_scroll_to_now: "Auto-Scroll zu jetzt",
-  l_remember_preferences: "Ansicht und ausgeblendete Personen in diesem Browser merken",
+  l_remember_preferences: "Ansicht, ausgeblendete Personen und Zoom in diesem Browser merken",
   l_preferences_key: "Einstellungs-ID (optional)",
   h_remember_preferences:
-    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Geänderte Personenspalten setzen Filter zurück.",
+    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Tag und Timeline behalten ihren Zoom unabhängig. Geänderte Dichte-Vorgaben oder Zurücksetzen löschen den Zoom der jeweiligen Ansicht.",
   h_preferences_key:
     "Unterschiedliche IDs trennen die Einstellungen identischer Karten auf demselben Dashboard-Pfad.",
   l_color_by: "Einfärben nach",

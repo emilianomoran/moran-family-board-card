@@ -76,8 +76,12 @@ Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die
 (40–96px; 100% = 64px), Timeline die Stundenbreite (48–240px; 100% = 96px), nicht die Personenzeilenhöhe.
 Datum, Uhrzeitposition und Personenspalten bleiben erhalten, soweit der Scrollbereich es
 zulässt. „Zurücksetzen“ stellt `hour_height`/`fit_height` in Tag oder `hour_width` in Timeline
-wieder her. Beide Ansichten behalten ihren Zoom unabhängig für die aktuelle Karte/Sitzung;
-andere Ansichten und Legacy bleiben unverändert.
+wieder her und löscht nur den gespeicherten Zoom der aktiven Ansicht. Bei aktiviertem
+`remember_preferences` (Wall-Standard) bleiben beide Zoomwerte unabhängig nach dem Neuladen
+erhalten: lokal in diesem Browser, je HA-Benutzer, Dashboard und Karte. Geänderte Dichte-
+Standardwerte verwerfen nur den Zoom der betroffenen Ansicht. Ohne diese Option bleibt
+Zoom auf die Sitzung beschränkt. Keine Termine, Datums-/Scrollpositionen oder geräteübergreifende
+Synchronisierung; andere Ansichten und Legacy bleiben unverändert.
 Kurze Termine zeigen vorrangig den Titel; Details und Agenda bieten mehr Platz.
 Der [aktuelle Stand](docs/STATUS.md) trennt Entwicklungsbuild und installierten Pilotbetrieb.
 

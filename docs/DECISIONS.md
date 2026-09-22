@@ -531,7 +531,7 @@ overflow-to-Agenda remain available; zoom in or use Agenda for larger short-even
 Timeline's 48px overlap targets are unchanged. Native range keyboard/touch input, Escape
 with focus return, outside-pointer/focus dismissal and reduced motion are tested.
 At this r16 checkpoint, per-device persistence and Timeline/Week density remain backlog
-choices. Timeline is subsequently implemented in D29; Week/persistence remain open.
+choices. Timeline is subsequently implemented in D29 and persistence in D30; Week remains open.
 
 ### D28. Set the DST fixture timezone before test workers start
 
@@ -562,10 +562,39 @@ labels use two-hour intervals while grid lines stay hourly. Midnight labels stay
 time axis instead of clipping behind names or wrapping at its end.
 This is local prototype/source work, not an HA deployment or a public release.
 
+D30 subsequently replaces only the session-only persistence rule above.
+
+### D30. Remember independent zoom in the existing browser preferences
+
+**Implementation choice under “Continue”, 2026-09-22.** Complete CAL-01's saved-zoom slice
+without adding another setting or toolbar row. Reuse `remember_preferences`: on by default
+in wall mode, off in legacy. These persistence semantics are an agent implementation choice,
+not a separately approved visual redesign. No HA deployment or calendar write is implied.
+
+Save manual Day height and Timeline width independently, using their existing validated
+integer ranges. Keep the existing HA-user/dashboard-path/card identity and config isolation.
+Reload/remount restores matching overrides; missing identity, opt-out or blocked storage
+keeps the UI usable without saving. Opt-out does not erase an existing saved record.
+Reset removes only the active view's override and resumes its configured geometry/fit.
+Do not save computed fit, dates, scroll offsets, events, raw names or credentials.
+
+Payload v2 retains the v1 key namespace. Accept and migrate v1 view/person choices, ignore
+unknown fields/versions and invalid scales. Each view's scale is accompanied by a fingerprint
+of its configured density defaults: height/fit for Day, width for Timeline. Changed defaults
+retire only the affected override while preserving view/filters and the other scale.
+Rewrite accepted records on restore so invalidation remains effective if defaults later revert.
+This is browser-profile-local, not cross-device or live cross-tab sync. Older builds ignore
+v2 on downgrade and fall back to configured UI defaults; calendar data remains untouched.
+
+Verify actual reloads, independent Reset, migration, configuration/user isolation, initial
+centering at a restored scale, inaccessible/full storage and desktop/phone/embedded sizes.
+Keep D27/D29's anchoring, Today and native range-input behavior unchanged.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after the r17 push, 2026-09-22 | Implement scoped saved Day/Timeline zoom with the existing opt-out, migration and Reset semantics (D30), then verify/document/push. No HA deployment, release or Week zoom implied. |
 | Continue, 2026-09-22 | Extend CAL-01 to Timeline with independent horizontal density and anchored scrolling (D29); verify, document and push on the existing branch. No live deployment or release implied. |
 | Continue the next phase, 2026-09-21 | Implement the requested zoom feature's wall Day slice (D27) and repair the diagnosed test-runner issue (D28). Keep all decisions in this repo; verify and push the milestone without GSD gates. No HA deployment or release implied. |
 | Skylight UI/features, existing HA cards, and a possible custom website | Calendar-first HA fork selected. Original research remains linked from the documentation index. |
