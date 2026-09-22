@@ -51,6 +51,11 @@ This replaces the early screenshot/concept, not the entire product design:
 - Day keeps person columns. Narrow Month provides counts and date-to-Day drilldown;
   restricted configurations keep appointments reachable. Week has pinned date/person
   headers; Agenda wraps long content. Month and Agenda share person filters.
+- Month's `+N more events` expands the remaining cards inside that date, with full titles
+  and “Show less”. One date expands at a time, without another toolbar or saved preference.
+  The date total counts unique events; overflow counts person-owned cards. Normal narrow
+  Month keeps date-to-Day drilldown. Where that route is unavailable, scroll a wider grid
+  instead of squeezing event targets. Disabled Day/weekend destinations are not buttons (D32).
 - Timeline fills the remaining wall panel with growing person rows and event bars.
   Overlapping lanes keep 48px event targets; short panels scroll instead of clipping.
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
@@ -59,7 +64,7 @@ This replaces the early screenshot/concept, not the entire product design:
 - Wall Day, Timeline and Week share a header zoom disclosure, not another fixed row. Each keeps
   independent density: Day hour height, Timeline hour width, Week list spacing/type. With `remember_preferences`
   enabled (wall default), each manual scale survives reload in this browser for this HA
-  user/dashboard/card. Opt-out keeps it session-only. Both anchor the visible time/people
+  user/dashboard/card. Opt-out keeps it session-only. Day and Timeline anchor visible time/people
   within scroll limits; Reset clears only the active view's saved override and restores its configuration.
   Manual Day zoom overrides fit until Reset. Short Day events retain title strips and details rather than stretching
   over neighboring events; Agenda offers larger targets. Initial choices are in D27.

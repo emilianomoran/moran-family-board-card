@@ -3,13 +3,12 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.19`, adding independent Week list density (D31)
-to saved Day/Timeline zoom (D27/D29/D30). The installed HA pilot remains r12; r13–r19 are not deployed or
+Latest development build: `0.25.1-moran.20`, repairing wall Month overflow and restricted
+narrow date cells (D32). The installed HA pilot remains r12; r13–r20 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Application source: `02ae983d2a14b6fa3745e5b3863b2452801fb75a`, pushed to personal origin
-on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source,
-including the existing PR-triggered runs. Later docs-only receipts retain the same build.
+R20 delivery verification is pending the milestone commit/push and hosted checks.
+Earlier source/CI receipts below remain historical, not evidence of r20 delivery.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -63,7 +62,50 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Reachable Month overflow, 2026-09-22
+
+D32 repairs an access gap in D18: only the first three cards were reachable when Day was
+disabled or weekends hidden. R20's native `+N more events` disclosure reveals the rest
+inside the date, wraps full titles and becomes “Show less”. It stays after the first three
+cards, preserving focus and the vertical anchor within scroll limits. Only one date expands;
+only that week row grows. Opening details keeps the existing read-only, refreshed-occurrence
+behavior and restores focus on close. Counts retain unique-event versus person-copy semantics.
+
+Expansion uses current filtered events, survives refresh/filter toggles, and does not fetch
+extra data. Paging/Today/kiosk return, changing views/config/preference identity clears it; it is never
+persisted. Without a valid Day route, date cells are labeled groups. A hidden weekend no
+longer opens a different weekday. Restricted narrow Month pans a 784px grid with aligned
+headings and 48px event/disclosure heights; ordinary compact Month remains unchanged.
+
+The regression failed against r19 with inert overflow, then passed seven focused cases:
+1920×1080, 812×844, 390×844, 320×568, 844×390, a 400px embedded card and reduced motion.
+Coverage includes expansion/collapse/one-date/Today, text/target floors, aligned headings,
+scroll bounds, details/focus, refreshed titles, failure/recovery, person filters, unique
+counts, all-day/midnight segments, disabled Day/hidden weekends, kiosk return, locale and legacy.
+Native Enter → Tab → Enter → Escape → Space, touch expansion and mouse collapse follow
+each case. Formatting, typecheck, 192 UTC-launched unit tests, build and all 91 compiled-browser
+scenarios pass. Hosted CI is pending the milestone push at this recording checkpoint.
+The existing integrity assertion still requires every appointment segment; its overflow
+label parser now accepts the readable suffix after `+N`, rather than treating it as NaN.
+
+Manual flow: restricted Month → expand February 18 → Library Visit details → Escape →
+same expanded date/focused appointment → Show less. Checked at 391×844 and 1707×960 CSS
+pixels. Correct page/title, nonblank content, no error overlay, clean warning/error logs,
+no horizontal page overflow and screenshots passed. The frontend-testing skill drove
+responsive/native-input checks. Browser plugin unavailable; existing Chromium/CDP and
+in-app Playwright/CUA were used without new dependencies. User's saved Day preference and
+normal viewport restored. Standard desktop Month also expands by Enter without accidentally
+opening Day; light and dark screenshots were reviewed. Main prototype reloaded to r20;
+the review copy remains on expanded Month. No HA changes; physical Safari/wall hardware remain untested.
+
+Port 4173 serves the exact built bundle, SHA-256
+`9df0eeaef09f4ddb59d253e9741af1cbb986f970f3f5db20af3c6007cf04c022`.
+Ten updated Markdown files have no broken local links; staged credential-pattern scan
+found no matches. The pre-existing untracked clipping debug note remains excluded.
+
 ### Week list density, 2026-09-22
+
+Historical r19 checkpoint; r20 retains this feature and adds D32's Month repair.
 
 D31 adds Week to the existing zoom popup with an independent 75–150% list scale, default
 100%. It changes row/card spacing and event text size, not hourly geometry. Full titles

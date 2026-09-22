@@ -15,7 +15,15 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.19`, adding independent Week list density (D31)
+- Latest development build: `0.25.1-moran.20`, repairing unreachable Month overflow (D32).
+  Wall Month's native `+N more events` disclosure expands one date in place; “Show less”
+  collapses it. Full titles/details remain reachable without Day, filters and refresh stay
+  authoritative, and details restore focus. Expansion is transient and adds no calendar reads.
+  Restricted narrow Month pans a 784px grid instead of shrinking event targets. Normal
+  compact Month/date-to-Day remains unchanged; hidden-weekend/no-Day dates are not dead buttons.
+  No Month/Agenda zoom, provider writes, HA deployment, release or main merge. Delivery
+  verification is recorded in STATUS; recheck Git/remote for the exact milestone commit.
+- Previous density milestone: r19 added independent Week list density (D31)
   to saved Day/Timeline zoom (D30). Week uses 75–150%, default 100%, scaling spacing/type
   with 12px text and 48px target floors. Pinned headings and person-column widths stay fixed;
   zoom anchors the visible date/fractional row position, not an hour. Week saves/resets independently.
@@ -30,15 +38,13 @@ when the task originated in the separate Home Assistant operations workspace.
   Delayed reads/hidden panels preserve pending anchors; newer panning or navigation cancels
   stale restoration. Midnight labels stay within the hour axis. Month/Agenda/legacy are unchanged.
   R18 retains Day/Timeline but drops Week on downgrade; r17 and earlier ignore all v2 preferences.
-  Application source `02ae983d2a14b6fa3745e5b3863b2452801fb75a` is pushed to personal origin;
-  remote HEAD matched and hosted CI/Validate passed. See STATUS for linked receipts;
-  later docs-only commits retain this build. No main merge, release or HA deployment.
+  The r19 source/CI receipts remain in STATUS as history; r20 retains those density features.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` now passes all 192; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r19 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r20 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -62,7 +68,9 @@ when the task originated in the separate Home Assistant operations workspace.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
-   feedback-driven usability/presentation across views. Do not assume Month/Agenda zoom or
+   feedback-driven usability/presentation across views. D32's Month-overflow gap is repaired;
+   do not reimplement it or treat the wider restricted grid as final design approval.
+   Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
    [OPERATIONS](docs/OPERATIONS.md) and the private workspace's current safety rules.
@@ -71,13 +79,14 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## Evidence and remaining limits
 
-R19 adds 12 preference tests and seven `week-density` browser cases: dense/long/all-day/
-midnight events, fixed headings, text/target floors, date-row anchors, delayed/hidden/obsolete
-reads, restricted/empty/legacy states, two actual reloads and independent Reset. Native
-mouse/touch/keyboard range checks run after each case. All 192 UTC-launched unit tests and
-84 compiled-browser scenarios pass; hosted receipts belong in STATUS. Manual desktop/phone checks
-confirmed 75–150%, persisted zoom, Reset, popup containment and the unchanged 48px header.
-Screenshots/logs were checked, then review preferences and viewport restored.
+R20's new `month-overflow` suite reproduced r19's inert overflow, then checks expansion,
+collapse, one-date/Today reset, aligned headings, long titles, details/focus, source refresh
+and failure, filters, shared/all-day/midnight events, weekend restrictions, locale and legacy.
+Real keyboard/mouse/touch checks follow each responsive case. All 192 UTC-launched unit tests
+and 91 compiled-browser cases pass; see STATUS for hosted checks and delivery.
+Manual desktop/phone checks confirmed expansion → hidden appointment
+details → Escape → restored focus/context, and collapse. Screenshots/logs were checked;
+temporary viewport and the user's saved Day preference were restored.
 Do not infer deployment from a source push.
 Actual HA review remains at r12. The user confirmed physical
 iPhone HA-app lock/reopen refresh.

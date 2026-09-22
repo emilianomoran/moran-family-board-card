@@ -39,6 +39,7 @@ Updated 2026-09-22. Private access/configuration remains outside this repo by de
 - D29: independent Timeline zoom, anchored time/rows and contained midnight labels.
 - D30: browser-local saved zoom, opt-out, migration, per-view Reset and default invalidation.
 - D31: Week list density, fixed headings/target floors, date-row anchoring and independent saved scale.
+- D32: reachable Month overflow, expandable date cards, restricted-view fallback and keyboard/touch access.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.

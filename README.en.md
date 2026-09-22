@@ -87,8 +87,8 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   to this browser and HA user/dashboard/card. Reset clears only the active saved override;
   changing its density defaults invalidates that scale. Opt-out keeps zoom session-only.
   No appointments or scroll/date positions are stored; there is no cross-device sync. Short Day events
-  prioritize titles; use details or Agenda for more space. Month, Agenda and legacy are
-  unchanged. Check STATUS for deployment state.
+  prioritize titles; use details or Agenda for more space. Month, Agenda and legacy have
+  no zoom slider. Check STATUS for deployment state.
 - Wall Week uses the same zoom popup for list density, 75–150% (default 100%). Move left
   for more events or right for larger text/spacing. Full titles wrap; text stays at least
   12px and appointment targets at least 48px. Pinned headings and person-column widths do
@@ -98,6 +98,11 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
   or hides weekends. Agenda wraps long titles/locations instead of truncating them.
+- Wall Month's **+N more events** expands that date's remaining appointment cards in place;
+  **Show less** collapses them. Expanded titles wrap, and each card opens the usual details.
+  One date expands at a time; expansion is not saved. Narrow cards without a valid Day
+  drilldown pan a wider, readable month grid. Hidden weekend dates no longer jump to a
+  weekday. Date totals count unique events; overflow counts the rendered person-owned cards.
 - Wall views keep the browsing date when switching between Day, Timeline, Week, Month,
   and Agenda. Month navigation carries the preferred day into the displayed month,
   clamped to a valid visible date; clicking a date explicitly takes precedence.

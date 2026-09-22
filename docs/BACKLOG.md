@@ -9,7 +9,7 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 | ID | Priority / state | Outcome and completion criteria | Source |
 |---|---|---|---|
 | CAL-01 | Day, Timeline, Week and browser-local persistence implemented through r19 | Independent scales, anchored scrolling, Reset, native keyboard/touch support and scoped reload persistence with opt-out. Further refinement follows concrete user feedback; Month/Agenda zoom is not assumed. | D19, D27, D29–D31 |
-| CAL-02 | Next usability milestone; broad design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Keep D18–D21 fixes; implement concrete feedback without demanding a complete redesign first. | D06, D07, D18 |
+| CAL-02 | Month overflow repaired in r20; broader design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Preserve D32's reachable overflow/restricted Month fallback and D18–D21 fixes. Continue with concrete feedback or reproduced usability defects, not an assumed full redesign. | D06, D07, D18, D32 |
 | CAL-03 | Hardware-dependent; open | Validate the actual portrait/landscape wall installation. Record resolution, device pixel ratio, browser/kiosk wrapper, distance and touch reach. Confirm full-day access, reload/wake and legibility. Desktop emulation cannot certify physical hardware. | D06 |
 
 ### CAL-01 implementation handoff

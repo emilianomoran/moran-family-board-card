@@ -242,6 +242,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _day: number = (new Date().getDay() + 6) % 7;
   @state() private _weekOffset = 0;
   @state() private _monthOffset = 0;
+  @state() private _expandedMonthDate?: number; // one date's overflow, never persisted
   @state() private _dialog?: DialogState;
   @state() private _loadError = false;
   @state() private _partialLoad = false;
@@ -337,6 +338,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
     this._config = config;
     this._statusExpanded = false;
+    this._expandedMonthDate = undefined;
     this._densityExpanded = false;
     this._dayHourHeight = undefined;
     this._timelineZoomWidth = undefined;
@@ -424,6 +426,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._weekDensity = undefined;
     this._weekScrollAnchor = undefined;
     this._densityExpanded = false;
+    this._expandedMonthDate = undefined;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
     const wanted = this._config.view ?? "day";
@@ -473,6 +476,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (!this._enabledViews.includes(view)) return;
     this._densityExpanded = false;
     if (this._view !== view) {
+      this._expandedMonthDate = undefined;
       this._weekScrollAnchor = undefined;
       this._cancelDayScroll();
       this._cancelTimelineScroll();
@@ -631,6 +635,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (Date.now() - this._lastInteract < min * 60000) return;
     if (this._dialog) return; // never yank an open dialog away
     this._densityExpanded = false;
+    this._expandedMonthDate = undefined;
     this._weekScrollAnchor = undefined;
     const wanted = this._config.view ?? "day";
     const view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
@@ -1612,12 +1617,15 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
   };
   private _prevMonth = () => {
+    this._expandedMonthDate = undefined;
     this._monthOffset -= 1;
   };
   private _nextMonth = () => {
+    this._expandedMonthDate = undefined;
     this._monthOffset += 1;
   };
   private _thisMonth = () => {
+    this._expandedMonthDate = undefined;
     this._monthOffset = 0;
     if (this._layout === "wall") {
       this._weekOffset = 0;
@@ -3110,6 +3118,26 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
     const today = startOfDay(this._now()).getTime();
     const maxChips = 3;
+    const renderChip = (e: BoardEvent) => {
+      const col = this._eventColor(e);
+      const tent = this._isTentative(e);
+      return html`<div
+        class="mchip ${this._isPast(e) ? "past" : ""} ${tent ? "tentative" : ""}"
+        style="background:${col}30;background:color-mix(in srgb, ${col} 22%, var(--card-background-color, #fff));border-left:2px ${tent
+          ? "dashed"
+          : "solid"} ${col}"
+        title="${this._evTitle(e)}"
+        tabindex="0"
+        role="button"
+        @click=${(ev: MouseEvent) => {
+          ev.stopPropagation();
+          this._openEvent(e);
+        }}
+        @keydown=${(k: KeyboardEvent) => this._onItemKey(k, e)}
+      >
+        ${e.continuesBefore ? "« " : ""}${this._evTitle(e)}
+      </div>`;
+    };
     return html`
       <div class="weekhead">
         <div class="weeknav">
@@ -3131,11 +3159,17 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           : ""}"
       >
         <div class="monthhead">${short.map((s) => html`<div class="mhcell">${s}</div>`)}</div>
-        <div class="monthgrid">
+        <div class="monthgrid ${wall && this._expandedMonthDate !== undefined ? "expanded" : ""}">
           ${Array.from({ length: numDays }, (_, d) => {
             const date = addLocalDays(gridStart, d);
             const inMonth = date.getMonth() === month;
             const isToday = date.getTime() === today;
+            const expanded = wall && this._expandedMonthDate === date.getTime();
+            const canOpenDay =
+              !wall ||
+              (this._enabledViews.includes("day") &&
+                (this._config.show_weekends !== false ||
+                  (date.getDay() !== 0 && date.getDay() !== 6)));
             const items = (byDay.get(d) || []).sort(
               (a, b) => Number(b.allDay) - Number(a.allDay) || a.startMin - b.startMin,
             );
@@ -3145,18 +3179,22 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             const owners = [...new Map(items.map((e) => [e.personIdx, e])).values()];
             return html`
               <div
-                class="mcell ${inMonth ? "" : "out"} ${isToday ? "today" : ""} ${date.getDay() ===
-                  0 || date.getDay() === 6
-                  ? "wkend"
-                  : ""}"
-                role="button"
+                class="mcell ${expanded ? "expanded" : ""} ${inMonth ? "" : "out"} ${isToday
+                  ? "today"
+                  : ""} ${date.getDay() === 0 || date.getDay() === 6 ? "wkend" : ""}"
+                data-date=${date.getTime()}
+                role=${canOpenDay ? "button" : "group"}
                 aria-label=${wall
                   ? `${dateLabel.format(date)}${count ? `, ${countLabel}` : ""}`
                   : nothing}
-                tabindex="0"
-                @click=${() => this._goToDate(date)}
+                tabindex=${canOpenDay ? "0" : nothing}
+                @click=${() => canOpenDay && this._goToDate(date)}
                 @keydown=${(k: KeyboardEvent) => {
-                  if (k.key === "Enter" || k.key === " ") {
+                  if (
+                    canOpenDay &&
+                    k.target === k.currentTarget &&
+                    (k.key === "Enter" || k.key === " ")
+                  ) {
                     k.preventDefault();
                     this._goToDate(date);
                   }
@@ -3176,29 +3214,24 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                     </div>`
                   : nothing}
                 <div class="mchips">
-                  ${items.slice(0, maxChips).map((e) => {
-                    const col = this._eventColor(e);
-                    const tent = this._isTentative(e);
-                    return html`<div
-                      class="mchip ${this._isPast(e) ? "past" : ""} ${tent ? "tentative" : ""}"
-                      style="background:${col}30;background:color-mix(in srgb, ${col} 22%, var(--card-background-color, #fff));border-left:2px ${tent
-                        ? "dashed"
-                        : "solid"} ${col}"
-                      title="${this._evTitle(e)}"
-                      tabindex="0"
-                      role="button"
-                      @click=${(ev: MouseEvent) => {
-                        ev.stopPropagation();
-                        this._openEvent(e);
-                      }}
-                      @keydown=${(k: KeyboardEvent) => this._onItemKey(k, e)}
-                    >
-                      ${e.continuesBefore ? "« " : ""}${this._evTitle(e)}
-                    </div>`;
-                  })}
+                  ${items.slice(0, maxChips).map(renderChip)}
                   ${items.length > maxChips
-                    ? html`<div class="mmore">+${items.length - maxChips}</div>`
+                    ? wall
+                      ? html`<button
+                          class="mmore"
+                          aria-expanded=${expanded}
+                          aria-label="${dateLabel.format(date)}: ${this._t(
+                            expanded ? "show_fewer_events" : "show_all_events",
+                          )}"
+                          @click=${(ev: MouseEvent) => this._toggleMonthEvents(ev, date)}
+                        >
+                          ${expanded
+                            ? this._t("show_less")
+                            : `+${items.length - maxChips} ${this._t("more_events")}`}
+                        </button>`
+                      : html`<div class="mmore">+${items.length - maxChips}</div>`
                     : nothing}
+                  ${expanded ? items.slice(maxChips).map(renderChip) : nothing}
                 </div>
               </div>
             `;
@@ -3206,6 +3239,27 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         </div>
       </div>
     `;
+  }
+
+  /** Reveal overflow in place; anchor its disclosure within the new scroll bounds. */
+  private async _toggleMonthEvents(event: MouseEvent, date: Date): Promise<void> {
+    event.stopPropagation();
+    const button = event.currentTarget as HTMLElement;
+    const wrap = this.renderRoot.querySelector<HTMLElement>(".monthwrap");
+    if (!wrap || this._layout !== "wall" || this._view !== "month") return;
+    const top = button.getBoundingClientRect().top;
+    const offset = this._monthOffset;
+    const next = this._expandedMonthDate === date.getTime() ? undefined : date.getTime();
+    this._expandedMonthDate = next;
+    await this.updateComplete;
+    if (
+      !button.isConnected ||
+      this._view !== "month" ||
+      this._monthOffset !== offset ||
+      this._expandedMonthDate !== next
+    )
+      return;
+    wrap.scrollTop += button.getBoundingClientRect().top - top;
   }
 
   private _statusLabel(state: string): string {
@@ -5129,7 +5183,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.19 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.20 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

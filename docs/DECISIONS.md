@@ -616,10 +616,38 @@ returns to 100%. R18 ignores/drops the unknown Week field on downgrade but still
 Day/Timeline; r17 and earlier ignore payload v2 entirely. Month, Agenda and legacy get no
 new slider. Calendar writes, HA deployment and public release remain outside this slice.
 
+### D32. Make Month overflow reachable without Day
+
+**Bounded CAL-02 repair under “Continue”, 2026-09-22.** A rendered/code review found that
+Month capped appointment cards at three and rendered `+N` as inert text. D18's fallback
+kept those three cards when Day was disabled or weekends hidden, but did not actually
+make the remaining appointments reachable. This corrects that gap; it is not a new
+calendar source, Month zoom design or approval of final presentation.
+
+In wall Month, `+N more events` is a native disclosure. It reveals the remaining cards
+inside the same date, with full wrapping titles and the existing read-only details.
+The disclosure stays after the first three cards and becomes “Show less”; keyboard focus
+and the disclosure's vertical position are retained within scroll bounds. Only one date
+is expanded at a time; only its week row grows. The overflow number counts rendered
+person-owned cards, while the date's accessible total still counts unique occurrences.
+Shared owner copies remain intentional. Filters and refreshed data drive the list directly.
+
+Expansion is transient: month paging/Today, kiosk return, leaving Month, config and preference identity
+changes clear it. It is not persisted and does not cause extra calendar reads. Source
+warnings and refreshed read-only details retain their existing behavior.
+
+The standard narrow Month counts/date-to-Day behavior stays unchanged. When that route
+is unavailable, a narrow card instead scrolls a 784px seven-column grid (112px per date),
+with aligned weekday headings and 48px event/disclosure heights. This minimum is an initial
+implementation choice, not final design approval. Dates without a valid Day destination
+are labeled groups rather than dead buttons; hidden weekends no longer jump to a weekday.
+Legacy behavior remains unchanged. No new fixed toolbar, dependency, HA write or release.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r19, 2026-09-22 | CAL-02 review exposed unreachable Month overflow in restricted configurations. D32 adds in-place expansion, keyboard/touch access, readable narrow fallback and truthful date targets; verify/document/push without live deployment. |
 | Continue after the r18 push, 2026-09-22 | Extend the suggested Week-density slice with independent saved list scale, fixed headings/target floors and date-row anchoring (D31); verify, document and push. No live deployment or release implied. |
 | Continue after the r17 push, 2026-09-22 | Implement scoped saved Day/Timeline zoom with the existing opt-out, migration and Reset semantics (D30), then verify/document/push. No HA deployment, release or Week zoom implied. |
 | Continue, 2026-09-22 | Extend CAL-01 to Timeline with independent horizontal density and anchored scrolling (D29); verify, document and push on the existing branch. No live deployment or release implied. |

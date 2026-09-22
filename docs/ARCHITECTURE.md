@@ -52,6 +52,14 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   Every read path defers while hidden. Wake/refocus/reconnect requests fresh data.
 - An inspected event is identified by calendar/occurrence, not title alone. Ambiguous,
   moved or missing data gets an honest warning; absence is not proof of cancellation.
+- Wall Month's `_expandedMonthDate` is a transient absolute local-date timestamp, not a
+  cached event list. Render overflow from current filtered `byDay` items. Keep the disclosure
+  after the first three cards so Tab reaches revealed appointments; use native button
+  activation and prevent the enclosing date from also navigating. Expansion anchors that
+  button vertically within scroll bounds and grows only its week row. Month paging/Today/kiosk return,
+  view/config/preference-identity changes clear it. No persistence or additional reads.
+  Restricted narrow Month shares one 784px width across headings/grid; valid compact Day
+  drilldown is unchanged. No-Day/hidden-weekend cells are labeled groups (D32).
 - `read_only: true` blocks create/edit/delete/drag paths, including stale handlers.
   The inherited writable code is not permission to enable editing in the pilot.
 - Dates/filters survive view changes. Day time/lane anchors survive navigation, person

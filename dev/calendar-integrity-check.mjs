@@ -135,7 +135,7 @@ export async function runCalendarIntegrityChecks(card, hass, nextRender) {
       assert(count(".agenda-row") === 7, "Agenda dropped an appointment segment.");
     if (view === "month") {
       const overflow = [...root.querySelectorAll(".mmore")].reduce(
-        (sum, item) => sum + Number(item.textContent.trim().slice(1)),
+        (sum, item) => sum + Number(item.textContent.trim().match(/^\+(\d+)/)?.[1]),
         0,
       );
       assert(

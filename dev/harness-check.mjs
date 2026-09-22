@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runNativeDensityChecks } from "./calendar-density-native-check.mjs";
+import { runNativeMonthOverflowChecks } from "./calendar-month-overflow-check.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const chromeCandidates = [
@@ -110,6 +111,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920,1080], [812,844], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "month-overflow", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "month overflow:",
+  })),
+  {name: "wall", checks: "month-overflow", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "month overflow:"},
+  {name: "wall", checks: "month-overflow", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "month overflow:"},
   ...[[1920,1080],[812,844],[390,844],[320,568],[844,390]].map(([width,height])=>({
     name:"wall",checks:"week-density",chromeHeight:64,width,height,
     expectedGeometryMarker:"week density:",
@@ -565,6 +574,7 @@ try {
       );
     }
     if (["density", "timeline-density", "week-density"].includes(checks)) await runNativeDensityChecks(cdp, delay);
+    if (checks === "month-overflow") await runNativeMonthOverflowChecks(cdp, delay);
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);
     console.log(

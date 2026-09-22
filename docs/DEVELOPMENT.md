@@ -28,6 +28,8 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
 3. Open [the wall fixture](http://127.0.0.1:4173/dev/harness.html?scenario=wall&daily=1&status=1&long-title=1).
    For comparison, use `?scenario=legacy`; add `&theme=dark` to inspect dark styling.
    The normal wall preview uses the Moran Calendar title; test cases retain generic stress titles.
+   Add `&month-only=1` to inspect Month without a Day destination or saved preferences;
+   the baseline fixture (omit `status=1`) has enough appointments on February 18 to expand overflow.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
    `npm run watch` rebuilds continuously but does not run a web server or reload the browser.
@@ -85,6 +87,7 @@ assuming new filter names. Useful current filters:
 | `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |
 | `presentation` | Week/Month/Agenda readability, filters, counts, drilldown and fallbacks |
+| `month-overflow` | Reachable/collapsible Month cards, details/focus, scroll bounds, restricted weekends, refreshed data, owner-copy counts, narrow grid, locale, legacy and native keyboard/mouse/touch input |
 | `views` | Date continuity across all views and month boundaries |
 | `navigation` | Discrete day movement, preserved scroll, keyboard, slow-read races |
 | `daily` | Today, real reload, persisted view/filters, storage/config failures |

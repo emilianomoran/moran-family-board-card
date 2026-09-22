@@ -1025,6 +1025,10 @@ export const wallShellStyles = css`
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
+  .moran-wall-shell .monthwrap {
+    overflow-anchor: none;
+  }
+
   .moran-wall-shell .mhcell {
     font-size: 13px;
   }
@@ -1040,11 +1044,45 @@ export const wallShellStyles = css`
     font-size: 13px;
   }
 
+  /* Only the expanded week grows; equal-fraction rows would inflate the whole month. */
+  .moran-wall-shell .monthgrid.expanded {
+    grid-auto-rows: minmax(64px, auto);
+  }
+
+  .moran-wall-shell .mcell[role="group"] {
+    cursor: default;
+  }
+
+  .moran-wall-shell .mcell.expanded .mchip {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .moran-wall-shell button.mmore {
+    min-width: 0;
+    width: 100%;
+    padding: 6px 2px;
+    border: 1px solid var(--moran-wall-divider);
+    border-radius: 4px;
+    background: var(--moran-wall-surface);
+    color: var(--moran-wall-text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+
   .moran-wall-shell .wall-month-summary {
     display: none;
   }
 
   @container (max-width: 600px) {
+    /* Without a safe Day drilldown, chips stay usable in a horizontally pannable grid. */
+    .moran-wall-shell .monthwrap:not(.compact-month) :is(.monthhead, .monthgrid) {
+      min-width: 784px;
+    }
+
     .moran-wall-shell .monthwrap.compact-month {
       padding: 0 4px 8px;
     }
