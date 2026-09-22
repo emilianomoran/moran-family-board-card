@@ -7,8 +7,9 @@ Latest development build: `0.25.1-moran.18`, adding browser-local saved Day/Time
 to the existing sliders (D27/D29). The installed HA pilot remains r12; r13–r18 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-R18 delivery is recorded below after verification. The previous r17 source
-`068ab453c512e9be2d46d63a4915f21e854464b9` was pushed and passed hosted CI/Validate.
+Application source: `9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42`, pushed to personal origin
+on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source,
+including the existing PR-triggered runs. Later docs-only receipts retain the same build.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 180
@@ -96,6 +97,14 @@ and installed HA behavior are not claimed by these checks.
 
 Port 4173 serves the same bytes as the built bundle, SHA-256
 `c0317170b17977ccc176f8df6b840c11b3740a9c81e37695c63d42bc71f5b104`.
+Source `9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42` is committed and pushed to
+`feature/moran-foundation`, verified with `git ls-remote`. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35740215784) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35740215493)
+passed, as did both PR-triggered counterparts. A fresh build reproduced committed dist.
+Ten changed Markdown files have no broken local links; the staged credential-pattern scan
+found no matches. The pre-existing untracked debug note was excluded. No HA deployment,
+main merge, tag or public release.
 
 ### Timeline density extension, 2026-09-22
 
