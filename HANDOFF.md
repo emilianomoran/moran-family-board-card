@@ -23,8 +23,9 @@ when the task originated in the separate Home Assistant operations workspace.
   Timeline Reset restores configured `hour_width`; Today still explicitly recenters.
   Delayed reads/hidden panels preserve pending anchors; newer panning or navigation cancels
   stale restoration. Midnight labels stay within the hour axis. Other views/legacy are unchanged.
-  Source, tests, bundle and docs belong to this milestone; see STATUS/Git for delivery receipts.
-  No main merge, release or HA deployment is part of this work.
+  Application source `068ab453c512e9be2d46d63a4915f21e854464b9` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. See STATUS for linked receipts;
+  later docs-only commits retain this build. No main merge, release or HA deployment.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` passes all 151; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.

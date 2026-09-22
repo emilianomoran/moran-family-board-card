@@ -7,9 +7,9 @@ Latest development build: `0.25.1-moran.17`, adding independent wall Timeline de
 to the Day slider (D27). The installed HA pilot remains r12; r13–r17 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-The previous r16 source `f1a0cdb7c547f93f7bc9c5d6dc551c677c940105` and its documentation
-receipt `f2794e2baa5961bf955ed6ff4d4f139fed42270f` were pushed with successful CI/Validate.
-The r17 delivery receipt is recorded below after verification. No merge, tag or release.
+Application source: `068ab453c512e9be2d46d63a4915f21e854464b9`, pushed to personal origin
+on 2026-09-22; `git ls-remote` matched local HEAD. Hosted CI and Validate succeeded for
+this exact source. Later documentation-only receipts retain this build. No merge, tag or release.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 151
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
@@ -99,7 +99,14 @@ are not claimed by this local verification.
 
 The loopback port 4173 serves identical bytes to the final bundle, SHA-256
 `1b2c465dcadff2d0d838919c6b8cb9149171ceb3376c7356fafda54b2f1b68f3`.
-Milestone push and hosted-check receipts are recorded after delivery below.
+Source `068ab453c512e9be2d46d63a4915f21e854464b9` is committed/pushed to
+`feature/moran-foundation`; remote HEAD was verified. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35737855390) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35737855460)
+passed for this exact source, as did their existing PR-triggered counterparts. A fresh
+build reproduced committed dist without a diff. Ten updated Markdown files have no broken
+local links; the staged credential-pattern scan found no matches. The unrelated untracked
+debug note remains excluded. No HA deployment, main merge, tag or release.
 
 ### Day density slider, 2026-09-21
 
