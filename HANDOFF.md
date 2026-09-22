@@ -21,8 +21,9 @@ when the task originated in the separate Home Assistant operations workspace.
   authoritative, and details restore focus. Expansion is transient and adds no calendar reads.
   Restricted narrow Month pans a 784px grid instead of shrinking event targets. Normal
   compact Month/date-to-Day remains unchanged; hidden-weekend/no-Day dates are not dead buttons.
-  No Month/Agenda zoom, provider writes, HA deployment, release or main merge. Delivery
-  verification is recorded in STATUS; recheck Git/remote for the exact milestone commit.
+  Source `b4467679a5743c33086fae6c53bb00878140cc8b` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. Receipts are in STATUS; later docs-only
+  commits retain this build. No Month/Agenda zoom, provider writes, HA deployment, release or main merge.
 - Previous density milestone: r19 added independent Week list density (D31)
   to saved Day/Timeline zoom (D30). Week uses 75–150%, default 100%, scaling spacing/type
   with 12px text and 48px target floors. Pinned headings and person-column widths stay fixed;

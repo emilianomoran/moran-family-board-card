@@ -7,8 +7,9 @@ Latest development build: `0.25.1-moran.20`, repairing wall Month overflow and r
 narrow date cells (D32). The installed HA pilot remains r12; r13–r20 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-R20 delivery verification is pending the milestone commit/push and hosted checks.
-Earlier source/CI receipts below remain historical, not evidence of r20 delivery.
+Application source `b4467679a5743c33086fae6c53bb00878140cc8b` was pushed to personal origin
+on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source.
+Later docs-only receipts retain the same build. Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -84,7 +85,7 @@ scroll bounds, details/focus, refreshed titles, failure/recovery, person filters
 counts, all-day/midnight segments, disabled Day/hidden weekends, kiosk return, locale and legacy.
 Native Enter → Tab → Enter → Escape → Space, touch expansion and mouse collapse follow
 each case. Formatting, typecheck, 192 UTC-launched unit tests, build and all 91 compiled-browser
-scenarios pass. Hosted CI is pending the milestone push at this recording checkpoint.
+scenarios pass. Hosted checks for the pushed source passed (links below).
 The existing integrity assertion still requires every appointment segment; its overflow
 label parser now accepts the readable suffix after `+N`, rather than treating it as NaN.
 
@@ -102,6 +103,12 @@ Port 4173 serves the exact built bundle, SHA-256
 `9df0eeaef09f4ddb59d253e9741af1cbb986f970f3f5db20af3c6007cf04c022`.
 Ten updated Markdown files have no broken local links; staged credential-pattern scan
 found no matches. The pre-existing untracked clipping debug note remains excluded.
+Source `b4467679a5743c33086fae6c53bb00878140cc8b` is committed and pushed to
+`feature/moran-foundation`, verified with `git ls-remote`. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35750180198) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35750180215)
+passed. A fresh build reproduced committed dist without a diff. Existing non-failing
+Actions/runtime/runner notices remain ENG-06; no workflow changes were included.
 
 ### Week list density, 2026-09-22
 
