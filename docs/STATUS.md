@@ -6,8 +6,10 @@ See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 Latest development build: `0.25.1-moran.21`, repairing wall view/date keyboard navigation
 (D33). The installed HA pilot remains r12; r13–r21 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`;
-Git/remote history is the delivery source of truth. Local verification passed;
-the source push and hosted checks are pending. Earlier receipts below remain historical.
+Git/remote history is the delivery source of truth. Source
+`60ea31c4f022c18bf4e88bf2b31e3b40e3f75f88` is pushed to personal origin, with remote HEAD
+verified and hosted CI/Validate passing. Later docs-only receipts retain the same build.
+Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -107,6 +109,14 @@ The unrelated untracked clipping debug note remains excluded from this milestone
 Eleven updated Markdown files have no broken local links, and the staged credential-pattern
 scan returned zero matches. Main and review previews were refreshed to r21; Day/Today and
 normal viewport are restored. No HA deployment, main merge, tag or release occurred.
+
+Application source `60ea31c4f022c18bf4e88bf2b31e3b40e3f75f88` is committed and pushed to
+`feature/moran-foundation`, verified by `git ls-remote`. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35761893701) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35761893277)
+both passed for that exact source. A fresh build reproduced committed dist without a diff.
+Existing non-failing Actions/runtime/runner notices remain tracked under ENG-06; no workflow
+or dependency upgrade was bundled with this UI repair.
 
 ### Reachable Month overflow, 2026-09-22
 

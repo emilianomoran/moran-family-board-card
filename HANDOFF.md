@@ -21,7 +21,9 @@ when the task originated in the separate Home Assistant operations workspace.
   preference save or calendar movement; only its track scrolls to reveal it. Groups have
   localized labels and a focusable labeled panel. Legacy remains unchanged. New `tabs` checks
   cover native keyboard/mouse/touch, restricted calendars, locale and narrow/embedded cards.
-  Local and hosted verification/delivery receipts belong to STATUS; do not infer HA deployment.
+  Source `60ea31c4f022c18bf4e88bf2b31e3b40e3f75f88` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. STATUS owns the receipts; later docs-only
+  commits retain this build. Do not infer HA deployment.
 - Previous development build r20 repaired unreachable Month overflow (D32).
   Wall Month's native `+N more events` disclosure expands one date in place; “Show less”
   collapses it. Full titles/details remain reachable without Day, filters and refresh stay
