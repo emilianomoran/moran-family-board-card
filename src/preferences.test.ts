@@ -226,6 +226,44 @@ describe("saved zoom", () => {
     expect(JSON.parse(storage.getItem()!)).not.toHaveProperty("zoom");
   });
 
+  it.each([75, 100, 150])("round-trips Week %s independently of hourly defaults", (week) => {
+    const storage = memory();
+    writePreferences(storage, "key", "week", [1], config, { day: 80, timeline: 160, week });
+    expect(read(storage)?.zoom).toEqual({ day: 80, timeline: 160, week });
+    expect(read(storage, { ...config, hour_height: 72, hour_width: 144 })?.zoom).toEqual({ week });
+    expect(read(storage, { ...config, layout: "default" })?.zoom).toBeUndefined();
+    writePreferences(storage, "key", "week", [1], config, { day: 80, timeline: 160 });
+    expect(read(storage)?.zoom).toEqual({ day: 80, timeline: 160 });
+  });
+
+  it.each([74, 151, 0, 100.5, "100", null, {}, true])(
+    "drops invalid Week scale %s without losing other choices",
+    (week) => {
+      const storage = memory();
+      writePreferences(storage, "key", "week", [1], config, { day: 80, timeline: 160, week: 125 });
+      const payload = JSON.parse(storage.getItem()!);
+      payload.zoom.week.value = week;
+      storage.setItem("key", JSON.stringify(payload));
+      expect(read(storage)).toEqual({
+        version: 2,
+        view: "week",
+        hidden: [1],
+        zoom: { day: 80, timeline: 160 },
+      });
+    },
+  );
+
+  it("ignores unsupported Week defaults and rejects Week in a v1 payload", () => {
+    const storage = memory();
+    writePreferences(storage, "key", "week", [], config, { week: 125 });
+    const payload = JSON.parse(storage.getItem()!);
+    storage.setItem("key", JSON.stringify({ ...payload, version: 1 }));
+    expect(read(storage)?.zoom).toBeUndefined();
+    payload.zoom.week.defaults = "retired";
+    storage.setItem("key", JSON.stringify(payload));
+    expect(read(storage)?.zoom).toBeUndefined();
+  });
+
   it.each([39, 97, 0, -1, 80.5, "80", null, {}, [], true, Infinity, NaN])(
     "ignores invalid Day zoom %s without discarding valid UI choices",
     (value) => {

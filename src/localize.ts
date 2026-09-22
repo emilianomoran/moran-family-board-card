@@ -86,6 +86,7 @@ const EN: Dict = {
   calendar_zoom: "Calendar zoom",
   reset_zoom: "Reset",
   zoom_more_hours: "More hours",
+  zoom_more_events: "More events",
   zoom_more_detail: "More detail",
 };
 
@@ -171,6 +172,7 @@ const DE: Dict = {
   calendar_zoom: "Kalenderzoom",
   reset_zoom: "Zurücksetzen",
   zoom_more_hours: "Mehr Stunden",
+  zoom_more_events: "Mehr Termine",
   zoom_more_detail: "Mehr Details",
 };
 

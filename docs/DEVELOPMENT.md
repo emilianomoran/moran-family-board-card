@@ -79,6 +79,7 @@ assuming new filter names. Useful current filters:
 |---|---|
 | `density` | Wall Day range/anchors, fit/reset, short/overlap details, navigation/legacy isolation; real keyboard, pointer and touch range input |
 | `timeline-density` | Timeline hour-width/row anchors, independent view scales, Reset/Today, delayed reads, hidden/obsolete frames, dense/all-day/midnight events and native keyboard/pointer/touch input |
+| `week-density` | List spacing/type, date-row anchors, fixed headings, target floors, long/all-day/midnight events, delayed/hidden/obsolete reads, two real reloads, independent Reset and native range input |
 | `zoom-preferences` | Actual reloads, independent Day/Timeline scales, per-view Reset, v1 migration, config invalidation, user/card isolation, opt-out and blocked/quota storage |
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
 | `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
@@ -103,7 +104,7 @@ the user's tab contains unsaved annotations. Do not erase annotations to simplif
 
 A separate review tab does not isolate stored preferences when its only difference is a
 `?review=` query parameter. Preferences use the pathname, not the query string. Record and
-restore the user's view/filters and Day/Timeline zoom around review, especially before
+restore the user's view/filters and Day/Timeline/Week zoom around review, especially before
 reloading their preview. Reset clears a saved override; setting 100% is not the same as
 Reset when configuration/fit differs. The automated persistence suite uses its own identity
 and cleans up only its synthetic record.
@@ -160,3 +161,5 @@ Preference payload v2 migrates v1 view/filter choices in place. A source downgra
 or earlier ignores v2 and starts from configured defaults; previous UI choices are not
 backward-compatible. Calendar data and HA configuration are unaffected. Do not describe
 this browser preference migration as a live HA deployment.
+R19 adds an optional Week scale inside v2. R18 still reads Day/Timeline but drops Week
+when rewriting the record; it does not understand Week density.

@@ -29,7 +29,7 @@ const EN: Dict = {
   l_remember_preferences: "Remember view, hidden people and zoom on this browser",
   l_preferences_key: "Preferences ID (optional)",
   h_remember_preferences:
-    "On by default in wall mode. Browser-local and per HA user; no events are saved. Wall Day/Timeline zoom is independent. Changing density defaults resets that view's saved zoom; Reset clears its override.",
+    "On by default in wall mode. Browser-local and per HA user; no events are saved. Wall Day, Timeline and Week zoom are independent. Changing density defaults resets that view's saved zoom; Reset clears its override.",
   h_preferences_key:
     "Give otherwise identical cards on the same dashboard path different IDs to keep their preferences separate.",
   l_color_by: "Color by",
@@ -176,7 +176,7 @@ const DE: Dict = {
   l_remember_preferences: "Ansicht, ausgeblendete Personen und Zoom in diesem Browser merken",
   l_preferences_key: "Einstellungs-ID (optional)",
   h_remember_preferences:
-    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Tag und Timeline behalten ihren Zoom unabhängig. Geänderte Dichte-Vorgaben oder Zurücksetzen löschen den Zoom der jeweiligen Ansicht.",
+    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Tag, Timeline und Woche behalten ihren Zoom unabhängig. Geänderte Dichte-Vorgaben oder Zurücksetzen löschen den Zoom der jeweiligen Ansicht.",
   h_preferences_key:
     "Unterschiedliche IDs trennen die Einstellungen identischer Karten auf demselben Dashboard-Pfad.",
   l_color_by: "Einfärben nach",

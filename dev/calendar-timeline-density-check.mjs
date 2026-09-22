@@ -231,7 +231,7 @@ export async function runTimelineDensityChecks(card, hass, nextRender) {
   await view("Timeline");
   assert(Number(slider().value) === 160 && panel().hidden, "Timeline lost session zoom.");
   await view("Week");
-  assert(!toggle(), "Timeline zoom leaked into Week.");
+  assert(toggle() && slider().value === "100", "Timeline zoom leaked into Week's independent scale.");
   await view("Day");
   assert(Number(slider().value) === 80, "Day lost independent zoom.");
   await view("Timeline");

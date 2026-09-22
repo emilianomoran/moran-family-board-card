@@ -3,16 +3,15 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.18`, adding browser-local saved Day/Timeline zoom (D30)
-to the existing sliders (D27/D29). The installed HA pilot remains r12; r13–r18 are not deployed or
+Latest development build: `0.25.1-moran.19`, adding independent Week list density (D31)
+to saved Day/Timeline zoom (D27/D29/D30). The installed HA pilot remains r12; r13–r19 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-Application source: `9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42`, pushed to personal origin
-on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source,
-including the existing PR-triggered runs. Later docs-only receipts retain the same build.
+R19 delivery is recorded below after verification. Previous r18 source
+`9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42` was pushed and passed hosted CI/Validate.
 No merge, tag or release is included in this milestone.
 
-ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 180
+ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
 to the app's runtime timezone. Hosted [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117304)
 and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35626117313)
@@ -63,7 +62,49 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
+### Week list density, 2026-09-22
+
+D31 adds Week to the existing zoom popup with an independent 75–150% list scale, default
+100%. It changes row/card spacing and event text size, not hourly geometry. Full titles
+wrap; text has a 12px floor and appointments a 48px target floor. Pinned headings, avatars,
+dates and 180px person-column minima remain fixed. The visible date/fractional row position
+and horizontal scroll are restored within scroll bounds after zoom; hidden/slow reads defer
+restoration, and newer interaction/navigation invalidates it.
+
+Week saves independently under `remember_preferences`; Reset clears only Week and returns
+to 100%. Payload v2 gains an optional Week field, with no new config setting. R18 drops
+that field on downgrade but retains Day/Timeline; r17 and earlier ignore v2 entirely.
+Month/Agenda/legacy behavior, source reads and calendar-write boundaries are unchanged.
+
+The new regression failed against r18's bundle (no Week slider), then all seven focused
+cases passed against r19: 1920×1080, 812×844, 390×844, 320×568, 844×390, a 400px embedded
+card and reduced motion. Coverage includes dense/long/all-day/midnight events, sticky headers,
+text/target floors, coalesced/date-row anchors, refresh/filters/resize, delayed/hidden/obsolete
+reads, empty/restricted/legacy states, read-only details, two real reloads and independent Reset.
+Native mouse, touch and keyboard input follow every case. Formatting, typecheck, build and
+192 UTC-launched unit tests pass (12 new preference cases). All 84 compiled-browser scenarios
+passed, including the existing Day/Timeline zoom, preference migration, five-view, integrity
+and recovery suites.
+
+Manual flow: Week → Calendar zoom → Home (75%) → End (150%) → reload (150% retained) →
+phone-width Home/Escape → Reset → reload (100%, Reset disabled). Checked at 1707×960 and
+391×844 CSS pixels. Compact fixture cards measured 50px high; header stayed 48px, popup
+stayed inside the card and no horizontal page overflow occurred. Page identity/content,
+no error overlay, screenshots, native interaction state and clean warning/error logs passed.
+The frontend-testing skill shaped the responsive/reload checks. Browser plugin unavailable;
+existing Chromium/CDP and in-app Playwright/CUA supplied evidence without new dependencies.
+Original Day/default-zoom preferences and normal viewport were restored; original prototype
+and review copy were refreshed to r19. The HA tab was untouched. Physical Safari, final wall
+hardware and installed HA behavior are not claimed by these local checks.
+
+Port 4173 serves bytes identical to the built bundle, SHA-256
+`649d4c5cc28d6c52c54a9f1494c0e1685241409e197dd0c4b4a1a468057fd134`.
+Ten updated Markdown files have no broken local links. The unrelated untracked clipping
+debug note remains excluded; no HA deployment or release is included.
+
 ### Saved Day/Timeline zoom, 2026-09-22
+
+Historical r18 checkpoint; D31 subsequently adds independent Week density.
 
 D30 extends the existing `remember_preferences` option, on by default in wall mode.
 Manual Day height and Timeline width persist independently per browser/HA user/dashboard/card.

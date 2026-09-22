@@ -863,6 +863,11 @@ export const wallShellStyles = css`
     width: 100%;
   }
 
+  .moran-wall-shell .weekwrap {
+    /* Zoom restores its date-row anchor explicitly, without browser scroll anchoring. */
+    overflow-anchor: none;
+  }
+
   .moran-wall-shell .wphead {
     min-width: 0;
     padding: 12px 8px;
@@ -889,28 +894,28 @@ export const wallShellStyles = css`
 
   .moran-wall-shell .wcell {
     min-width: 0;
-    min-height: 88px;
-    padding: 6px;
-    gap: 6px;
+    min-height: calc(88px * var(--week-scale, 1));
+    padding: calc(6px * var(--week-scale, 1));
+    gap: calc(6px * var(--week-scale, 1));
   }
 
   .moran-wall-shell .wchip {
     flex-direction: column;
     align-items: stretch;
-    gap: 4px;
-    padding: 8px;
+    gap: calc(4px * var(--week-scale, 1));
+    padding: calc(8px * var(--week-scale, 1));
   }
 
   .moran-wall-shell .wchip > span {
     white-space: normal;
     overflow-wrap: anywhere;
-    font-size: 14px;
+    font-size: clamp(12px, calc(14px * var(--week-scale, 1)), 21px);
     line-height: 1.4;
   }
 
   .moran-wall-shell .wchip small {
     margin: 0;
-    font-size: 13px;
+    font-size: clamp(12px, calc(13px * var(--week-scale, 1)), 19.5px);
   }
 
   .moran-wall-shell .wall-person-filters {

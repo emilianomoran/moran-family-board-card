@@ -81,8 +81,13 @@ wieder her und löscht nur den gespeicherten Zoom der aktiven Ansicht. Bei aktiv
 erhalten: lokal in diesem Browser, je HA-Benutzer, Dashboard und Karte. Geänderte Dichte-
 Standardwerte verwerfen nur den Zoom der betroffenen Ansicht. Ohne diese Option bleibt
 Zoom auf die Sitzung beschränkt. Keine Termine, Datums-/Scrollpositionen oder geräteübergreifende
-Synchronisierung; andere Ansichten und Legacy bleiben unverändert.
+Synchronisierung; Monat, Agenda und Legacy bleiben unverändert.
 Kurze Termine zeigen vorrangig den Titel; Details und Agenda bieten mehr Platz.
+Wall-Woche nutzt dieselbe Lupe für die Listendichte, 75–150% (Standard 100%): links mehr
+Termine, rechts größere Schrift/Abstände. Titel bleiben vollständig umbrochen, Text mindestens
+12px und Terminkarten mindestens 48px hoch. Fixierte Überschriften und Personenspaltenbreiten
+bleiben gleich. Die sichtbare Datumszeile bleibt beim Zoomen im Rahmen der Scrollgrenzen
+erhalten. Woche speichert ihren Zoom unabhängig; „Zurücksetzen“ löscht nur diesen Wert.
 Der [aktuelle Stand](docs/STATUS.md) trennt Entwicklungsbuild und installierten Pilotbetrieb.
 
 ## Installation (HACS Custom Repository)

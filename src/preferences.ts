@@ -6,11 +6,15 @@ import {
   DEFAULT_HOUR_WIDTH,
   HOUR_WIDTH_MIN,
   HOUR_WIDTH_MAX,
+  DEFAULT_WEEK_DENSITY,
+  WEEK_DENSITY_MIN,
+  WEEK_DENSITY_MAX,
 } from "./calendar-density";
 
 export interface BoardZoom {
   day?: number;
   timeline?: number;
+  week?: number;
 }
 
 export interface BoardPreferences {
@@ -66,14 +70,20 @@ function zoomDefaults(config: FamilyBoardConfig, view: keyof BoardZoom): string 
     JSON.stringify(
       view === "day"
         ? [config.hour_height ?? DEFAULT_HOUR_HEIGHT, config.fit_height === true]
-        : [config.hour_width ?? DEFAULT_HOUR_WIDTH],
+        : view === "timeline"
+          ? [config.hour_width ?? DEFAULT_HOUR_WIDTH]
+          : [DEFAULT_WEEK_DENSITY],
     ),
   );
 }
 
 function validDensity(value: unknown, view: keyof BoardZoom): value is number {
   const [min, max] =
-    view === "day" ? [HOUR_HEIGHT_MIN, HOUR_HEIGHT_MAX] : [HOUR_WIDTH_MIN, HOUR_WIDTH_MAX];
+    view === "day"
+      ? [HOUR_HEIGHT_MIN, HOUR_HEIGHT_MAX]
+      : view === "timeline"
+        ? [HOUR_WIDTH_MIN, HOUR_WIDTH_MAX]
+        : [WEEK_DENSITY_MIN, WEEK_DENSITY_MAX];
   return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max;
 }
 
@@ -81,7 +91,7 @@ function readZoom(value: unknown, config?: FamilyBoardConfig): BoardZoom | undef
   if (!config || normalizeLayout(config.layout) !== "wall" || !value || typeof value !== "object")
     return undefined;
   const zoom: BoardZoom = {};
-  for (const view of ["day", "timeline"] as const) {
+  for (const view of ["day", "timeline", "week"] as const) {
     const entry = (value as Record<string, unknown>)[view];
     if (!entry || typeof entry !== "object") continue;
     const saved = entry as Record<string, unknown>;
@@ -136,7 +146,7 @@ export function writePreferences(
     // Only UI choices, never events, names, entity IDs, or authentication data.
     const savedZoom: Partial<Record<keyof BoardZoom, { value: number; defaults: string }>> = {};
     if (config && normalizeLayout(config.layout) === "wall") {
-      for (const name of ["day", "timeline"] as const) {
+      for (const name of ["day", "timeline", "week"] as const) {
         const value = zoom?.[name];
         if (validDensity(value, name))
           savedZoom[name] = { value, defaults: zoomDefaults(config, name) };

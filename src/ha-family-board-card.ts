@@ -37,6 +37,9 @@ import {
   DEFAULT_HOUR_WIDTH,
   HOUR_WIDTH_MIN,
   HOUR_WIDTH_MAX,
+  DEFAULT_WEEK_DENSITY,
+  WEEK_DENSITY_MIN,
+  WEEK_DENSITY_MAX,
 } from "./calendar-density";
 import { adjacentVisibleDate, dateInMonth, daySwipeStep } from "./calendar-navigation";
 import {
@@ -282,6 +285,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _densityExpanded = false;
   @state() private _dayHourHeight?: number; // optional wall Day override; browser-local only
   @state() private _timelineZoomWidth?: number; // independent Timeline override
+  @state() private _weekDensity?: number; // Week list density in percent, not hours
+  private _weekScrollAnchor?: { week: number; day: number; fraction: number; left: number };
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -335,6 +340,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._densityExpanded = false;
     this._dayHourHeight = undefined;
     this._timelineZoomWidth = undefined;
+    this._weekDensity = undefined;
+    this._weekScrollAnchor = undefined;
     this._daySwipe = undefined;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
@@ -414,6 +421,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._preferencesKey = key;
     this._dayHourHeight = undefined;
     this._timelineZoomWidth = undefined;
+    this._weekDensity = undefined;
+    this._weekScrollAnchor = undefined;
     this._densityExpanded = false;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
@@ -435,6 +444,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         this._hiddenP = saved.hidden;
         this._dayHourHeight = saved.zoom?.day;
         this._timelineZoomWidth = saved.zoom?.timeline;
+        this._weekDensity = saved.zoom?.week;
         // Canonicalize v1 records and retire overrides whose configured defaults changed.
         this._savePreferences();
       }
@@ -452,7 +462,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         this._view,
         this._hiddenP,
         this._config,
-        { day: this._dayHourHeight, timeline: this._timelineZoomWidth },
+        { day: this._dayHourHeight, timeline: this._timelineZoomWidth, week: this._weekDensity },
       );
     } catch {
       // Preferences are optional; a storage failure must not break interactions.
@@ -463,6 +473,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (!this._enabledViews.includes(view)) return;
     this._densityExpanded = false;
     if (this._view !== view) {
+      this._weekScrollAnchor = undefined;
       this._cancelDayScroll();
       this._cancelTimelineScroll();
       this._daySwipe = undefined;
@@ -522,6 +533,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         requestAnimationFrame(() => {
           this._measureFit();
           this._restoreTimelineScroll();
+          this._restoreWeekScroll();
           // A hidden/zero-width panel may not have been measurable on first render.
           this._maybeScrollToNow();
         }),
@@ -533,6 +545,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   public disconnectedCallback(): void {
     super.disconnectedCallback();
     this._densityExpanded = false;
+    this._weekScrollAnchor = undefined;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
     this._daySwipe = undefined;
@@ -618,6 +631,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (Date.now() - this._lastInteract < min * 60000) return;
     if (this._dialog) return; // never yank an open dialog away
     this._densityExpanded = false;
+    this._weekScrollAnchor = undefined;
     const wanted = this._config.view ?? "day";
     const view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
     if (this._view !== view) this._view = view;
@@ -724,6 +738,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._measureFit();
     this._restoreDayScroll();
     this._restoreTimelineScroll();
+    this._restoreWeekScroll();
     this._maybeScrollToNow();
     if (this._layout === "wall" && (changed.has("_view") || changed.has("_config"))) {
       const track = this.renderRoot.querySelector<HTMLElement>(".switch");
@@ -1586,6 +1601,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._weekOffset += 1;
   };
   private _thisWeek = () => {
+    this._weekScrollAnchor = undefined;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
     this._weekOffset = 0;
@@ -1872,6 +1888,18 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._setDayDensity(value);
       return;
     }
+    if (this._layout === "wall" && this._view === "week") {
+      if (value !== undefined && !Number.isFinite(value)) return;
+      this._onInteract();
+      this._rememberWeekScroll();
+      this._weekDensity =
+        value === undefined
+          ? undefined
+          : Math.round(Math.min(WEEK_DENSITY_MAX, Math.max(WEEK_DENSITY_MIN, value)));
+      this._savePreferences();
+      this.requestUpdate();
+      return;
+    }
     if (this._layout !== "wall" || this._view !== "timeline") return;
     if (value !== undefined && !Number.isFinite(value)) return;
     this._onInteract();
@@ -1883,12 +1911,25 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   }
 
   private _renderDensityControl() {
-    if (this._view !== "day" && this._view !== "timeline") return nothing;
+    if (this._view !== "day" && this._view !== "timeline" && this._view !== "week") return nothing;
     const timeline = this._view === "timeline";
-    const hourSize = timeline ? this._timelineHourWidth : this._pxPerMin * 60;
-    const defaultSize = timeline ? DEFAULT_HOUR_WIDTH : DEFAULT_HOUR_HEIGHT;
-    const override = timeline ? this._timelineZoomWidth : this._dayHourHeight;
-    const percent = `${Math.round((hourSize / defaultSize) * 100)}%`;
+    const week = this._view === "week";
+    const densitySize = week
+      ? (this._weekDensity ?? DEFAULT_WEEK_DENSITY)
+      : timeline
+        ? this._timelineHourWidth
+        : this._pxPerMin * 60;
+    const defaultSize = week
+      ? DEFAULT_WEEK_DENSITY
+      : timeline
+        ? DEFAULT_HOUR_WIDTH
+        : DEFAULT_HOUR_HEIGHT;
+    const override = week
+      ? this._weekDensity
+      : timeline
+        ? this._timelineZoomWidth
+        : this._dayHourHeight;
+    const percent = `${Math.round((densitySize / defaultSize) * 100)}%`;
     return html`
       <button
         class="wall-density-toggle"
@@ -1933,16 +1974,17 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         <input
           id="wall-calendar-density"
           type="range"
-          min=${timeline ? HOUR_WIDTH_MIN : HOUR_HEIGHT_MIN}
-          max=${timeline ? HOUR_WIDTH_MAX : HOUR_HEIGHT_MAX}
+          min=${week ? WEEK_DENSITY_MIN : timeline ? HOUR_WIDTH_MIN : HOUR_HEIGHT_MIN}
+          max=${week ? WEEK_DENSITY_MAX : timeline ? HOUR_WIDTH_MAX : HOUR_HEIGHT_MAX}
           step="1"
-          .value=${String(Math.round(hourSize))}
+          .value=${String(Math.round(densitySize))}
           aria-valuetext=${percent}
           @input=${(event: Event) =>
             this._setDensity((event.target as HTMLInputElement).valueAsNumber)}
         />
         <div class="wall-density-hints" aria-hidden="true">
-          <span>${this._t("zoom_more_hours")}</span><span>${this._t("zoom_more_detail")}</span>
+          <span>${this._t(week ? "zoom_more_events" : "zoom_more_hours")}</span
+          ><span>${this._t("zoom_more_detail")}</span>
         </div>
       </div>
     `;
@@ -2750,6 +2792,60 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._openCreate(idx, day, min);
   }
 
+  private _onWeekPan = (): void => {
+    this._weekScrollAnchor = undefined;
+  };
+
+  /** Preserve the visible date and position within its variable-height list row. */
+  private _rememberWeekScroll(): void {
+    if (this._weekScrollAnchor) return; // coalesced input uses the pre-render geometry
+    const wrap = this.renderRoot.querySelector<HTMLElement>(".weekwrap");
+    const header = wrap?.querySelector<HTMLElement>(".corner");
+    if (!wrap?.clientHeight || !wrap.clientWidth || !header) return;
+    const edge = header.getBoundingClientRect().bottom;
+    const row = [...wrap.querySelectorAll<HTMLElement>(".wday")].find(
+      (el) => el.getBoundingClientRect().bottom > edge,
+    );
+    if (!row) return;
+    const bounds = row.getBoundingClientRect();
+    this._weekScrollAnchor = {
+      week: this._weekBounds().monday.getTime(),
+      day: Number(row.dataset.day),
+      fraction: Math.max(0, Math.min(1, (edge - bounds.top) / bounds.height)),
+      left: wrap.scrollLeft,
+    };
+  }
+
+  private _restoreWeekScroll(): void {
+    const anchor = this._weekScrollAnchor;
+    if (!anchor) return;
+    if (
+      this._view !== "week" ||
+      this._layout !== "wall" ||
+      this._weekBounds().monday.getTime() !== anchor.week
+    ) {
+      this._weekScrollAnchor = undefined;
+      return;
+    }
+    const wrap = this.renderRoot.querySelector<HTMLElement>(".weekwrap");
+    if (this._loading || !wrap?.clientHeight || !wrap.clientWidth) return;
+    const row = wrap.querySelector<HTMLElement>(`.wday[data-day="${anchor.day}"]`);
+    const header = wrap.querySelector<HTMLElement>(".corner");
+    if (row && header) {
+      const bounds = row.getBoundingClientRect();
+      wrap.scrollTo({
+        left: anchor.left,
+        top:
+          wrap.scrollTop +
+          bounds.top -
+          header.getBoundingClientRect().bottom +
+          anchor.fraction * bounds.height,
+        behavior: "instant",
+      });
+    }
+    this._weekScrollAnchor = undefined;
+  }
+
   private _renderWeek() {
     const short = weekdayNames(this.hass, "short", this._firstDayJs);
     const wall = this._layout === "wall";
@@ -2770,11 +2866,16 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const cols = `70px repeat(${shown.length}, minmax(${wall ? 180 : 110}px, 1fr))`;
     return html`
       <div class="weekhead">${this._weekNav()}</div>
-      <div class="weekwrap">
+      <div
+        class="weekwrap"
+        @wheel=${this._onWeekPan}
+        @pointerdown=${this._onWeekPan}
+        @keydown=${this._onWeekPan}
+      >
         <div
           class="weekgrid"
           style="grid-template-columns:${cols};${wall
-            ? `min-width:${70 + shown.length * 180}px`
+            ? `min-width:${70 + shown.length * 180}px;--week-scale:${(this._weekDensity ?? DEFAULT_WEEK_DENSITY) / 100}`
             : ""}"
         >
           <div class="corner"></div>
@@ -2799,6 +2900,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             (d) => html`
               <div
                 class="wday ${this._isRealToday(d) ? "today" : ""}"
+                data-day=${d}
                 role="button"
                 tabindex="0"
                 title=${this._t("day")}
@@ -5027,7 +5129,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.18 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.19 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

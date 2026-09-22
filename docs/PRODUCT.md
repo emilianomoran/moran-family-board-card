@@ -56,8 +56,8 @@ This replaces the early screenshot/concept, not the entire product design:
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
-- Wall Day and Timeline share a header zoom disclosure, not another fixed row. Each keeps
-  independent density: Day hour height, Timeline hour width. With `remember_preferences`
+- Wall Day, Timeline and Week share a header zoom disclosure, not another fixed row. Each keeps
+  independent density: Day hour height, Timeline hour width, Week list spacing/type. With `remember_preferences`
   enabled (wall default), each manual scale survives reload in this browser for this HA
   user/dashboard/card. Opt-out keeps it session-only. Both anchor the visible time/people
   within scroll limits; Reset clears only the active view's saved override and restores its configuration.
@@ -65,11 +65,15 @@ This replaces the early screenshot/concept, not the entire product design:
   over neighboring events; Agenda offers larger targets. Initial choices are in D27.
   Timeline keeps its row heights/overlap targets and pins both midnight labels inside the
   time area. Compact zoom uses two-hour labels over an hourly grid (D29).
+- Week density runs from 75–150%, default 100%. Full titles wrap, event text stays at
+  least 12px and appointment targets at least 48px. Date/person headings and column widths
+  remain fixed. Zoom anchors the visible date and fractional row position within scroll
+  bounds; Reset clears Week's saved scale and returns to 100% (D31).
 
 Changing configured density defaults invalidates only that view's saved scale (D30).
 No appointments, browsing dates or scroll positions are stored; zoom is not device/account sync.
 
-See D18–D21 and D27–D30 for exact scope. Older blanket 48px target rules do not override the
+See D18–D21 and D27–D31 for exact scope. Older blanket 48px target rules do not override the
 compact header controls or duration-scaled Day title strips. Other targets retain their tested sizes.
 
 ## Status tiles are not presence or unlimited availability

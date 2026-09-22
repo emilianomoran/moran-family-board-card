@@ -590,10 +590,37 @@ Verify actual reloads, independent Reset, migration, configuration/user isolatio
 centering at a restored scale, inaccessible/full storage and desktop/phone/embedded sizes.
 Keep D27/D29's anchoring, Today and native range-input behavior unchanged.
 
+### D31. Give Week its own list-density scale
+
+**Implementation choice under “Continue”, 2026-09-22, following the suggested Week slice.**
+Week is a day-by-person list, not an hourly grid. Reuse the existing zoom popup with a
+75–150% integer scale, 100% matching the previous layout. Left means “More events”; right
+means “More detail”. These bounds and typography are initial implementation choices,
+not a separately approved final design. No new fixed row or configuration option.
+
+Scale the minimum day-row space, cell/card padding and gaps, and event title/time type.
+Keep full wrapping titles, a 12px text floor and 48px appointment target floor. Keep person
+column minimum widths (180px), dates, avatars and pinned headings unchanged. This can fit
+more list content vertically; it does not promise a dense seven-day week will fit one screen.
+
+Capture the first visible date below the pinned headings, the fractional position within
+that date row and horizontal scroll before zoom; restore after layout within scroll bounds.
+Coalesced input uses the original geometry. Delayed reads/hidden panels defer restoration;
+new browsing, dates, views, configs, kiosk return and disconnect discard obsolete anchors.
+No date/scroll position is persisted and zoom does not change event routing or details.
+
+Store Week independently alongside Day/Timeline in optional payload-v2 `zoom.week`, using
+the existing `remember_preferences` opt-out and identity. Its baseline fingerprint uses
+the fixed 100% default, independent of hourly configuration. Reset clears only Week and
+returns to 100%. R18 ignores/drops the unknown Week field on downgrade but still reads
+Day/Timeline; r17 and earlier ignore payload v2 entirely. Month, Agenda and legacy get no
+new slider. Calendar writes, HA deployment and public release remain outside this slice.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after the r18 push, 2026-09-22 | Extend the suggested Week-density slice with independent saved list scale, fixed headings/target floors and date-row anchoring (D31); verify, document and push. No live deployment or release implied. |
 | Continue after the r17 push, 2026-09-22 | Implement scoped saved Day/Timeline zoom with the existing opt-out, migration and Reset semantics (D30), then verify/document/push. No HA deployment, release or Week zoom implied. |
 | Continue, 2026-09-22 | Extend CAL-01 to Timeline with independent horizontal density and anchored scrolling (D29); verify, document and push on the existing branch. No live deployment or release implied. |
 | Continue the next phase, 2026-09-21 | Implement the requested zoom feature's wall Day slice (D27) and repair the diagnosed test-runner issue (D28). Keep all decisions in this repo; verify and push the milestone without GSD gates. No HA deployment or release implied. |

@@ -15,8 +15,11 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.18`, saving independent Day/Timeline zoom under
-  `remember_preferences` (D30). The same header popup changes horizontal hour width, 48–240px/hour (96 = 100%),
+- Latest development build: `0.25.1-moran.19`, adding independent Week list density (D31)
+  to saved Day/Timeline zoom (D30). Week uses 75–150%, default 100%, scaling spacing/type
+  with 12px text and 48px target floors. Pinned headings and person-column widths stay fixed;
+  zoom anchors the visible date/fractional row position, not an hour. Week saves/resets independently.
+  Timeline's same header popup changes hour width, 48–240px/hour (96 = 100%),
   retaining the clock time after pinned names and vertical row position within scroll limits.
   Day keeps its independent 40–96px height (64 = 100%) and Reset-to-fit behavior (D27).
   Matching browser-local overrides now survive config/remount/reload; opt-out is session-only.
@@ -25,16 +28,16 @@ when the task originated in the separate Home Assistant operations workspace.
   but older builds ignore v2 on downgrade. No calendar data/date/scroll positions are stored.
   Timeline Reset restores configured `hour_width`; Today still explicitly recenters.
   Delayed reads/hidden panels preserve pending anchors; newer panning or navigation cancels
-  stale restoration. Midnight labels stay within the hour axis. Other views/legacy are unchanged.
-  Application source `9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42` is pushed to personal origin;
-  remote HEAD matched and hosted CI/Validate passed. See STATUS for linked receipts;
-  later docs-only commits retain this build. No main merge, release or HA deployment.
+  stale restoration. Midnight labels stay within the hour axis. Month/Agenda/legacy are unchanged.
+  R18 retains Day/Timeline but drops Week on downgrade; r17 and earlier ignore all v2 preferences.
+  See STATUS for current verification and delivery receipts; Git/remote history is the
+  source of truth. No main merge, release or HA deployment is included.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
-  `TZ=UTC npm test` now passes all 180; no DST assertion or app runtime timezone was changed.
+  `TZ=UTC npm test` now passes all 192; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r18 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r19 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -57,9 +60,9 @@ when the task originated in the separate Home Assistant operations workspace.
 2. Use [DEVELOPMENT](docs/DEVELOPMENT.md) to start the synthetic preview and run checks.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
-   Day, Timeline and saved-zoom slices are implemented.** Next candidates are feedback-driven
-   usability across views or Week density. Week zoom is not built; define its semantics
-   before extending the current scales. Meals/lists remain deferred.
+   Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
+   feedback-driven usability/presentation across views. Do not assume Month/Agenda zoom or
+   silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
    [OPERATIONS](docs/OPERATIONS.md) and the private workspace's current safety rules.
 5. Update the owning docs and this handoff before the next milestone push. Verify the
@@ -67,12 +70,13 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## Evidence and remaining limits
 
-R18 adds 29 unit tests and five `zoom-preferences` browser cases with actual page reloads,
-Reset, migration, invalid defaults/payloads, user/card isolation and storage failures.
-All 180 UTC-launched unit tests and 77 compiled-browser scenarios passed, including desktop,
-phone, reduced-motion and embedded widths. Delivery/hosted receipts belong in STATUS. Manual desktop/phone-width
-checks confirmed independent saved scales and Reset across reloads; screenshots/logs and
-the unchanged 48px header were checked. Review preferences and viewport were restored.
+R19 adds 12 preference tests and seven `week-density` browser cases: dense/long/all-day/
+midnight events, fixed headings, text/target floors, date-row anchors, delayed/hidden/obsolete
+reads, restricted/empty/legacy states, two actual reloads and independent Reset. Native
+mouse/touch/keyboard range checks run after each case. All 192 UTC-launched unit tests and
+84 compiled-browser scenarios pass; hosted receipts belong in STATUS. Manual desktop/phone checks
+confirmed 75–150%, persisted zoom, Reset, popup containment and the unchanged 48px header.
+Screenshots/logs were checked, then review preferences and viewport restored.
 Do not infer deployment from a source push.
 Actual HA review remains at r12. The user confirmed physical
 iPhone HA-app lock/reopen refresh.

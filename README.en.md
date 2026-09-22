@@ -87,8 +87,13 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   to this browser and HA user/dashboard/card. Reset clears only the active saved override;
   changing its density defaults invalidates that scale. Opt-out keeps zoom session-only.
   No appointments or scroll/date positions are stored; there is no cross-device sync. Short Day events
-  prioritize titles; use details or Agenda for more space. Other views and legacy are
+  prioritize titles; use details or Agenda for more space. Month, Agenda and legacy are
   unchanged. Check STATUS for deployment state.
+- Wall Week uses the same zoom popup for list density, 75–150% (default 100%). Move left
+  for more events or right for larger text/spacing. Full titles wrap; text stays at least
+  12px and appointment targets at least 48px. Pinned headings and person-column widths do
+  not scale. Zoom preserves the visible date-row position within scroll bounds. Week saves
+  independently with `remember_preferences`; Reset clears only Week and restores 100%.
 - Wall Week shows date numbers and readable, wrapping event cards with pinned date/person
   headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
@@ -289,7 +294,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `layout` | string | absent / existing | Set to `wall` for the opt-in calendar-only full-panel Day proof; omitting it preserves existing behavior |
 | `view` | string | `day` | Start view: `day`, `timeline`, `week`, `month` or `agenda` |
 | `views` | list | all | Which views appear in the switcher, e.g. `[day, agenda]` |
-| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Retain selected view, hidden people and independent wall Day/Timeline zoom in this browser for the HA user/dashboard/card. No calendar payloads are stored. Changing lane definitions, enabled views, or view defaults resets the saved choices; changing density defaults resets only that view's zoom. Reset clears its zoom override. Blocked storage falls back to normal unsaved use. |
+| `remember_preferences` | boolean | `true` for wall, otherwise `false` | Retain selected view, hidden people and independent wall Day/Timeline/Week zoom in this browser for the HA user/dashboard/card. No calendar payloads are stored. Changing lane definitions, enabled views, or view defaults resets the saved choices; changing density defaults resets only that view's zoom. Reset clears its zoom override. Blocked storage falls back to normal unsaved use. |
 | `preferences_key` | string | title-based identity | Distinguish otherwise identical cards on the same dashboard path; not a credential or security boundary. |
 | `time_grid` | number | `30` | Time axis grid in minutes |
 | `start_hour` | number | `6` | First visible hour |
