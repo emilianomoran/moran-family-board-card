@@ -30,8 +30,9 @@ when the task originated in the separate Home Assistant operations workspace.
   Delayed reads/hidden panels preserve pending anchors; newer panning or navigation cancels
   stale restoration. Midnight labels stay within the hour axis. Month/Agenda/legacy are unchanged.
   R18 retains Day/Timeline but drops Week on downgrade; r17 and earlier ignore all v2 preferences.
-  See STATUS for current verification and delivery receipts; Git/remote history is the
-  source of truth. No main merge, release or HA deployment is included.
+  Application source `02ae983d2a14b6fa3745e5b3863b2452801fb75a` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. See STATUS for linked receipts;
+  later docs-only commits retain this build. No main merge, release or HA deployment.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` now passes all 192; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.

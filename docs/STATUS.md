@@ -7,8 +7,9 @@ Latest development build: `0.25.1-moran.19`, adding independent Week list densit
 to saved Day/Timeline zoom (D27/D29/D30). The installed HA pilot remains r12; r13–r19 are not deployed or
 released. Source, tests, built bundle and docs belong to this milestone on
 `feature/moran-foundation`; Git/remote history is the delivery source of truth.
-R19 delivery is recorded below after verification. Previous r18 source
-`9abcb7cf3b4c89cb8fb0f80042e79a602ebf1a42` was pushed and passed hosted CI/Validate.
+Application source: `02ae983d2a14b6fa3745e5b3863b2452801fb75a`, pushed to personal origin
+on 2026-09-22; remote HEAD matched. Hosted CI and Validate passed for this exact source,
+including the existing PR-triggered runs. Later docs-only receipts retain the same build.
 No merge, tag or release is included in this milestone.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -101,6 +102,12 @@ Port 4173 serves bytes identical to the built bundle, SHA-256
 `649d4c5cc28d6c52c54a9f1494c0e1685241409e197dd0c4b4a1a468057fd134`.
 Ten updated Markdown files have no broken local links. The unrelated untracked clipping
 debug note remains excluded; no HA deployment or release is included.
+Source `02ae983d2a14b6fa3745e5b3863b2452801fb75a` is committed/pushed to
+`feature/moran-foundation`, verified with `git ls-remote`. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35746129683) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35746129433)
+passed, as did both existing PR-triggered counterparts. A fresh build reproduced committed
+dist without a diff. The staged credential-pattern scan found no matches.
 
 ### Saved Day/Timeline zoom, 2026-09-22
 
