@@ -1,5 +1,6 @@
 import { LitElement, html, css, nothing, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
 import type { HomeAssistant, LovelaceCard, LovelaceCardEditor } from "custom-card-helpers";
 import {
   RawEvent,
@@ -246,6 +247,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _monthOffset = 0;
   @state() private _expandedMonthDate?: number; // one date's overflow, never persisted
   @state() private _dialog?: DialogState;
+  @state() private _dayOverflow?: { date: number; personIdx: number };
   @state() private _loadError = false;
   @state() private _partialLoad = false;
   @state() private _loading = false;
@@ -299,6 +301,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _scrollToNowFrame?: number;
   private _preferencesKey?: string;
   private _restoreFocus?: HTMLElement;
+  private _overflowRestoreFocus?: HTMLElement;
   private _ro?: ResizeObserver;
   private _lastInteract = Date.now();
   private _lastCalendarDate?: Date;
@@ -343,6 +346,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._dayTabFocus = undefined;
     this._statusExpanded = false;
     this._expandedMonthDate = undefined;
+    this._dayOverflow = undefined;
     this._densityExpanded = false;
     this._dayHourHeight = undefined;
     this._timelineZoomWidth = undefined;
@@ -480,6 +484,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (!this._enabledViews.includes(view)) return;
     this._densityExpanded = false;
     if (this._view !== view) {
+      this._dayOverflow = undefined;
       this._dayTabFocus = undefined;
       this._expandedMonthDate = undefined;
       this._weekScrollAnchor = undefined;
@@ -553,6 +558,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    this._dayOverflow = undefined;
+    this._overflowRestoreFocus = undefined;
     this._densityExpanded = false;
     this._weekScrollAnchor = undefined;
     this._cancelDayScroll();
@@ -611,7 +618,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._lastCalendarDate = today;
     if (!previous || previous.getTime() === today.getTime()) return;
     const previousIndex = (previous.getDay() - this._firstDayJs + 7) % 7;
-    const followsToday = this._weekOffset === 0 && this._day === previousIndex;
+    const followsToday =
+      !this._dayOverflow && this._weekOffset === 0 && this._day === previousIndex;
     const newIndex = this._todayIndex();
     const weekShift =
       localDayDifference(addLocalDays(today, -newIndex), addLocalDays(previous, -previousIndex)) /
@@ -638,7 +646,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     const min = Number(this._config?.auto_return ?? 0);
     if (!Number.isFinite(min) || min <= 0) return;
     if (Date.now() - this._lastInteract < min * 60000) return;
-    if (this._dialog) return; // never yank an open dialog away
+    if (this._dialog || this._dayOverflow) return; // never yank an open dialog away
     this._densityExpanded = false;
     this._expandedMonthDate = undefined;
     this._weekScrollAnchor = undefined;
@@ -682,19 +690,21 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   };
 
   private _onKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === "Escape" && this._densityExpanded && !this._dialog) {
+    if (e.key === "Escape" && this._densityExpanded && !this._dialog && !this._dayOverflow) {
       e.preventDefault();
       e.stopPropagation();
       this._densityExpanded = false;
       this.renderRoot.querySelector<HTMLButtonElement>(".wall-density-toggle")?.focus();
       return;
     }
-    if (e.key === "Escape" && this._dialog) {
+    if (e.key === "Escape" && (this._dialog || this._dayOverflow)) {
+      e.preventDefault();
       e.stopPropagation();
-      this._closeDialog();
+      if (this._dialog) this._closeDialog();
+      else this._dayOverflow = undefined;
     }
-    if (e.key === "Tab" && this._dialog) {
-      const dialog = this.renderRoot.querySelector<HTMLElement>(".dialog");
+    if (e.key === "Tab" && (this._dialog || this._dayOverflow)) {
+      const dialog = this.renderRoot.querySelector<HTMLElement>(".overlay:not([inert]) .dialog");
       if (!dialog) return;
       const controls = [
         ...dialog.querySelectorAll<HTMLElement>(
@@ -743,6 +753,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     ) {
       this._maybeFetch();
       if (changed.has("hass") || changed.has("_config")) this._maybeFetchWeather();
+    }
+    if (changed.has("_dayOverflow")) {
+      this._manageOverflowFocus(!!changed.get("_dayOverflow"));
     }
     if (changed.has("_dialog")) this._manageDialogFocus(changed.get("_dialog") as DialogState);
     this._measureFit();
@@ -944,23 +957,50 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _manageDialogFocus(prev?: DialogState): void {
     const previouslyFocused = (this.renderRoot as ShadowRoot).activeElement as HTMLElement | null;
     const surface = this.renderRoot.querySelector<HTMLElement>(".moran-wall-shell, ha-card");
-    surface?.toggleAttribute("inert", !!this._dialog);
+    surface?.toggleAttribute("inert", !!this._dialog || !!this._dayOverflow);
     if (this._dialog && !prev) {
       this._restoreFocus = previouslyFocused ?? undefined;
       requestAnimationFrame(() => {
         if (!this._dialog || !this.isConnected) return;
         const target =
-          this.renderRoot.querySelector<HTMLElement>(".dialog input:not(:disabled)") ??
-          this.renderRoot.querySelector<HTMLElement>(".dialog .icon");
+          this.renderRoot.querySelector<HTMLElement>(
+            ".overlay:not([inert]) .dialog input:not(:disabled)",
+          ) ?? this.renderRoot.querySelector<HTMLElement>(".overlay:not([inert]) .dialog .icon");
         target?.focus({ preventScroll: true });
       });
     } else if (!this._dialog && prev) {
       const target = this._restoreFocus?.isConnected
         ? this._restoreFocus
-        : (this.renderRoot.querySelector<HTMLElement>(".dayname[tabindex]") ??
+        : (this.renderRoot.querySelector<HTMLElement>(".day-overflow .icon") ??
+          this.renderRoot.querySelector<HTMLElement>(".dayname[tabindex]") ??
           this.renderRoot.querySelector<HTMLElement>('.switch [aria-selected="true"], .nav-now'));
       target?.focus({ preventScroll: true });
       this._restoreFocus = undefined;
+    }
+  }
+
+  /** Keep the fallback list and details as separate, focus-contained modal levels. */
+  private _manageOverflowFocus(wasOpen: boolean): void {
+    const focused = (this.renderRoot as ShadowRoot).activeElement as HTMLElement | null;
+    this.renderRoot
+      .querySelector(".moran-wall-shell")
+      ?.toggleAttribute("inert", !!this._dayOverflow || !!this._dialog);
+    if (this._dayOverflow && !wasOpen) {
+      this._overflowRestoreFocus = focused ?? undefined;
+      requestAnimationFrame(() => {
+        if (this._dayOverflow && !this._dialog && this.isConnected) {
+          this.renderRoot
+            .querySelector<HTMLElement>(".day-overflow .icon")
+            ?.focus({ preventScroll: true });
+        }
+      });
+    } else if (!this._dayOverflow && wasOpen) {
+      const target = this._overflowRestoreFocus?.isConnected
+        ? this._overflowRestoreFocus
+        : (this.renderRoot.querySelector<HTMLElement>('.tabs [aria-selected="true"]') ??
+          this.renderRoot.querySelector<HTMLElement>(".nav-now"));
+      if (!this._dialog) target?.focus({ preventScroll: true });
+      this._overflowRestoreFocus = undefined;
     }
   }
 
@@ -1506,9 +1546,70 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     return e.ref.tentative === true;
   }
   /** Jump to the agenda list for a given weekday so collapsed events stay reachable. */
-  private _showDayAgenda(day: number): void {
+  private _showDayAgenda(day: number, personIdx: number): void {
+    if (this._layout === "wall" && !this._enabledViews.includes("agenda")) {
+      this._dayOverflow = { date: this._dateForDay(day).getTime(), personIdx };
+      return;
+    }
     this._day = day;
     this._selectView("agenda");
+  }
+
+  /** Live day/person list: no cached events, extra reads, view changes or saved state. */
+  private _renderDayOverflow() {
+    const { date, personIdx } = this._dayOverflow!;
+    const day = localDayDifference(new Date(date), this._weekBounds().monday);
+    const items = this._eventsFor(day, personIdx);
+    // Keep duplicate provider copies when configured, without duplicate Lit keys.
+    const copies = new Map<string, number>();
+    const keyedItems = items.map((event) => {
+      const identity = occurrenceKey(event.ref);
+      const copy = copies.get(identity) ?? 0;
+      copies.set(identity, copy + 1);
+      return { event, key: `${identity}|${copy}` };
+    });
+    const heading = `${this._personName(this._persons[personIdx], personIdx)} · ${new Intl.DateTimeFormat(
+      this.hass.locale?.language || "en",
+      { weekday: "long", month: "short", day: "numeric", year: "numeric" },
+    ).format(new Date(date))}`;
+    return html`<div
+      class="overlay day-overflow-overlay"
+      ?inert=${!!this._dialog}
+      aria-hidden=${this._dialog ? "true" : nothing}
+      @click=${(e: MouseEvent) => {
+        if (e.target === e.currentTarget) this._dayOverflow = undefined;
+      }}
+    >
+      <div
+        class="dialog day-overflow"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="day-overflow-title"
+        tabindex="-1"
+      >
+        <div class="dlg-head">
+          <h2 id="day-overflow-title">${heading}</h2>
+          <button
+            class="icon"
+            aria-label=${this._t("close")}
+            @click=${() => {
+              this._dayOverflow = undefined;
+            }}
+          >
+            ✕
+          </button>
+        </div>
+        ${this._renderCalendarStatus()}
+        ${repeat(
+          keyedItems,
+          (item) => item.key,
+          (item) => this._agendaRow(item.event),
+        )}
+        ${!items.length && !this._loading && !this._loadError && !this._partialLoad
+          ? html`<p role="status">${this._t("no_events")}</p>`
+          : nothing}
+      </div>
+    </div>`;
   }
   /** Jump from the week view into the day view of a given weekday. */
   private _openDayView(day: number): void {
@@ -2064,7 +2165,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
               ${focus} ${content}
             </ha-card>
           `;
-    return html`${surface} ${this._dialog ? this._renderDialog() : nothing}`;
+    return html`${surface} ${this._dayOverflow ? this._renderDayOverflow() : nothing}
+    ${this._dialog ? this._renderDialog() : nothing}`;
   }
 
   private _renderViewSwitcher() {
@@ -2686,14 +2788,22 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                         tabindex="0"
                         role="button"
                         title="${o.count} ${this._t("more_events")}"
+                        aria-label=${this._layout === "wall"
+                          ? `${o.count} ${this._t("more_events")} · ${this._personName(p, i)}`
+                          : nothing}
+                        aria-haspopup=${this._layout === "wall" &&
+                        !this._enabledViews.includes("agenda")
+                          ? "dialog"
+                          : nothing}
                         @click=${(ev: MouseEvent) => {
                           ev.stopPropagation();
-                          this._showDayAgenda(day);
+                          this._showDayAgenda(day, i);
                         }}
                         @keydown=${(k: KeyboardEvent) => {
                           if (k.key === "Enter" || k.key === " ") {
                             k.preventDefault();
-                            this._showDayAgenda(day);
+                            k.stopPropagation();
+                            this._showDayAgenda(day, i);
                           }
                         }}
                         style="top:${top + 1.5}px;height:${h}px;
@@ -5143,6 +5253,54 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       min-width: 48px;
       min-height: 48px;
     }
+    .day-overflow {
+      max-width: 560px;
+      max-height: calc(100dvh - 32px);
+      overscroll-behavior: contain;
+    }
+    .day-overflow-overlay[inert] {
+      visibility: hidden;
+    }
+    .day-overflow .dlg-head {
+      align-items: start;
+      gap: 12px;
+    }
+    .day-overflow h2 {
+      margin: 8px 0;
+      font: inherit;
+      overflow-wrap: anywhere;
+    }
+    .day-overflow .icon {
+      flex: 0 0 48px;
+    }
+    .day-overflow .agenda-row {
+      display: grid;
+      grid-template-columns: 4px minmax(0, 1fr);
+      gap: 4px 10px;
+      padding: 12px 4px;
+      min-height: 48px;
+      box-sizing: border-box;
+    }
+    .day-overflow .agenda-bar {
+      grid-column: 1;
+      grid-row: 1 / 4;
+    }
+    .day-overflow :is(.agenda-time, .agenda-main, .agenda-cd) {
+      grid-column: 2;
+    }
+    .day-overflow :is(.agenda-title, .agenda-meta, .agenda-time, .agenda-cd) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .day-overflow .agenda-title {
+      font-size: 16px;
+    }
+    .day-overflow :is(.agenda-row, button):focus-visible {
+      outline: 2px solid var(--primary-color, #03a9f4);
+      outline-offset: -2px;
+    }
     .dlg-head {
       display: flex;
       align-items: center;
@@ -5310,7 +5468,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.21 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.22 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

@@ -3,12 +3,12 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.21`, repairing wall view/date keyboard navigation
-(D33). The installed HA pilot remains r12; r13–r21 are not deployed or released. Source,
-tests, built bundle and docs belong to this milestone on `feature/moran-foundation`;
-Git/remote history is the delivery source of truth. Source
-`60ea31c4f022c18bf4e88bf2b31e3b40e3f75f88` is pushed to personal origin, with remote HEAD
-verified and hosted CI/Validate passing. Later docs-only receipts retain the same build.
+Latest development build: `0.25.1-moran.22`, repairing Day overlap when Agenda is disabled
+(D34). The installed HA pilot remains r12; r13–r22 are not deployed or released. Source,
+tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
+R22 is implemented locally; all 104 browser scenarios and 192 unit tests passed.
+It is ready for milestone commit/push; hosted checks are not yet recorded. Git/remote history is the delivery
+source of truth; the r21 receipts below remain the last recorded hosted checks.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
 
@@ -62,6 +62,39 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Restricted Day overflow, 2026-09-22
+
+D34 repairs the Day overlap chip that silently failed when Agenda was disabled. The new
+`day-overflow` regression failed against r21 before the fix. R22 opens a current-data
+person/day list without switching views, changing the column cap or saving a preference.
+It includes all selected-day appointments, with full titles and the normal event-details
+flow. Enabled Agenda and legacy retain their existing behavior.
+
+Focused checks pass at 1920×1080, 390×844, 320×568, 844×390, a 400px embedded card and
+reduced motion. Coverage includes no extra reads, wrapping/48px targets, date/person routing,
+shared/all-day/midnight events, duplicate config, localized labels, two-level Tab/Escape,
+fresh titles/details, removed occurrences, failure/retry, filters, scroll retention within
+changed-content bounds, midnight anchoring, kiosk retention and config/reattachment cleanup.
+Each case also exercises native keyboard, mouse and touch activation.
+
+Manual in-app flow passed at 1707×960 and 391×844 CSS pixels: Casey's +2 → day list →
+Music Lesson details → Escape to the same row → Escape to the original overlap chip.
+Light/dark screenshots, meaningful page content, correct URL/title, no error overlay,
+clean warning/error logs and contained phone bounds were checked. Normal viewport was
+restored, the main Day/Today preview refreshed, and a separate restricted-Day example
+left available. No saved preferences were changed by the stress configuration.
+The frontend-testing skill guided this rendered/native-input verification using already
+connected browser controls. Physical Safari, screen-reader speech and wall hardware remain
+untested; these synthetic checks are not live HA evidence.
+
+Formatting, typecheck, 192 UTC-launched unit tests and build pass. The served 4173 bundle
+matches dist, SHA-256 `21413adb02c8776caf344d03201832de49040deb72c32df5d876f5347981ed94`.
+All 104 compiled-browser scenarios passed, including the existing details, navigation,
+zoom/persistence, responsive alignment, source integrity and recovery checks. Ten updated
+Markdown files have no broken local links; the added-diff credential-pattern scan found
+zero matches. The pre-existing untracked clipping debug note remains untouched/excluded.
+Commit/push and hosted-check receipts follow separately. No live HA change or release.
 
 ### Keyboard view/date tabs, 2026-09-22
 

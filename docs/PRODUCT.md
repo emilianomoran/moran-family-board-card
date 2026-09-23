@@ -55,6 +55,10 @@ This replaces the early screenshot/concept, not the entire product design:
 - Day keeps person columns. Narrow Month provides counts and date-to-Day drilldown;
   restricted configurations keep appointments reachable. Week has pinned date/person
   headers; Agenda wraps long content. Month and Agenda share person filters.
+- Day's overlap chip opens Agenda when enabled. If Agenda is disabled in wall mode, it
+  opens a current-data list of that person's selected-day appointments instead. Full titles
+  and details stay reachable; closing returns through the list to the same Day context.
+  The list is transient, requires no new fetch and does not enable an excluded view (D34).
 - Month's `+N more events` expands the remaining cards inside that date, with full titles
   and “Show less”. One date expands at a time, without another toolbar or saved preference.
   The date total counts unique events; overflow counts person-owned cards. Normal narrow

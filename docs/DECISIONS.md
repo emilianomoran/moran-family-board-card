@@ -670,10 +670,39 @@ Both it and the in-app browser were connected. The earlier optional “Browser p
 recommendation was unnecessary; a missing specifically named skill was not missing browser
 access. Continue with available browser controls, without another install prerequisite.
 
+### D34. Reachable Day overflow when Agenda is disabled
+
+**2026-09-22 — implemented under the user's continued CAL-02 work, not a redesign.**
+The r21 Day overlap chip called the guarded Agenda navigation handler; with Agenda omitted
+from `views`, it silently did nothing. A new compiled-browser regression reproduced this
+before implementation.
+
+Wall Day now falls back to a modal day list for that person when Agenda is disabled.
+The list includes all of that person's appointments on the selected date, not only the
+hidden cluster, so all-day context and other appointments remain reachable. It reuses
+the existing Agenda rows and event details, without enabling an excluded view, altering
+`max_columns`, adding a toolbar, saving state or making an extra calendar read.
+When Agenda is enabled, its existing route is unchanged. Legacy is unchanged.
+
+The list derives from current filtered events and shows loading/failure/retry state.
+Person, absolute date, localized times and full wrapping titles remain visible. Modal
+rows retain at least 48px targets. Opening details hides/inerts the list but preserves its
+DOM and scroll; closing details returns focus to the same appointment, or the list's
+Close button if that occurrence disappeared. Closing the list restores its trigger, or
+the selected date if refresh removed the trigger. Scroll is retained within current bounds.
+Escape closes one level at a time; Tab stays inside the active modal. Backdrop/Close work.
+
+The selected date remains anchored through midnight while the list is open, and kiosk
+return does not dismiss it. Config/view changes or disconnection clear the transient list.
+Provider writes remain blocked by the existing read-only contract. No HA deployment,
+new polling, preference schema change, dependency upgrade, release or main merge.
+Verification and delivery receipts belong to STATUS.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r21, 2026-09-22 | CAL-02 review reproduced a dead Day overlap chip when Agenda was disabled. D34 adds a current-data person/day list and details return path, with responsive/native-input tests and a milestone push; no live deployment. |
 | Chrome extension clarification and continue after r20, 2026-09-22 | Existing browser access verified; no additional plugin needed. D33 repairs keyboard navigation of view/date tabs under CAL-02, with no redesign or live deployment. |
 | Continue after r19, 2026-09-22 | CAL-02 review exposed unreachable Month overflow in restricted configurations. D32 adds in-place expansion, keyboard/touch access, readable narrow fallback and truthful date targets; verify/document/push without live deployment. |
 | Continue after the r18 push, 2026-09-22 | Extend the suggested Week-density slice with independent saved list scale, fixed headings/target floors and date-row anchoring (D31); verify, document and push. No live deployment or release implied. |

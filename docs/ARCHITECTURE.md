@@ -62,6 +62,14 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   drilldown is unchanged. No-Day/hidden-weekend cells are labeled groups (D32).
 - `read_only: true` blocks create/edit/delete/drag paths, including stale handlers.
   The inherited writable code is not permission to enable editing in the pilot.
+- Day's `_showDayAgenda` uses `_dayOverflow` only in wall mode without enabled Agenda (D34).
+  This stores absolute date/person, never event snapshots. `_renderDayOverflow` derives
+  current filtered rows and keys them by occurrence plus duplicate-copy ordinal to preserve
+  DOM/focus identity. The list remains mounted but hidden/inert during event details.
+  Each modal level owns its restore target; shared Tab/Escape logic selects only the active
+  overlay. Removed event/trigger targets fall back to the list Close/selected date.
+  Midnight anchors the inspected date; kiosk does not dismiss the list. View/config/disconnect
+  clears it. No additional source reads or persisted state; enabled Agenda and legacy are unchanged.
 - Dates/filters survive view changes. Day time/lane anchors survive navigation, person
   toggles and Status expansion. Today intentionally recenters; background ticks do not.
 - Wall Timeline uses a remaining-height flex scroll container. Rows and bars grow into

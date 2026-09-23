@@ -270,6 +270,7 @@
         view: "day",
         views: ["day", "timeline", "week", "month", "agenda"],
         ...(query.get("month-only") === "1" ? {view:"month",views:["month"],remember_preferences:false} : {}),
+        ...(query.get("day-only") === "1" ? {views:["day"],max_columns:1,remember_preferences:false} : {}),
         start_hour: dailyUse ? 0 : 7,
         end_hour: dailyUse ? 24 : 21,
         trim_hours: false,
@@ -1043,7 +1044,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "tabs"
+        (query.get("checks") === "day-overflow"
+          ? import("./calendar-day-overflow-check.mjs").then(({ runDayOverflowChecks }) =>
+              runDayOverflowChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "tabs"
           ? import("./calendar-tab-navigation-check.mjs").then(({ runTabNavigationChecks }) =>
               runTabNavigationChecks(card, hass, nextRender),
             )
@@ -1130,7 +1135,7 @@
           })
           .finally(() => {
             // The density runner follows geometry checks with real range-input events.
-            if (["density", "timeline-density", "week-density", "month-overflow", "tabs"].includes(query.get("checks"))) return;
+            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "tabs"].includes(query.get("checks"))) return;
             card.remove();
             window.stop();
           });

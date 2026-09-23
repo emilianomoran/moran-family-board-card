@@ -51,7 +51,7 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - **Everyday polish** – past events dimmed, coloring by calendar, open a location straight in the maps app, hide noisy events by pattern.
 - **Live progress & countdown** – running events show a progress bar (can be turned off), upcoming ones show “in 20 min” in the agenda; updates every minute.
 - **Weather** – icon + temperature per day from a `weather.*` entity in the day/agenda header (HA location, not the event address).
-- **Busy days stay readable** – if more events overlap than `max_columns` allows, the extra columns are collapsed into a “+N” chip (click opens the agenda) instead of shrinking into unreadable slivers.
+- **Busy days stay readable** – if more events overlap than `max_columns` allows, extra columns collapse into a “+N” chip instead of unreadable slivers. It opens Agenda when enabled; wall Day uses a person/day list when Agenda is disabled.
 - **Long events as a background band** – long-running events (after-school care, “free play”) beyond a configurable length run as a subtle full-width band behind the column instead of squeezing the short events sideways. The real appointments get the full width.
 - **Auto-fit height** – optionally the day view adapts to the available card height so that start–end hour are fully visible without scrolling (ideal for wall tablets / kiosk).
 - **Fills the screen** – person columns grow with the card width (panel view / wide cards); with `full_height` the board reaches the bottom of the screen. Column width, axis width and spacing are configurable.
@@ -78,6 +78,11 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 
 ### Calendar reliability preview
 
+- Wall Day's **+N** overlap chip stays usable with Agenda disabled: it opens a list of
+  that person's selected-day appointments, including full titles and the existing details.
+  Closing details returns to the list; closing the list returns to Day without changing
+  views or saved preferences. Current-data refresh, failure/retry, keyboard focus and
+  scroll context are retained. Enabled Agenda and legacy behavior are unchanged.
 - Wall view/date tabs support Left/Right and Home/End to move focus; Enter/Space selects.
   Tab leaves each group, and returning targets its selected option. Off-screen tabs are
   revealed without moving the calendar. Arrow focus alone does not load another view/date.

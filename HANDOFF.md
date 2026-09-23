@@ -15,7 +15,13 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.21`, repairing wall view/date keyboard tabs (D33).
+- Latest development build: `0.25.1-moran.22`, repairing Day overlap when Agenda is disabled (D34).
+  Wall Day's +N opens that person's current-data day list; details return to the list, then
+  closing returns to Day with scroll/focus retained within current bounds. It does not
+  enable Agenda, fetch extra data, persist state or change legacy behavior. Refresh failures,
+  removed occurrences, midnight and modal focus are covered by the new `day-overflow` suite.
+  Verification/delivery is in STATUS; do not infer HA deployment.
+- Previous development build r21 repaired wall view/date keyboard tabs (D33).
   Left/Right wraps focus; Home/End reaches group edges; Enter/Space selects using the existing
   handlers. Tab exits and re-entry targets the selected option. Focus alone causes no fetch,
   preference save or calendar movement; only its track scrolls to reveal it. Groups have
@@ -54,7 +60,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r21 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r22 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -78,8 +84,9 @@ when the task originated in the separate Home Assistant operations workspace.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
-   feedback-driven usability/presentation across views. D32's Month-overflow and D33's keyboard-tab gaps are repaired;
-   do not reimplement it or treat the wider restricted grid as final design approval.
+   feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab
+   and D34's restricted Day-overflow gaps are repaired; do not reimplement them or treat
+   the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
@@ -88,6 +95,12 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R22 passes formatting, types, build, 192 UTC-launched unit tests and all 104 compiled-browser
+scenarios. Manual light/dark desktop and 391px phone checks verified list → details → list
+→ Day with restored focus, no page clipping and clean console. The normal viewport and
+main Day preview were restored; the separate `day-only=1` example has no saved preferences.
+STATUS owns source/remote/hosted-check receipts. No HA deployment is implied.
 
 R21 passes 192 UTC-launched unit tests and all 98 compiled-browser scenarios, plus build,
 types and formatting. Manual desktop/phone checks confirmed focus versus selection and
