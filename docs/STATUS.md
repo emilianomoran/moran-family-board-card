@@ -7,7 +7,8 @@ Latest development build: `0.25.1-moran.24`, repairing Week's selected-date reve
 (D36). The installed HA pilot remains r12; r13–r24 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 116 compiled-browser scenarios
-pass. Milestone commit/push and hosted checks are pending.
+pass. Source `086e50648edf05c7002091cd7f6274bf9d8c495e` is pushed to personal origin;
+remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -101,8 +102,14 @@ SHA-256 `baaa0c17c938dd9b94eacabbe129430d2b082c99aab70f0adf5d032551c821b5`.
 All 116 compiled-browser scenarios passed, including existing Agenda navigation, Week density,
 recovery, routing, details, saved preferences, alignment and legacy checks. Ten updated Markdown
 documents have no broken local links; the added-diff credential-pattern check found no matches.
-The pre-existing untracked debug note remains untouched/excluded. Commit/push and hosted checks
-are pending.
+The pre-existing untracked debug note remains untouched/excluded.
+Delivery: source `086e50648edf05c7002091cd7f6274bf9d8c495e` was committed and pushed to
+personal origin's `feature/moran-foundation`; `git ls-remote` matched local HEAD.
+Push [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35865254979)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35865255004)
+completed successfully for that exact source, as did PR CI `35865260777` and Validate
+`35865260852`. Existing non-failing Actions runtime/runner migration notices remain ENG-06;
+no dependency or workflow upgrade was added. Later receipt-only commits retain the bundle.
 No HA deployment, main merge, tag or release.
 
 ### Agenda selected-date reveal, 2026-09-22

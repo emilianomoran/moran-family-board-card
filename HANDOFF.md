@@ -21,8 +21,10 @@ when the task originated in the separate Home Assistant operations workspace.
   on short phones. Horizontal person position, manual browsing and fractional density anchors
   remain intact. Delayed/failed/hidden loads wait, but newer input cancels navigation.
   Uses the existing Week anchor and shared list-navigation helper; no extra reads, stored
-  date/scroll state, new controls or legacy changes. Local verification passed; delivery is pending;
-  STATUS owns the receipts. No HA deployment.
+  date/scroll state, new controls or legacy changes. Source
+  `086e50648edf05c7002091cd7f6274bf9d8c495e` is pushed to personal origin; remote HEAD
+  matched and hosted CI/Validate passed. STATUS owns the receipts; later docs-only commits
+  retain this build. No HA deployment.
 - Previous development build r23 repaired Agenda's selected-date reveal (D35).
   Entry, Day +N, Today and week paging reveal the selected date; missing dates use the
   next real group or last earlier one. Ordinary updates retain manual browsing. Delayed
@@ -119,8 +121,8 @@ starts at the row top. Six focused `week-context` scenarios pass, including nati
 Today/paging, current-data waits/cancellation, density anchors and legacy. Manual desktop,
 320px light and 391px dark phone checks verified date visibility; details returned focus
 to the same event. Normal viewport restored and the main Day preview refreshed. Formatting,
-types, build, 192 UTC-launched units and all 116 compiled-browser scenarios pass. Commit/push
-and hosted checks are pending; use STATUS rather than assuming a push or HA deployment.
+types, build, 192 UTC-launched units and all 116 compiled-browser scenarios pass. Source is
+pushed and hosted CI/Validate passed; STATUS owns exact receipts. No HA deployment is implied.
 
 R23 passes formatting, types, build, 192 UTC-launched units and all 110 compiled-browser
 scenarios. Its `agenda-context` regression reproduced r22 opening Monday from Wednesday.
