@@ -6,9 +6,10 @@ See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 Latest development build: `0.25.1-moran.22`, repairing Day overlap when Agenda is disabled
 (D34). The installed HA pilot remains r12; r13–r22 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-R22 is implemented locally; all 104 browser scenarios and 192 unit tests passed.
-It is ready for milestone commit/push; hosted checks are not yet recorded. Git/remote history is the delivery
-source of truth; the r21 receipts below remain the last recorded hosted checks.
+All 104 browser scenarios and 192 unit tests passed. Source
+`1a2c1ca8ac648b06ab78e579778fb9296e0f6060` is pushed to personal origin, with remote HEAD
+verified and hosted CI/Validate passing. Later docs-only receipts retain this build.
+Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
 
@@ -94,7 +95,13 @@ All 104 compiled-browser scenarios passed, including the existing details, navig
 zoom/persistence, responsive alignment, source integrity and recovery checks. Ten updated
 Markdown files have no broken local links; the added-diff credential-pattern scan found
 zero matches. The pre-existing untracked clipping debug note remains untouched/excluded.
-Commit/push and hosted-check receipts follow separately. No live HA change or release.
+Application source `1a2c1ca8ac648b06ab78e579778fb9296e0f6060` is committed and pushed to
+`feature/moran-foundation`; `git ls-remote` matched local HEAD. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35811018863) and
+[HACS Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35811018865)
+passed for that exact source; the corresponding pull-request checks also passed. A fresh
+build reproduced committed dist without a diff. Existing non-failing Actions runtime/runner
+notices remain ENG-06; no workflow upgrade was added. No live HA change, release or main merge.
 
 ### Keyboard view/date tabs, 2026-09-22
 

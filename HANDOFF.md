@@ -20,7 +20,9 @@ when the task originated in the separate Home Assistant operations workspace.
   closing returns to Day with scroll/focus retained within current bounds. It does not
   enable Agenda, fetch extra data, persist state or change legacy behavior. Refresh failures,
   removed occurrences, midnight and modal focus are covered by the new `day-overflow` suite.
-  Verification/delivery is in STATUS; do not infer HA deployment.
+  Source `1a2c1ca8ac648b06ab78e579778fb9296e0f6060` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. STATUS owns the receipts; later
+  docs-only commits retain this build. Do not infer HA deployment.
 - Previous development build r21 repaired wall view/date keyboard tabs (D33).
   Left/Right wraps focus; Home/End reaches group edges; Enter/Space selects using the existing
   handlers. Tab exits and re-entry targets the selected option. Focus alone causes no fetch,
