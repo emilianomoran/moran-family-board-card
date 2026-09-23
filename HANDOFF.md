@@ -15,7 +15,14 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.24`, repairing Week's selected-date reveal (D36).
+- Latest development build: `0.25.1-moran.25`, repairing Month's explicit Today action (D37).
+  Clicking the month name reveals today's date/column inside the grid, below pinned weekdays.
+  Already visible dates stay put. Current-data/layout waits cancel on newer grid input or
+  obsolete navigation; ordinary updates do not recenter. Accessible name/tooltip explain
+  Today. No automatic Month entry/paging scroll policy, saved scroll, new controls or legacy
+  change. Local checks and manual review pass; milestone delivery is pending.
+  STATUS owns exact evidence. No HA deployment.
+- Previous development build r24 repaired Week's selected-date reveal (D36).
   Entry/configuration, Today and explicit week paging reveal the selected date under pinned
   person headings. Date labels start at row tops so busy days remain identifiable on entry
   on short phones. Horizontal person position, manual browsing and fractional density anchors
@@ -79,7 +86,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r24 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r25 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -104,7 +111,7 @@ when the task originated in the separate Home Assistant operations workspace.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
-   D34's restricted Day-overflow and D35–D36's Agenda/Week date gaps are repaired; do not reimplement
+   D34's restricted Day-overflow and D35–D37's date/Today gaps are repaired; do not reimplement
    them or treat the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
@@ -114,6 +121,13 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R25 reproduced r24's off-screen Today date on a short landscape Month. Six `month-today`
+cases pass, including current-data/layout waits, cancellation, midnight/kiosk, ordinary
+manual context, native activation, compact/restricted grids and legacy. Manual desktop,
+landscape dark and portrait light review confirmed Today reveal and details return focus;
+the normal viewport was restored. Format, types, 192 UTC-launched units and build pass.
+All 122 compiled-browser scenarios pass. Commit/push and hosted checks are pending; see STATUS.
 
 R24's regression reproduced r23 opening Monday despite a selected Friday. Manual short-phone
 review also found the old vertically centered Week date below the viewport; its label now

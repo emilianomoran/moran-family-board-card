@@ -134,6 +134,14 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   and automatic week-offset bookkeeping must not create a new request. No focus movement,
   extra fetch, timer or persisted state; legacy is untouched.
 
+- Wall Month's explicit `_thisMonth` action sets transient `_monthScrollDate` and requests
+  a render even if the month/day values are unchanged (D37). `_restoreMonthScroll` waits
+  for current data/layout, then reveals the date label vertically and its cell horizontally
+  inside `.monthwrap`, accounting for the pinned weekday heading. Already visible axes
+  remain still. Grid input and obsolete date/view/config/kiosk/disconnect cancel it.
+  Reuse the existing update/ResizeObserver paths; no new timer or automatic entry/paging
+  request. Failed reads wait for retry. Ordinary updates, legacy and preferences are unchanged.
+
 ## Extension seams, not prebuilt modules
 
 Density belongs in view geometry plus scroll-anchor handling. Household modules need

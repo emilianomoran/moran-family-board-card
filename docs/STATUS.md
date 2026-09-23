@@ -3,12 +3,11 @@
 Last recorded: 2026-09-23. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.24`, repairing Week's selected-date reveal
-(D36). The installed HA pilot remains r12; r13–r24 are not deployed or released. Source,
+Latest development build: `0.25.1-moran.25`, repairing Month's explicit Today reveal
+(D37). The installed HA pilot remains r12; r13–r25 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-Formatting, types, build, 192 UTC-launched unit tests and all 116 compiled-browser scenarios
-pass. Source `086e50648edf05c7002091cd7f6274bf9d8c495e` is pushed to personal origin;
-remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
+Formatting, types, build, 192 UTC-launched unit tests and all 122 compiled-browser scenarios
+pass. Milestone commit/push and hosted checks are pending.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +62,48 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Month Today reveal, 2026-09-23
+
+D37 repairs the existing month-name/Today action. R24 reset internal date state but left
+today outside the scroll viewport. The new regression failed at 844×390 (date y≈−91,
+panel y=233); manual reproduction from scroll zero also showed today at y≈920 below a
+391px screen. R25 reveals today's date and column inside Month, below pinned weekday
+headings. Already visible dates stay in place; host scrolling/focus are not changed.
+Existing overflow collapse and date reset remain. Accessible name/tooltip explain Today.
+
+The one-shot request waits for current data and measurable layout. Failed reads wait for
+retry; healthy empty months still show the date. Grid wheel/pointer/keyboard cancels pending
+work; paging, view/config changes, disconnect, midnight and kiosk clear obsolete intent.
+Ordinary updates, Month entry/paging layout, preferences and legacy are unchanged. No extra
+calendar reads, new timer, settings, permanent toolbar, provider writes or saved scroll.
+
+Six `month-today` configurations pass: 844×390, 1920×1080, 390×844, 320×568, a 400px embedded
+card and reduced motion. Coverage includes both axes, unchanged visible dates, no extra
+same-month reads, focus/host isolation, refresh/tick/resize, details, overflow collapse,
+return from another month, hidden/slow/failed data, cancellation/cleanup, healthy emptiness,
+compact/restricted grids, weekday settings, German labels and legacy. Each case also uses
+native Enter, mouse and touch activation after moving away from Today.
+
+Manual in-app desktop 1707×960, dark landscape 844×391 and light portrait 391×844 review
+confirmed Today reveal. Phone horizontal scroll moved today's label off-screen; Today
+brought it back without changing its already-visible vertical position. Details → Escape
+restored event focus. Screenshots showed meaningful content/no overlay, expected page
+URL/title, contained phone bounds and no relevant console warnings/errors. Normal viewport
+restored; the main preview loaded the r25 banner with its saved Day view. The existing
+`agenda-context=1` fixture supplies generic busy dates; `month-only=1`
+adds the restricted-phone case without saved preferences. The frontend-testing skill guided
+reproduction and rendered/native-input checks. Physical Safari, screen-reader speech and
+wall hardware remain untested; no live HA data or configuration was changed.
+
+Formatting, types, 192 UTC-launched units and build pass. Dist SHA-256:
+`bd82783e081e80d3b04d9be953f4c211dccbfd9dc7c9a8c16512668d6b734c61`.
+Served 4173 bytes match dist. All 122 compiled-browser scenarios passed, including existing
+navigation, overflow, density/preferences, routing, recovery, details, alignment and legacy.
+Ten updated Markdown files have no broken local links; the staged added-diff credential-pattern
+check found no matches. The pre-existing debug note remains untouched/untracked. Milestone
+commit/push and hosted checks are pending.
+No HA deployment, main merge, tag or release.
 
 ### Week selected-date reveal, 2026-09-23
 

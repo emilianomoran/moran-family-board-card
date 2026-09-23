@@ -111,6 +111,9 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   delayed navigation. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
   or hides weekends. Agenda wraps long titles/locations instead of truncating them.
+  In wall Month, clicking the month name returns to Today and reveals its date/column
+  without scrolling the host page. An already visible date stays in place; ordinary
+  updates preserve manual browsing, and new grid input cancels delayed navigation.
   Wall Agenda opens near the selected date; Today and week paging reveal that date again.
   Empty dates use the next available group in the week, otherwise the last earlier one,
   with its real heading. Refreshes and resizing do not recenter manual browsing. Late

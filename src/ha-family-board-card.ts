@@ -279,6 +279,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _timelineScrollAnchor?: { minute: number; top: number; date: number };
   private _timelineScrollFrame?: number;
   private _agendaScrollDate?: number; // one explicit navigation, never persisted
+  private _monthScrollDate?: number; // explicit Today only, never automatic recentering
   private _raw: RawEvent[] = [];
   private _calendarResults: CalendarReadResult[] = [];
   private _fetchedKey = "";
@@ -360,6 +361,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._weekDensity = undefined;
     this._weekScrollAnchor = undefined;
     this._daySwipe = undefined;
+    this._cancelMonthScroll();
     this._cancelDayScroll();
     this._cancelTimelineScroll();
     if (config.read_only) {
@@ -495,6 +497,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       this._dayTabFocus = undefined;
       this._expandedMonthDate = undefined;
       this._weekScrollAnchor = undefined;
+      this._cancelMonthScroll();
       this._cancelDayScroll();
       this._cancelTimelineScroll();
       this._daySwipe = undefined;
@@ -556,6 +559,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           this._restoreTimelineScroll();
           this._restoreWeekScroll();
           this._restoreAgendaScroll();
+          this._restoreMonthScroll();
           // A hidden/zero-width panel may not have been measurable on first render.
           this._maybeScrollToNow();
         }),
@@ -573,6 +577,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._cancelDayScroll();
     this._cancelTimelineScroll();
     this._cancelAgendaScroll();
+    this._cancelMonthScroll();
     this._daySwipe = undefined;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
     this._scrollToNowFrame = undefined;
@@ -659,6 +664,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._densityExpanded = false;
     this._expandedMonthDate = undefined;
     this._weekScrollAnchor = undefined;
+    this._cancelMonthScroll();
     const wanted = this._config.view ?? "day";
     const view = this._enabledViews.includes(wanted) ? wanted : this._enabledViews[0];
     if (this._view !== view) this._view = view;
@@ -773,6 +779,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._restoreTimelineScroll();
     this._restoreWeekScroll();
     this._restoreAgendaScroll();
+    this._restoreMonthScroll();
     this._maybeScrollToNow();
     if (this._layout === "wall" && (changed.has("_view") || changed.has("_config"))) {
       const track = this.renderRoot.querySelector<HTMLElement>(".switch");
@@ -1740,10 +1747,12 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
   };
   private _prevMonth = () => {
+    this._cancelMonthScroll();
     this._expandedMonthDate = undefined;
     this._monthOffset -= 1;
   };
   private _nextMonth = () => {
+    this._cancelMonthScroll();
     this._expandedMonthDate = undefined;
     this._monthOffset += 1;
   };
@@ -1753,6 +1762,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (this._layout === "wall") {
       this._weekOffset = 0;
       this._day = this._todayIndex();
+      this._monthScrollDate = startOfDay(this._now()).getTime();
+      this.requestUpdate(); // Today must work even when already in the current month.
     }
   };
 
@@ -3409,6 +3420,55 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     `;
   }
 
+  private _cancelMonthScroll = (): void => {
+    this._monthScrollDate = undefined;
+  };
+
+  /** Reveal Today inside Month only; do not scroll its host or disturb a visible date. */
+  private _restoreMonthScroll(): void {
+    const date = this._monthScrollDate;
+    if (date === undefined) return;
+    if (
+      this._layout !== "wall" ||
+      this._view !== "month" ||
+      this._monthOffset !== 0 ||
+      date !== startOfDay(this._now()).getTime()
+    ) {
+      this._cancelMonthScroll();
+      return;
+    }
+    const wrap = this.renderRoot.querySelector<HTMLElement>(".monthwrap");
+    if (
+      this._loading ||
+      this._loadError ||
+      this._dataKey !== this._fetchedKey ||
+      !wrap?.clientHeight ||
+      !wrap.clientWidth
+    )
+      return;
+    const cell = wrap.querySelector<HTMLElement>(`.mcell[data-date="${date}"]`);
+    const label = cell?.querySelector<HTMLElement>(".mdate");
+    const header = wrap.querySelector<HTMLElement>(".monthhead");
+    if (!cell || !label || !header) return;
+    const box = wrap.getBoundingClientRect();
+    const row = cell.getBoundingClientRect();
+    const number = label.getBoundingClientRect();
+    const topEdge = Math.max(box.top, header.getBoundingClientRect().bottom);
+    // A tall day's appointments need not all fit. Keep its date and row start visible.
+    const top =
+      number.top < topEdge || number.bottom > box.bottom
+        ? wrap.scrollTop + row.top - topEdge
+        : wrap.scrollTop;
+    const left =
+      row.left < box.left
+        ? wrap.scrollLeft + row.left - box.left
+        : row.right > box.right
+          ? wrap.scrollLeft + row.right - box.right
+          : wrap.scrollLeft;
+    wrap.scrollTo({ top, left, behavior: "instant" });
+    this._cancelMonthScroll();
+  }
+
   private _renderMonth() {
     const { gridStart, weeks, month, year } = this._monthGrid();
     const numDays = weeks * 7;
@@ -3461,7 +3521,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           <button class="nav" aria-label=${this._t("prev_month")} @click=${this._prevMonth}>
             ‹
           </button>
-          <button class="nav-now" @click=${this._thisMonth}>${monthName}</button>
+          <button
+            class="nav-now"
+            @click=${this._thisMonth}
+            title=${wall ? this._t("today") : nothing}
+            aria-label=${wall ? `${monthName}: ${this._t("today")}` : nothing}
+          >
+            ${monthName}
+          </button>
           <button class="nav" aria-label=${this._t("next_month")} @click=${this._nextMonth}>
             ›
           </button>
@@ -3479,6 +3546,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
         aria-labelledby=${this._tabPanelLabelledBy}
         aria-label=${wall && this._enabledViews.length === 1 ? this._t("month") : nothing}
         tabindex=${wall ? "0" : nothing}
+        @wheel=${this._cancelMonthScroll}
+        @pointerdown=${this._cancelMonthScroll}
+        @keydown=${this._cancelMonthScroll}
       >
         <div class="monthhead">${short.map((s) => html`<div class="mhcell">${s}</div>`)}</div>
         <div class="monthgrid ${wall && this._expandedMonthDate !== undefined ? "expanded" : ""}">
@@ -5553,7 +5623,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.24 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.25 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

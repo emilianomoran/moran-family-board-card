@@ -87,6 +87,9 @@ Standardwerte verwerfen nur den Zoom der betroffenen Ansicht. Ohne diese Option 
 Zoom auf die Sitzung beschränkt. Keine Termine, Datums-/Scrollpositionen oder geräteübergreifende
 Synchronisierung; Monat, Agenda und Legacy haben keinen Zoomregler.
 Kurze Termine zeigen vorrangig den Titel; Details und Agenda bieten mehr Platz.
+Im Wall-Monat führt ein Klick auf den Monatsnamen zu „Heute“ und macht Datum und Spalte
+sichtbar. Bereits sichtbare Daten bleiben an ihrer Position; neue Eingaben im Raster
+brechen verzögertes Scrollen ab. Normale Aktualisierungen setzen die Ansicht nicht zurück.
 Wall-Woche zeigt beim Öffnen, Wochenwechsel und Klick auf „Heute“ das gewählte Datum im
 verfügbaren Scrollbereich. Das Datum steht oben in seiner Zeile. Die horizontale Position
 bleibt erhalten; Aktualisierungen und Größenänderungen setzen manuelles Scrollen nicht zurück.

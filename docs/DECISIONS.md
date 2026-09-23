@@ -749,10 +749,35 @@ weeks, weekday settings, remount, legacy and native keyboard/wheel/touch scrolli
 No additional reads, saved date/scroll state, settings, timer, toolbar or legacy change.
 Agenda retains D35. STATUS owns verification and delivery; no HA deployment or release implied.
 
+### D37. Month's Today action reveals the current date
+
+**Bounded CAL-02 correction under “Continue”, 2026-09-23.** R24's month-name button reset
+the month/date internally but left the current date outside the visible scroll area.
+The regression failed on a short landscape screen; manual review also reproduced today
+below the viewport. This repairs the existing Today action, not Month entry/paging design.
+
+In wall Month, clicking the month name now reveals today's date below the pinned weekday
+heading and brings its column into view. Only the Month container scrolls, within its
+bounds. Already visible dates stay in place; a tall day's appointments need not all fit.
+The existing overflow collapse and selected-date reset are retained. The button's accessible
+name includes the displayed month plus localized Today, with a Today tooltip; no new row.
+
+A transient `_monthScrollDate` waits for current-range data and measurable layout. Failed
+reads wait for retry; healthy empty months still reveal the date. Grid wheel/pointer/keyboard
+input cancels pending movement. Month paging, view/config changes, disconnect, midnight
+and kiosk return discard obsolete work. Refresh, resize, filters and details do not create
+a new request. No additional fetch, timer, stored date/scroll state or legacy change.
+
+R25 implements this behavior. `month-today` covers six responsive/reduced-motion cases,
+compact/restricted grids, both scroll axes, overflow, details/focus, ordinary updates,
+delayed/hidden/failed data, cancellation, locale, legacy and native Enter/mouse/touch activation.
+STATUS owns verification/delivery. No new Month zoom, redesign, HA deployment or release.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r24, 2026-09-23 | Reproduced Month's Today action leaving the current date off-screen. D37 repairs explicit two-axis reveal with delayed-input safeguards; ordinary entry/paging and the overall Month layout are unchanged. |
 | Continue after r23, 2026-09-23 | Reproduced Week opening on Monday despite selecting Friday. D36 reveals the selected date and keeps the date label visible on entry, preserving manual scrolling and zoom. No broader redesign or live deployment. |
 | Continue after r22, 2026-09-22 | Reproduced Agenda opening at week start despite the selected Day date. D35 repairs date reveal and explicit Today/week navigation while preserving manual scrolling. No Agenda redesign, zoom, deployment or release. |
 | Continue after r21, 2026-09-22 | CAL-02 review reproduced a dead Day overlap chip when Agenda was disabled. D34 adds a current-data person/day list and details return path, with responsive/native-input tests and a milestone push; no live deployment. |

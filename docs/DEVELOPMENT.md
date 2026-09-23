@@ -36,6 +36,8 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    Add `&agenda-context=1` to load a crowded synthetic week with no saved preferences.
    Select a Day date, then Week, Agenda or **+12**: the matching date should be revealed.
    In Week, the date label starts at the busy row's top; click the week range for Today.
+   In Month, scroll away and click the month name for Today. Add `&month-only=1` to also
+   exercise horizontal date recovery on a narrow phone, without a Day destination.
    This query replaces the sample feed, not any real calendar data.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
@@ -86,6 +88,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `month-today` | Explicit Today date/column reveal, both axes, overflow collapse, current-data/layout waits and cancellation, manual context/details, compact/restricted grids, locale/legacy and native Enter/mouse/touch |
 | `week-context` | Selected-date entry, Today/week paging, visible row labels, manual browsing/details, density anchors, hidden/delayed/failed reads and cancellation, weekday settings, legacy and native wheel/keyboard/touch scrolling |
 | `agenda-context` | Selected-date entry/Day overflow, Today/week paging, manual browsing/details, sparse/empty/failed reads, hidden/delayed/cancelled navigation, legacy and native wheel/keyboard/touch scrolling |
 | `day-overflow` | Disabled-Agenda fallback, all appointments/details, two-level modal focus, refresh/removal/retry, Day scroll/date retention, routing/duplicates, midnight, locale, legacy, native keyboard/mouse/touch |

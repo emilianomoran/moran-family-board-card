@@ -9,6 +9,7 @@ import { runNativeMonthOverflowChecks } from "./calendar-month-overflow-check.mj
 import { runNativeDayOverflowChecks } from "./calendar-day-overflow-check.mjs";
 import { runNativeAgendaContextChecks } from "./calendar-agenda-context-check.mjs";
 import { runNativeWeekContextChecks } from "./calendar-week-context-check.mjs";
+import { runNativeMonthTodayChecks } from "./calendar-month-today-check.mjs";
 import { runNativeTabNavigationChecks } from "./calendar-tab-navigation-check.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -115,6 +116,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[844,390], [1920,1080], [390,844], [320,568]].map(([width,height]) => ({
+    name: "wall", checks: "month-today", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "month today:",
+  })),
+  {name: "wall", checks: "month-today", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "month today:"},
+  {name: "wall", checks: "month-today", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "month today:"},
   ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "week-context", chromeHeight: 64, width, height,
     expectedGeometryMarker: "week date context:",
@@ -616,6 +625,7 @@ try {
     if (checks === "day-overflow") await runNativeDayOverflowChecks(cdp, delay);
     if (checks === "agenda-context") await runNativeAgendaContextChecks(cdp, delay);
     if (checks === "week-context") await runNativeWeekContextChecks(cdp, delay);
+    if (checks === "month-today") await runNativeMonthTodayChecks(cdp, delay);
     if (checks === "tabs") await runNativeTabNavigationChecks(cdp, delay);
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);

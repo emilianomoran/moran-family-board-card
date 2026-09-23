@@ -72,6 +72,10 @@ This replaces the early screenshot/concept, not the entire product design:
   The date total counts unique events; overflow counts person-owned cards. Normal narrow
   Month keeps date-to-Day drilldown. Where that route is unavailable, scroll a wider grid
   instead of squeezing event targets. Disabled Day/weekend destinations are not buttons (D32).
+- Month's month-name button returns to Today and reveals its date/column inside the grid,
+  below pinned weekday headings. It leaves an already visible date in place and preserves
+  ordinary manual browsing. New grid input cancels delayed movement. No automatic Month
+  entry/paging scroll policy or saved scroll position is introduced (D37).
 - Timeline fills the remaining wall panel with growing person rows and event bars.
   Overlapping lanes keep 48px event targets; short panels scroll instead of clipping.
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).

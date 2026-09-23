@@ -44,6 +44,7 @@ Updated 2026-09-23. Private access/configuration remains outside this repo by de
 - D34: Day overlap fallback without Agenda, current-data person/day list, details return path and modal focus.
 - D35: Agenda selected-date reveal, explicit Today/week navigation and manual-scroll preservation.
 - D36: Week selected-date reveal, row-top date labels and shared navigation/density anchoring.
+- D37: Month Today reveals the current date/column without resetting ordinary browsing.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.
