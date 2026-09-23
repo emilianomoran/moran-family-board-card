@@ -24,6 +24,10 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Wochenansicht** – Wochentage als Zeilen, Personen als Spalten, kompakte Termin-Chips.
 - **Monatsansicht** – klassisches Monats-Grid mit farbigen Terminen pro Person; Klick auf einen Tag springt in die Tagesansicht.
 - **Agenda-/Listenansicht** – chronologische Terminliste, nach Tagen gruppiert; ideal fürs Handy.
+  Im Wall-Modus wird beim Öffnen das gewählte Datum sichtbar. „Heute“ und der Wochenwechsel
+  positionieren die Liste erneut; Aktualisierungen und Größenänderungen unterbrechen das
+  manuelle Scrollen nicht. Leere Tage führen zur nächsten vorhandenen Datumsgruppe der Woche,
+  sonst zur letzten vorherigen Gruppe – immer mit deren tatsächlichem Datum.
 - **Status-Kacheln** (`show_focus`) – im Wall-Layout aktueller Frei-/Belegt-Status und nächster Termin mit eigenem Datum/Uhrzeit. Unvollständige Daten gelten nicht als frei; Ganztagstermine zählen nicht als belegt. Das Legacy-Layout behält die bisherige „Jetzt / als Nächstes“-Darstellung.
 - **Auto-Symbole** – optional bekommt jeder Termin per Stichwort ein passendes Emoji (Arzt → 🩺, Sport → 🏃, Geburtstag → 🎂, Schule → 🎒 …); eigene Regeln möglich. Titel, die schon ein Emoji haben, bleiben unberührt.
 - **Zeitstrahl-Ansicht** – Personen als Zeilen links, die Zeit läuft horizontal: Termine als Balken auf einem Zeitstrahl (Gantt-Stil); überlappende Termine stapeln sich in Unterzeilen.

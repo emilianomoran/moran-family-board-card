@@ -182,6 +182,12 @@
         calendarEvents["calendar.fixture_activities"] = [];
       }
 
+      if (query.get("agenda-context") === "1") {
+        const { agendaContextEvents } = await import("./calendar-agenda-context-check.mjs");
+        calendarEvents["calendar.fixture_family"] = agendaContextEvents;
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
       const states = {
         "calendar.fixture_family": {
           entity_id: "calendar.fixture_family",
@@ -271,6 +277,7 @@
         views: ["day", "timeline", "week", "month", "agenda"],
         ...(query.get("month-only") === "1" ? {view:"month",views:["month"],remember_preferences:false} : {}),
         ...(query.get("day-only") === "1" ? {views:["day"],max_columns:1,remember_preferences:false} : {}),
+        ...(query.get("agenda-context") === "1" ? {max_columns:1,remember_preferences:false} : {}),
         start_hour: dailyUse ? 0 : 7,
         end_hour: dailyUse ? 24 : 21,
         trim_hours: false,
@@ -1044,7 +1051,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "day-overflow"
+        (query.get("checks") === "agenda-context"
+          ? import("./calendar-agenda-context-check.mjs").then(({ runAgendaContextChecks }) =>
+              runAgendaContextChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "day-overflow"
           ? import("./calendar-day-overflow-check.mjs").then(({ runDayOverflowChecks }) =>
               runDayOverflowChecks(card, hass, nextRender),
             )
@@ -1135,7 +1146,7 @@
           })
           .finally(() => {
             // The density runner follows geometry checks with real range-input events.
-            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "tabs"].includes(query.get("checks"))) return;
+            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "agenda-context", "tabs"].includes(query.get("checks"))) return;
             card.remove();
             window.stop();
           });

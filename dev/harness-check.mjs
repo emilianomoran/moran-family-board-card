@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { runNativeDensityChecks } from "./calendar-density-native-check.mjs";
 import { runNativeMonthOverflowChecks } from "./calendar-month-overflow-check.mjs";
 import { runNativeDayOverflowChecks } from "./calendar-day-overflow-check.mjs";
+import { runNativeAgendaContextChecks } from "./calendar-agenda-context-check.mjs";
 import { runNativeTabNavigationChecks } from "./calendar-tab-navigation-check.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -113,6 +114,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "agenda-context", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "agenda date context:",
+  })),
+  {name: "wall", checks: "agenda-context", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "agenda date context:"},
+  {name: "wall", checks: "agenda-context", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "agenda date context:"},
   ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "day-overflow", chromeHeight: 64, width, height,
     expectedGeometryMarker: "day overflow:",
@@ -596,6 +605,7 @@ try {
     if (["density", "timeline-density", "week-density"].includes(checks)) await runNativeDensityChecks(cdp, delay);
     if (checks === "month-overflow") await runNativeMonthOverflowChecks(cdp, delay);
     if (checks === "day-overflow") await runNativeDayOverflowChecks(cdp, delay);
+    if (checks === "agenda-context") await runNativeAgendaContextChecks(cdp, delay);
     if (checks === "tabs") await runNativeTabNavigationChecks(cdp, delay);
     webSocket.close();
     await fetch(`http://127.0.0.1:${devToolsPort}/json/close/${target.id}`);

@@ -59,6 +59,10 @@ This replaces the early screenshot/concept, not the entire product design:
   opens a current-data list of that person's selected-day appointments instead. Full titles
   and details stay reachable; closing returns through the list to the same Day context.
   The list is transient, requires no new fetch and does not enable an excluded view (D34).
+- Agenda reveals the selected date on entry, explicit week paging and Today. If that
+  date has no visible appointments, it reveals the next available date in the week, or
+  the last earlier date, with its real heading. Ordinary refresh/resize/details retain
+  manual browsing; newer input cancels delayed navigation. No saved scroll state (D35).
 - Month's `+N more events` expands the remaining cards inside that date, with full titles
   and “Show less”. One date expands at a time, without another toolbar or saved preference.
   The date total counts unique events; overflow counts person-owned cards. Normal narrow

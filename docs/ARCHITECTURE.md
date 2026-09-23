@@ -69,7 +69,8 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   Each modal level owns its restore target; shared Tab/Escape logic selects only the active
   overlay. Removed event/trigger targets fall back to the list Close/selected date.
   Midnight anchors the inspected date; kiosk does not dismiss the list. View/config/disconnect
-  clears it. No additional source reads or persisted state; enabled Agenda and legacy are unchanged.
+  clears it. No additional source reads or persisted state; enabled Agenda retains its route,
+  and legacy is unchanged.
 - Dates/filters survive view changes. Day time/lane anchors survive navigation, person
   toggles and Status expansion. Today intentionally recenters; background ticks do not.
 - Wall Timeline uses a remaining-height flex scroll container. Rows and bars grow into
@@ -119,6 +120,13 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   date/view/config, kiosk return or disconnect invalidates the transient anchor (D31).
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses
   a fixed date. Header time reuses `formatTime` and the minute tick, not a second timer.
+- Wall Agenda uses transient `_agendaScrollDate` for entry/configuration, explicit week
+  paging and Today (D35). `_restoreAgendaScroll` waits for matching data and measurable
+  layout, then scrolls only `.agenda` to its absolute `data-date` group within browser
+  bounds. Missing dates use the next real group or the last earlier one; failed empty
+  reads wait for retry. Wheel/pointer/keyboard input cancels pending work. Ordinary updates
+  and automatic week-offset bookkeeping must not create a new request. No focus movement,
+  extra fetch, timer or persisted state; legacy is untouched.
 
 ## Extension seams, not prebuilt modules
 

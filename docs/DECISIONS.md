@@ -698,10 +698,37 @@ Provider writes remain blocked by the existing read-only contract. No HA deploym
 new polling, preference schema change, dependency upgrade, release or main merge.
 Verification and delivery receipts belong to STATUS.
 
+### D35. Agenda reveals the selected date
+
+**Bounded CAL-02 correction under continued work, 2026-09-22.** A new regression against
+r22 and the rendered preview both reproduced Day Wednesday → Agenda opening on Monday.
+The selected date was retained internally but not revealed in the list. This is a navigation
+repair, not approval of a broader Agenda redesign or density control.
+
+Wall Agenda now reveals the selected date on entry/configuration, Day's enabled-Agenda
+overflow route, explicit week paging and Today. Paging keeps the selected weekday. Date
+navigation is independent of the hourly `scroll_to_now` option. An empty selected date
+uses the next available group in that week, otherwise the last earlier group, retaining
+its truthful heading; a wholly empty healthy result stays empty. Position clamps to the
+available scroll range. Filters and event ordering remain authoritative.
+
+The one-shot date waits for current-range data and measurable layout. Failed empty reads
+retain it for retry; subsequent wheel, pointer or keyboard input cancels it so a late load
+cannot override the user's interaction. Ordinary refresh, resize, clock updates and details
+do not request another jump. Leaving the view, changing the date or disconnecting invalidates
+obsolete work. Only the Agenda container scrolls; no focus movement, saved date/scroll state,
+extra provider reads, timer, setting or toolbar is introduced. Legacy is unchanged.
+
+R23 implements this behavior. `agenda-context` checks cover six responsive/reduced-motion
+configurations, delayed/failed/hidden loads, sparse/empty weeks, Day overflow, week navigation,
+Today, details/manual context and native mouse-wheel, keyboard and touch scrolling.
+STATUS owns delivery/verification evidence. No HA deployment or release is implied.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r22, 2026-09-22 | Reproduced Agenda opening at week start despite the selected Day date. D35 repairs date reveal and explicit Today/week navigation while preserving manual scrolling. No Agenda redesign, zoom, deployment or release. |
 | Continue after r21, 2026-09-22 | CAL-02 review reproduced a dead Day overlap chip when Agenda was disabled. D34 adds a current-data person/day list and details return path, with responsive/native-input tests and a milestone push; no live deployment. |
 | Chrome extension clarification and continue after r20, 2026-09-22 | Existing browser access verified; no additional plugin needed. D33 repairs keyboard navigation of view/date tabs under CAL-02, with no redesign or live deployment. |
 | Continue after r19, 2026-09-22 | CAL-02 review exposed unreachable Month overflow in restricted configurations. D32 adds in-place expansion, keyboard/touch access, readable narrow fallback and truthful date targets; verify/document/push without live deployment. |

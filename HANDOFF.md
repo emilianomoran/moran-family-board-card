@@ -15,7 +15,13 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.22`, repairing Day overlap when Agenda is disabled (D34).
+- Latest development build: `0.25.1-moran.23`, repairing Agenda's selected-date reveal (D35).
+  Entry, Day +N, Today and week paging reveal the selected date; missing dates use the
+  next real group or last earlier one. Ordinary updates retain manual browsing. Delayed
+  data/layout waits, but newer input cancels navigation. No extra reads, saved scroll,
+  Agenda zoom or legacy changes. Verification/delivery are recorded in STATUS; the
+  current source milestone is local until its push receipt is added there.
+- Previous development build r22 repaired Day overlap when Agenda is disabled (D34).
   Wall Day's +N opens that person's current-data day list; details return to the list, then
   closing returns to Day with scroll/focus retained within current bounds. It does not
   enable Agenda, fetch extra data, persist state or change legacy behavior. Refresh failures,
@@ -62,7 +68,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r22 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r23 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -86,9 +92,9 @@ when the task originated in the separate Home Assistant operations workspace.
    No HA access or real appointments are needed for ordinary feature development.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
-   feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab
-   and D34's restricted Day-overflow gaps are repaired; do not reimplement them or treat
-   the fallback presentations as final design approval.
+   feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
+   D34's restricted Day-overflow and D35's Agenda-date gaps are repaired; do not reimplement
+   them or treat the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
@@ -97,6 +103,13 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R23 passes formatting, types, build, 192 UTC-launched units and all 110 compiled-browser
+scenarios. Its `agenda-context` regression reproduced r22 opening Monday from Wednesday.
+Focused checks pass across six desktop/phone/short/embedded/reduced-motion configurations, including
+native wheel, keyboard and touch scrolling. Manual desktop/phone light/dark review confirmed
+selected-date entry, Friday Day +N → Agenda, Today and details return focus. Normal viewport
+restored. STATUS owns the full-suite totals and commit/remote/hosted-check receipts.
 
 R22 passes formatting, types, build, 192 UTC-launched unit tests and all 104 compiled-browser
 scenarios. Manual light/dark desktop and 391px phone checks verified list → details → list

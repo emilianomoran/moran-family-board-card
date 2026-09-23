@@ -33,6 +33,9 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    Add `&day-only=1` instead to disable Agenda and force a one-column overlap cap without
    saved preferences. Casey's **+2** opens the restricted Day list (use the baseline feed,
    without `status=1`); this is a synthetic stress configuration, not a new default.
+   Add `&agenda-context=1` to load a crowded synthetic week with no saved preferences.
+   Select a Day date, then Agenda or **+12**: the matching date should be revealed.
+   This query replaces the sample feed, not any real calendar data.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
    `npm run watch` rebuilds continuously but does not run a web server or reload the browser.
@@ -82,6 +85,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `agenda-context` | Selected-date entry/Day overflow, Today/week paging, manual browsing/details, sparse/empty/failed reads, hidden/delayed/cancelled navigation, legacy and native wheel/keyboard/touch scrolling |
 | `day-overflow` | Disabled-Agenda fallback, all appointments/details, two-level modal focus, refresh/removal/retry, Day scroll/date retention, routing/duplicates, midnight, locale, legacy, native keyboard/mouse/touch |
 | `tabs` | Manual view/date activation, roving entry/exit, wrap/Home/End, track-only visibility, panel labels/focus, locale, RTL, restricted views/weekdays, legacy, native keyboard/mouse/touch |
 | `density` | Wall Day range/anchors, fit/reset, short/overlap details, navigation/legacy isolation; real keyboard, pointer and touch range input |

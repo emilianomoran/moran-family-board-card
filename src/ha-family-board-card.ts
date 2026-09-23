@@ -278,6 +278,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _dayScrollFrame?: number;
   private _timelineScrollAnchor?: { minute: number; top: number; date: number };
   private _timelineScrollFrame?: number;
+  private _agendaScrollDate?: number; // one explicit navigation, never persisted
   private _raw: RawEvent[] = [];
   private _calendarResults: CalendarReadResult[] = [];
   private _fetchedKey = "";
@@ -548,6 +549,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           this._measureFit();
           this._restoreTimelineScroll();
           this._restoreWeekScroll();
+          this._restoreAgendaScroll();
           // A hidden/zero-width panel may not have been measurable on first render.
           this._maybeScrollToNow();
         }),
@@ -564,6 +566,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._weekScrollAnchor = undefined;
     this._cancelDayScroll();
     this._cancelTimelineScroll();
+    this._cancelAgendaScroll();
     this._daySwipe = undefined;
     if (this._scrollToNowFrame !== undefined) cancelAnimationFrame(this._scrollToNowFrame);
     this._scrollToNowFrame = undefined;
@@ -741,6 +744,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   protected updated(changed: PropertyValues): void {
     if (changed.has("hass") || changed.has("_config")) this._restorePreferences();
+    if (changed.has("_view") || changed.has("_config")) this._requestAgendaScroll();
     if (
       (changed.has("hass") ||
         changed.has("_browserOnline") ||
@@ -762,6 +766,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._restoreDayScroll();
     this._restoreTimelineScroll();
     this._restoreWeekScroll();
+    this._restoreAgendaScroll();
     this._maybeScrollToNow();
     if (this._layout === "wall" && (changed.has("_view") || changed.has("_config"))) {
       const track = this.renderRoot.querySelector<HTMLElement>(".switch");
@@ -1707,9 +1712,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private _prevWeek = () => {
     this._weekOffset -= 1;
+    this._requestAgendaScroll();
   };
   private _nextWeek = () => {
     this._weekOffset += 1;
+    this._requestAgendaScroll();
   };
   private _thisWeek = () => {
     this._weekScrollAnchor = undefined;
@@ -1717,6 +1724,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._cancelTimelineScroll();
     this._weekOffset = 0;
     this._day = this._todayIndex();
+    if (this._layout === "wall" && this._view === "agenda") {
+      this._requestAgendaScroll();
+      this.requestUpdate();
+    }
     if (this._layout === "wall" && (this._view === "day" || this._view === "timeline")) {
       this._scrollToNowRequested = true;
       this.requestUpdate();
@@ -3197,6 +3208,53 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     `;
   }
 
+  private _requestAgendaScroll(): void {
+    this._agendaScrollDate =
+      this._layout === "wall" && this._view === "agenda"
+        ? this._dateForDay(this._shownDay()).getTime()
+        : undefined;
+  }
+
+  private _cancelAgendaScroll = (): void => {
+    this._agendaScrollDate = undefined;
+  };
+
+  /** Reveal a navigated date once; refreshes and manual browsing keep their own position. */
+  private _restoreAgendaScroll(): void {
+    const date = this._agendaScrollDate;
+    if (date === undefined) return;
+    if (
+      !this.isConnected ||
+      this._layout !== "wall" ||
+      this._view !== "agenda" ||
+      date !== this._dateForDay(this._shownDay()).getTime()
+    ) {
+      this._cancelAgendaScroll();
+      return;
+    }
+    const agenda = this.renderRoot.querySelector<HTMLElement>(".agenda");
+    if (
+      this._loading ||
+      this._dataKey !== this._fetchedKey ||
+      !agenda?.clientHeight ||
+      !agenda.clientWidth
+    )
+      return;
+    const groups = [...agenda.querySelectorAll<HTMLElement>(".agenda-day[data-date]")];
+    // Empty dates have no group. Prefer the next available date, then the last earlier one;
+    // keep the real heading, and never interpret a failed read as a healthy empty week.
+    if (!groups.length && (this._loadError || this._partialLoad)) return;
+    const target =
+      groups.find((group) => Number(group.dataset.date) >= date) ?? groups[groups.length - 1];
+    agenda.scrollTo({
+      top: target
+        ? agenda.scrollTop + target.getBoundingClientRect().top - agenda.getBoundingClientRect().top
+        : 0,
+      behavior: "instant",
+    });
+    this._cancelAgendaScroll();
+  }
+
   private _renderAgenda() {
     const full = weekdayNames(this.hass, "long", this._firstDayJs);
     const dateFmt = new Intl.DateTimeFormat(this.hass.locale?.language || "en", {
@@ -3229,6 +3287,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       ${this._renderPersonFilters()}
       <div
         class="agenda"
+        @wheel=${this._cancelAgendaScroll}
+        @pointerdown=${this._cancelAgendaScroll}
+        @keydown=${this._cancelAgendaScroll}
         id=${this._layout === "wall" ? "calendar-panel" : nothing}
         role=${this._layout === "wall" ? "tabpanel" : nothing}
         aria-labelledby=${this._tabPanelLabelledBy}
@@ -3247,7 +3308,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             </div>`
           : groups.map(
               (g) => html`
-                <div class="agenda-day">
+                <div
+                  class="agenda-day"
+                  data-date=${this._layout === "wall" ? this._dateForDay(g.d).getTime() : nothing}
+                >
                   <div class="agenda-date ${this._isRealToday(g.d) ? "today" : ""}">
                     ${this._relativeDay(this._dateForDay(g.d)) ?? full[g.d]} ·
                     ${dateFmt.format(this._dateForDay(g.d))}
@@ -5468,7 +5532,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.22 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.23 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

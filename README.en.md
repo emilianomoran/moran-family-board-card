@@ -82,7 +82,7 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   that person's selected-day appointments, including full titles and the existing details.
   Closing details returns to the list; closing the list returns to Day without changing
   views or saved preferences. Current-data refresh, failure/retry, keyboard focus and
-  scroll context are retained. Enabled Agenda and legacy behavior are unchanged.
+  scroll context are retained. Enabled Agenda keeps its existing route; legacy is unchanged.
 - Wall view/date tabs support Left/Right and Home/End to move focus; Enter/Space selects.
   Tab leaves each group, and returning targets its selected option. Off-screen tabs are
   revealed without moving the calendar. Arrow focus alone does not load another view/date.
@@ -108,6 +108,10 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
   or hides weekends. Agenda wraps long titles/locations instead of truncating them.
+  Wall Agenda opens near the selected date; Today and week paging reveal that date again.
+  Empty dates use the next available group in the week, otherwise the last earlier one,
+  with its real heading. Refreshes and resizing do not recenter manual browsing. Late
+  navigation waits for data/layout and yields to new scroll/pointer/keyboard input.
 - Wall Month's **+N more events** expands that date's remaining appointment cards in place;
   **Show less** collapses them. Expanded titles wrap, and each card opens the usual details.
   One date expands at a time; expansion is not saved. Narrow cards without a valid Day

@@ -3,12 +3,11 @@
 Last recorded: 2026-09-22. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.22`, repairing Day overlap when Agenda is disabled
-(D34). The installed HA pilot remains r12; r13–r22 are not deployed or released. Source,
+Latest development build: `0.25.1-moran.23`, repairing Agenda's selected-date reveal
+(D35). The installed HA pilot remains r12; r13–r23 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-All 104 browser scenarios and 192 unit tests passed. Source
-`1a2c1ca8ac648b06ab78e579778fb9296e0f6060` is pushed to personal origin, with remote HEAD
-verified and hosted CI/Validate passing. Later docs-only receipts retain this build.
+Formatting, types, build, 192 UTC-launched unit tests and all 110 compiled-browser scenarios
+pass. This source milestone is local; push/hosted checks pending.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +62,41 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Agenda selected-date reveal, 2026-09-22
+
+D35 repairs the visible date handoff: r22 retained the selected date internally, but
+Agenda opened at week start. The new regression failed against r22 (Wednesday expected
+roughly 1791px, actual scroll 0); manual reproduction likewise displayed Monday.
+R23 reveals the selected date on entry, Day overflow, Today and explicit week paging.
+Sparse dates use a real later/earlier group; healthy emptiness and failed reads stay distinct.
+No extra reads, saved scroll/date, provider writes, new settings or legacy change.
+
+The six `agenda-context` scenarios cover 1920×1080, 390×844, 320×568, 844×390, a 400px
+embedded card and reduced motion. They check date reveal/clamping, Day +N, paging/Today,
+manual scroll through refresh/resize/details/filters, hidden/delayed/failed data, cancellation
+by newer input, weekday settings, remount and legacy. Native Enter opens Day overflow;
+wheel, PageDown and touch scroll Agenda; clicking Today returns to the date.
+
+Manual in-app review at 1707×960 and 391×844 CSS pixels confirmed Today entry and Friday
+Day +N → Friday Agenda, plus Today → details → Escape with row focus restored.
+Light/dark screenshots, correct URL/title, meaningful content, no error overlay,
+clean warning/error logs, no host-page scroll and contained phone bounds were checked.
+The viewport override was reset, the normal Day preview refreshed to r23 without changing
+its saved view, and a separate `agenda-context=1` review left open without saved preferences.
+The frontend-testing skill guided the reproduction and
+native-input/rendered verification using existing connected browser controls.
+Physical Safari, screen-reader speech and final wall hardware remain untested.
+
+Formatting, typecheck, 192 UTC-launched units and build pass. Served 4173 bytes match dist,
+SHA-256 `3d120ceff1334f5f80484e53e0cf8d4b54b6afc6966473f029587ea08b12c28a`.
+All 110 compiled-browser scenarios passed, preserving existing recovery, routing, details,
+date/tab navigation, source integrity, density/persistence, alignment and legacy coverage.
+The focused suite was rerun after strengthening week-rollover/filter assertions and passed.
+Ten changed Markdown documents have no broken local links; staged credential-pattern checks
+found no matches. The unrelated pre-existing debug note remains untracked and untouched.
+Source push and hosted checks are pending; the delivery receipt follows separately.
+No HA deployment, main merge, tag or release.
 
 ### Restricted Day overflow, 2026-09-22
 
