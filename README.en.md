@@ -105,7 +105,10 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   not scale. Zoom preserves the visible date-row position within scroll bounds. Week saves
   independently with `remember_preferences`; Reset clears only Week and restores 100%.
 - Wall Week shows date numbers and readable, wrapping event cards with pinned date/person
-  headers. Month and Agenda expose shared person filters. Narrow Month shows unique event
+  headers. Entry, Today and week paging reveal the selected date within scroll bounds,
+  with its label at the row's top. Horizontal person position is retained; refresh/resize
+  preserve manual browsing, and zoom retains its fractional row position. New input cancels
+  delayed navigation. Month and Agenda expose shared person filters. Narrow Month shows unique event
   counts and opens Day when a date is tapped; direct event cards remain when Day is disabled
   or hides weekends. Agenda wraps long titles/locations instead of truncating them.
   Wall Agenda opens near the selected date; Today and week paging reveal that date again.

@@ -1,6 +1,6 @@
 ---
 project: moran-family-board-card
-date: 2026-09-22
+date: 2026-09-23
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -15,7 +15,15 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.23`, repairing Agenda's selected-date reveal (D35).
+- Latest development build: `0.25.1-moran.24`, repairing Week's selected-date reveal (D36).
+  Entry/configuration, Today and explicit week paging reveal the selected date under pinned
+  person headings. Date labels start at row tops so busy days remain identifiable on entry
+  on short phones. Horizontal person position, manual browsing and fractional density anchors
+  remain intact. Delayed/failed/hidden loads wait, but newer input cancels navigation.
+  Uses the existing Week anchor and shared list-navigation helper; no extra reads, stored
+  date/scroll state, new controls or legacy changes. Local verification passed; delivery is pending;
+  STATUS owns the receipts. No HA deployment.
+- Previous development build r23 repaired Agenda's selected-date reveal (D35).
   Entry, Day +N, Today and week paging reveal the selected date; missing dates use the
   next real group or last earlier one. Ordinary updates retain manual browsing. Delayed
   data/layout waits, but newer input cancels navigation. No extra reads, saved scroll,
@@ -69,7 +77,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r23 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r24 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -94,7 +102,7 @@ when the task originated in the separate Home Assistant operations workspace.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
-   D34's restricted Day-overflow and D35's Agenda-date gaps are repaired; do not reimplement
+   D34's restricted Day-overflow and D35–D36's Agenda/Week date gaps are repaired; do not reimplement
    them or treat the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
@@ -104,6 +112,15 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R24's regression reproduced r23 opening Monday despite a selected Friday. Manual short-phone
+review also found the old vertically centered Week date below the viewport; its label now
+starts at the row top. Six focused `week-context` scenarios pass, including native input,
+Today/paging, current-data waits/cancellation, density anchors and legacy. Manual desktop,
+320px light and 391px dark phone checks verified date visibility; details returned focus
+to the same event. Normal viewport restored and the main Day preview refreshed. Formatting,
+types, build, 192 UTC-launched units and all 116 compiled-browser scenarios pass. Commit/push
+and hosted checks are pending; use STATUS rather than assuming a push or HA deployment.
 
 R23 passes formatting, types, build, 192 UTC-launched units and all 110 compiled-browser
 scenarios. Its `agenda-context` regression reproduced r22 opening Monday from Wednesday.

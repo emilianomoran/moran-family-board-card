@@ -724,10 +724,36 @@ configurations, delayed/failed/hidden loads, sparse/empty weeks, Day overflow, w
 Today, details/manual context and native mouse-wheel, keyboard and touch scrolling.
 STATUS owns delivery/verification evidence. No HA deployment or release is implied.
 
+### D36. Week reveals the selected date without resetting manual browsing
+
+**Bounded CAL-02 correction under “Continue”, 2026-09-23.** R23 retained Friday internally
+when switching Day → Week but displayed Monday at scroll zero. A new regression and manual
+review reproduced it. This is a navigation repair, not approval of a Week redesign.
+
+Wall Week now reveals the selected date on entry/configuration, explicit week paging and
+Today, within scroll bounds. Paging preserves the selected weekday. Navigation preserves
+the horizontal person-column position and scrolls only the Week container; focus stays put.
+Date labels start at the top of their rows so a busy day's label is visible on entry even
+on a short phone. The date column remains horizontally pinned, not newly vertically sticky.
+
+Reuse Week's existing transient density anchor with an optional absolute navigation date.
+Navigation waits for current-range data and measurable layout; a failed read waits for retry.
+Subsequent wheel, pointer or keyboard input cancels pending movement. Leaving the view,
+obsolete dates and disconnect clear it. Ordinary refresh, resize, clock updates, details
+and automatic week-offset bookkeeping do not create navigation requests. Density continues
+to retain its fractional row position rather than snapping back to the selected date.
+
+R24 implements this behavior. The six `week-context` cases cover responsive/reduced-motion
+layouts, delayed/failed/hidden data, cancellation, paging/Today, density interaction, empty
+weeks, weekday settings, remount, legacy and native keyboard/wheel/touch scrolling.
+No additional reads, saved date/scroll state, settings, timer, toolbar or legacy change.
+Agenda retains D35. STATUS owns verification and delivery; no HA deployment or release implied.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r23, 2026-09-23 | Reproduced Week opening on Monday despite selecting Friday. D36 reveals the selected date and keeps the date label visible on entry, preserving manual scrolling and zoom. No broader redesign or live deployment. |
 | Continue after r22, 2026-09-22 | Reproduced Agenda opening at week start despite the selected Day date. D35 repairs date reveal and explicit Today/week navigation while preserving manual scrolling. No Agenda redesign, zoom, deployment or release. |
 | Continue after r21, 2026-09-22 | CAL-02 review reproduced a dead Day overlap chip when Agenda was disabled. D34 adds a current-data person/day list and details return path, with responsive/native-input tests and a milestone push; no live deployment. |
 | Chrome extension clarification and continue after r20, 2026-09-22 | Existing browser access verified; no additional plugin needed. D33 repairs keyboard navigation of view/date tabs under CAL-02, with no redesign or live deployment. |

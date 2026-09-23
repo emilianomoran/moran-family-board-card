@@ -881,7 +881,7 @@ export const wallShellStyles = css`
 
   .moran-wall-shell .wday {
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 8px 4px;
     font-size: 12px;
   }

@@ -292,7 +292,13 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   @state() private _dayHourHeight?: number; // optional wall Day override; browser-local only
   @state() private _timelineZoomWidth?: number; // independent Timeline override
   @state() private _weekDensity?: number; // Week list density in percent, not hours
-  private _weekScrollAnchor?: { week: number; day: number; fraction: number; left: number };
+  private _weekScrollAnchor?: {
+    week: number;
+    day: number;
+    fraction: number;
+    left: number;
+    date?: number; // explicit date navigation; absent for density anchoring
+  };
   private _timer?: number;
   private _tick?: number;
   @state() private _forecast: Record<string, { temp: number; condition: string }> = {};
@@ -744,7 +750,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   protected updated(changed: PropertyValues): void {
     if (changed.has("hass") || changed.has("_config")) this._restorePreferences();
-    if (changed.has("_view") || changed.has("_config")) this._requestAgendaScroll();
+    if (changed.has("_view") || changed.has("_config")) this._requestListDateScroll();
     if (
       (changed.has("hass") ||
         changed.has("_browserOnline") ||
@@ -1712,11 +1718,11 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
 
   private _prevWeek = () => {
     this._weekOffset -= 1;
-    this._requestAgendaScroll();
+    this._requestListDateScroll();
   };
   private _nextWeek = () => {
     this._weekOffset += 1;
-    this._requestAgendaScroll();
+    this._requestListDateScroll();
   };
   private _thisWeek = () => {
     this._weekScrollAnchor = undefined;
@@ -1724,8 +1730,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     this._cancelTimelineScroll();
     this._weekOffset = 0;
     this._day = this._todayIndex();
-    if (this._layout === "wall" && this._view === "agenda") {
-      this._requestAgendaScroll();
+    if (this._layout === "wall" && (this._view === "agenda" || this._view === "week")) {
+      this._requestListDateScroll();
       this.requestUpdate();
     }
     if (this._layout === "wall" && (this._view === "day" || this._view === "timeline")) {
@@ -3059,13 +3065,18 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (
       this._view !== "week" ||
       this._layout !== "wall" ||
-      this._weekBounds().monday.getTime() !== anchor.week
+      this._weekBounds().monday.getTime() !== anchor.week ||
+      (anchor.date !== undefined && anchor.date !== this._dateForDay(this._shownDay()).getTime())
     ) {
       this._weekScrollAnchor = undefined;
       return;
     }
     const wrap = this.renderRoot.querySelector<HTMLElement>(".weekwrap");
     if (this._loading || !wrap?.clientHeight || !wrap.clientWidth) return;
+    // Failed/obsolete data cannot establish the row geometry for a new date. Density
+    // anchors still restore the existing snapshot; manual input cancels either intent.
+    if (anchor.date !== undefined && (this._dataKey !== this._fetchedKey || this._loadError))
+      return;
     const row = wrap.querySelector<HTMLElement>(`.wday[data-day="${anchor.day}"]`);
     const header = wrap.querySelector<HTMLElement>(".corner");
     if (row && header) {
@@ -3208,11 +3219,21 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     `;
   }
 
-  private _requestAgendaScroll(): void {
+  /** Explicit entry/paging only; background updates must not recenter list views. */
+  private _requestListDateScroll(): void {
     this._agendaScrollDate =
       this._layout === "wall" && this._view === "agenda"
         ? this._dateForDay(this._shownDay()).getTime()
         : undefined;
+    if (this._layout === "wall" && this._view === "week") {
+      this._weekScrollAnchor = {
+        week: this._weekBounds().monday.getTime(),
+        day: this._shownDay(),
+        fraction: 0,
+        left: this.renderRoot.querySelector<HTMLElement>(".weekwrap")?.scrollLeft ?? 0,
+        date: this._dateForDay(this._shownDay()).getTime(),
+      };
+    }
   }
 
   private _cancelAgendaScroll = (): void => {
@@ -5532,7 +5553,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.23 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.24 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

@@ -1,6 +1,6 @@
 # Calendar architecture and change map
 
-Status: code-backed reference, 2026-09-22. Build/delivery checkpoints live in [STATUS](STATUS.md).
+Status: code-backed reference, 2026-09-23. Build/delivery checkpoints live in [STATUS](STATUS.md).
 See [ADR 0001](adr/0001-implementation-base.md)
 for the accepted implementation choice. This is the current map, not the older `.planning` proposal.
 
@@ -118,6 +118,12 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   captures visible date/fraction and horizontal position; `_restoreWeekScroll` runs after
   render or a measurable ResizeObserver retry. Loading/hidden panels defer; new interaction,
   date/view/config, kiosk return or disconnect invalidates the transient anchor (D31).
+  `_requestListDateScroll` also queues Week entry/configuration, explicit paging and Today
+  with an absolute `date` and zero row fraction (D36). Navigation additionally waits for
+  matching successful data; density retains its existing snapshot behavior. Both preserve
+  horizontal position and use the same restore/cancellation path. No ordinary-update or
+  automatic week-rollover recentering. Wall date labels align to row tops, keeping their
+  existing horizontal pinning; no extra sticky layer or stored scroll state.
 - `nowProvider` is the shared display-clock seam. Production uses real time; harness uses
   a fixed date. Header time reuses `formatTime` and the minute tick, not a second timer.
 - Wall Agenda uses transient `_agendaScrollDate` for entry/configuration, explicit week

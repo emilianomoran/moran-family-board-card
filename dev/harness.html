@@ -1051,7 +1051,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "agenda-context"
+        (query.get("checks") === "week-context"
+          ? import("./calendar-week-context-check.mjs").then(({ runWeekContextChecks }) =>
+              runWeekContextChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "agenda-context"
           ? import("./calendar-agenda-context-check.mjs").then(({ runAgendaContextChecks }) =>
               runAgendaContextChecks(card, hass, nextRender),
             )
@@ -1146,7 +1150,7 @@
           })
           .finally(() => {
             // The density runner follows geometry checks with real range-input events.
-            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "agenda-context", "tabs"].includes(query.get("checks"))) return;
+            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "agenda-context", "week-context", "tabs"].includes(query.get("checks"))) return;
             card.remove();
             window.stop();
           });

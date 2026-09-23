@@ -1,6 +1,6 @@
 # Develop and verify the calendar
 
-Status: current how-to, 2026-09-22. Audience: a developer or agent with a fresh clone,
+Status: current how-to, 2026-09-23. Audience: a developer or agent with a fresh clone,
 no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) first.
 
 ## Start the synthetic prototype
@@ -34,7 +34,8 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    saved preferences. Casey's **+2** opens the restricted Day list (use the baseline feed,
    without `status=1`); this is a synthetic stress configuration, not a new default.
    Add `&agenda-context=1` to load a crowded synthetic week with no saved preferences.
-   Select a Day date, then Agenda or **+12**: the matching date should be revealed.
+   Select a Day date, then Week, Agenda or **+12**: the matching date should be revealed.
+   In Week, the date label starts at the busy row's top; click the week range for Today.
    This query replaces the sample feed, not any real calendar data.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
@@ -85,6 +86,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `week-context` | Selected-date entry, Today/week paging, visible row labels, manual browsing/details, density anchors, hidden/delayed/failed reads and cancellation, weekday settings, legacy and native wheel/keyboard/touch scrolling |
 | `agenda-context` | Selected-date entry/Day overflow, Today/week paging, manual browsing/details, sparse/empty/failed reads, hidden/delayed/cancelled navigation, legacy and native wheel/keyboard/touch scrolling |
 | `day-overflow` | Disabled-Agenda fallback, all appointments/details, two-level modal focus, refresh/removal/retry, Day scroll/date retention, routing/duplicates, midnight, locale, legacy, native keyboard/mouse/touch |
 | `tabs` | Manual view/date activation, roving entry/exit, wrap/Home/End, track-only visibility, panel labels/focus, locale, RTL, restricted views/weekdays, legacy, native keyboard/mouse/touch |

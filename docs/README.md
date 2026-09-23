@@ -2,7 +2,7 @@
 
 This repository owns the Moran Calendar product record. A fresh agent should not need
 the original conversation or the private HA workspace to understand or develop it.
-Updated 2026-09-22. Private access/configuration remains outside this repo by design.
+Updated 2026-09-23. Private access/configuration remains outside this repo by design.
 
 ## Start here
 
@@ -43,6 +43,7 @@ Updated 2026-09-22. Private access/configuration remains outside this repo by de
 - D33: manual keyboard view/date navigation, labeled panels, focus/selection separation and existing-browser-access clarification.
 - D34: Day overlap fallback without Agenda, current-data person/day list, details return path and modal focus.
 - D35: Agenda selected-date reveal, explicit Today/week navigation and manual-scroll preservation.
+- D36: Week selected-date reveal, row-top date labels and shared navigation/density anchoring.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.

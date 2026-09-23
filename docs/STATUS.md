@@ -1,14 +1,13 @@
 # Current status and next work
 
-Last recorded: 2026-09-22. This is the current project status, not a release announcement.
+Last recorded: 2026-09-23. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.23`, repairing Agenda's selected-date reveal
-(D35). The installed HA pilot remains r12; r13–r23 are not deployed or released. Source,
+Latest development build: `0.25.1-moran.24`, repairing Week's selected-date reveal
+(D36). The installed HA pilot remains r12; r13–r24 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-Formatting, types, build, 192 UTC-launched unit tests and all 110 compiled-browser scenarios
-pass. Source `2c39178f40ea8b8149a23241b3293bad8642e37c` is pushed to personal origin;
-remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
+Formatting, types, build, 192 UTC-launched unit tests and all 116 compiled-browser scenarios
+pass. Milestone commit/push and hosted checks are pending.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +62,48 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Week selected-date reveal, 2026-09-23
+
+D36 repairs Day Friday → Week opening at Monday despite retaining Friday internally.
+The new regression failed r23 at scroll 0 versus roughly 3153px expected; manual review
+also placed Friday below the viewport. R24 reveals the selected date on entry/configuration,
+Today and explicit week paging, preserving horizontal person position and focus.
+Week reuses its existing density anchor with an optional absolute navigation date. Ordinary
+updates retain manual scrolling; density retains its fractional row position. Current-data
+and measurable-layout waits yield to newer wheel/pointer/keyboard input. Failed reads wait
+for retry; obsolete dates/views and disconnect clear pending movement. No extra provider
+reads, stored dates/scroll, settings, timers or legacy changes. Agenda retains D35.
+
+Short-phone review found a second problem: vertically centered dates in tall busy rows
+were below the viewport even after correct navigation. Wall Week labels now start at the
+row top; the date column remains horizontally pinned, without another vertical sticky layer.
+
+The six `week-context` cases pass at 1920×1080, 390×844, 320×568, 844×390, a 400px embedded
+card and reduced motion. They cover entry, Today/week paging, label visibility, horizontal
+context, refresh/tick/resize/details/manual scroll, density/Reset, hidden/delayed/failed reads,
+new-input cancellation, leaving the view, weekday restrictions, empty weeks, remount and
+legacy. Native Enter activates Week; wheel, PageDown and touch scroll it; Today returns
+to Wednesday. The pre-existing Week-density and Agenda-context scenarios also pass.
+
+Manual in-app review at 1707×960, 320×568 light and 391×844 dark confirmed the date at
+row top on entry. Friday → Week → event details → Escape retained Friday and event focus;
+Today returned to Wednesday. Screenshots showed meaningful content and no error overlay,
+page identity was correct, warning/error logs were empty, and phone page bounds/host scroll
+were contained. The normal viewport was restored and main Day preview refreshed to r24.
+The separate synthetic `agenda-context=1` review also exercises Week without saved preferences.
+The frontend-testing skill guided reproduction and rendered/native-input verification with
+the existing connected browser. Physical Safari, screen-reader speech and wall hardware
+remain untested. No real appointments or HA configuration were changed.
+
+Formatting, typecheck, 192 UTC-launched units and build pass. Served 4173 bytes match dist,
+SHA-256 `baaa0c17c938dd9b94eacabbe129430d2b082c99aab70f0adf5d032551c821b5`.
+All 116 compiled-browser scenarios passed, including existing Agenda navigation, Week density,
+recovery, routing, details, saved preferences, alignment and legacy checks. Ten updated Markdown
+documents have no broken local links; the added-diff credential-pattern check found no matches.
+The pre-existing untracked debug note remains untouched/excluded. Commit/push and hosted checks
+are pending.
+No HA deployment, main merge, tag or release.
 
 ### Agenda selected-date reveal, 2026-09-22
 

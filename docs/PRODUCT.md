@@ -1,6 +1,6 @@
 # Moran Calendar product brief
 
-Status: current requirements summary, 2026-09-22. This describes the product contract,
+Status: current requirements summary, 2026-09-23. This describes the product contract,
 not a new design approval or a list of unfinished features. Delivery is in [STATUS](STATUS.md);
 future work is in [BACKLOG](BACKLOG.md); rationale is in [DECISIONS](DECISIONS.md).
 
@@ -63,6 +63,10 @@ This replaces the early screenshot/concept, not the entire product design:
   date has no visible appointments, it reveals the next available date in the week, or
   the last earlier date, with its real heading. Ordinary refresh/resize/details retain
   manual browsing; newer input cancels delayed navigation. No saved scroll state (D35).
+- Week likewise reveals the selected date on entry, explicit paging and Today, preserving
+  horizontal person position. Date labels start at their row tops. Ordinary updates retain
+  manual browsing, while density retains its fractional row anchor; newer input cancels
+  delayed navigation. No saved date/scroll state or additional source reads (D36).
 - Month's `+N more events` expands the remaining cards inside that date, with full titles
   and “Show less”. One date expands at a time, without another toolbar or saved preference.
   The date total counts unique events; overflow counts person-owned cards. Normal narrow
