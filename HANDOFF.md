@@ -19,8 +19,9 @@ when the task originated in the separate Home Assistant operations workspace.
   Entry, Day +N, Today and week paging reveal the selected date; missing dates use the
   next real group or last earlier one. Ordinary updates retain manual browsing. Delayed
   data/layout waits, but newer input cancels navigation. No extra reads, saved scroll,
-  Agenda zoom or legacy changes. Verification/delivery are recorded in STATUS; the
-  current source milestone is local until its push receipt is added there.
+  Agenda zoom or legacy changes. Source `2c39178f40ea8b8149a23241b3293bad8642e37c`
+  is pushed to personal origin; remote HEAD matched and hosted CI/Validate passed.
+  STATUS owns the receipts; later docs-only commits retain this build. No HA deployment.
 - Previous development build r22 repaired Day overlap when Agenda is disabled (D34).
   Wall Day's +N opens that person's current-data day list; details return to the list, then
   closing returns to Day with scroll/focus retained within current bounds. It does not

@@ -7,7 +7,8 @@ Latest development build: `0.25.1-moran.23`, repairing Agenda's selected-date re
 (D35). The installed HA pilot remains r12; r13–r23 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 110 compiled-browser scenarios
-pass. This source milestone is local; push/hosted checks pending.
+pass. Source `2c39178f40ea8b8149a23241b3293bad8642e37c` is pushed to personal origin;
+remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -95,7 +96,13 @@ date/tab navigation, source integrity, density/persistence, alignment and legacy
 The focused suite was rerun after strengthening week-rollover/filter assertions and passed.
 Ten changed Markdown documents have no broken local links; staged credential-pattern checks
 found no matches. The unrelated pre-existing debug note remains untracked and untouched.
-Source push and hosted checks are pending; the delivery receipt follows separately.
+Delivery: source `2c39178f40ea8b8149a23241b3293bad8642e37c` was committed and pushed to
+personal origin's `feature/moran-foundation`; `git ls-remote` matched local HEAD.
+Push [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35814498425)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35814498652)
+completed successfully for that exact source, as did PR CI `35814501934` and Validate
+`35814501918`. Existing non-failing runner/action migration notices remain ENG-06, not
+an incidental dependency upgrade. Later receipt-only commits do not change the bundle.
 No HA deployment, main merge, tag or release.
 
 ### Restricted Day overflow, 2026-09-22
