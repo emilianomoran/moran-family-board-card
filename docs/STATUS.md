@@ -7,7 +7,8 @@ Latest development build: `0.25.1-moran.25`, repairing Month's explicit Today re
 (D37). The installed HA pilot remains r12; r13–r25 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 122 compiled-browser scenarios
-pass. Milestone commit/push and hosted checks are pending.
+pass. Source `fbd01bf881b7b28c7e3f20f687082163f12d3630` is pushed to personal origin;
+remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -101,8 +102,14 @@ Formatting, types, 192 UTC-launched units and build pass. Dist SHA-256:
 Served 4173 bytes match dist. All 122 compiled-browser scenarios passed, including existing
 navigation, overflow, density/preferences, routing, recovery, details, alignment and legacy.
 Ten updated Markdown files have no broken local links; the staged added-diff credential-pattern
-check found no matches. The pre-existing debug note remains untouched/untracked. Milestone
-commit/push and hosted checks are pending.
+check found no matches. The pre-existing debug note remains untouched/untracked.
+Delivery: source `fbd01bf881b7b28c7e3f20f687082163f12d3630` was committed and pushed to
+personal origin's `feature/moran-foundation`; `git ls-remote` matched local HEAD.
+Push [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35929278499)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35929278353)
+completed successfully for that exact source, as did PR CI `35929282482` and Validate
+`35929282478`. Existing non-failing Actions runtime/runner notices remain ENG-06; no incidental
+workflow/dependency upgrade. Later receipt-only commits retain this bundle.
 No HA deployment, main merge, tag or release.
 
 ### Week selected-date reveal, 2026-09-23

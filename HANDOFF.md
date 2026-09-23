@@ -20,8 +20,9 @@ when the task originated in the separate Home Assistant operations workspace.
   Already visible dates stay put. Current-data/layout waits cancel on newer grid input or
   obsolete navigation; ordinary updates do not recenter. Accessible name/tooltip explain
   Today. No automatic Month entry/paging scroll policy, saved scroll, new controls or legacy
-  change. Local checks and manual review pass; milestone delivery is pending.
-  STATUS owns exact evidence. No HA deployment.
+  change. Source `fbd01bf881b7b28c7e3f20f687082163f12d3630` is pushed to personal origin;
+  remote HEAD matched and hosted CI/Validate passed. STATUS owns exact evidence;
+  later docs-only commits retain this build. No HA deployment.
 - Previous development build r24 repaired Week's selected-date reveal (D36).
   Entry/configuration, Today and explicit week paging reveal the selected date under pinned
   person headings. Date labels start at row tops so busy days remain identifiable on entry
@@ -127,7 +128,8 @@ cases pass, including current-data/layout waits, cancellation, midnight/kiosk, o
 manual context, native activation, compact/restricted grids and legacy. Manual desktop,
 landscape dark and portrait light review confirmed Today reveal and details return focus;
 the normal viewport was restored. Format, types, 192 UTC-launched units and build pass.
-All 122 compiled-browser scenarios pass. Commit/push and hosted checks are pending; see STATUS.
+All 122 compiled-browser scenarios pass. Source is pushed and hosted CI/Validate passed;
+STATUS owns exact receipts. No HA deployment is implied.
 
 R24's regression reproduced r23 opening Monday despite a selected Friday. Manual short-phone
 review also found the old vertically centered Week date below the viewport; its label now
