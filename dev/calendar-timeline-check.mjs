@@ -170,6 +170,69 @@ export async function runCalendarTimelineChecks(card, hass, nextRender) {
   await settle();
   check();
   assert(root.querySelectorAll(".tlbar").length === 8, "Dense overlaps lose appointments.");
+  // Busy rows can be taller than a landscape phone. Their identity must not sit
+  // below the screen, and should follow vertical browsing only within its own row.
+  app.style.height = `${shortHeight}px`;
+  app.style.flex = `0 0 ${shortHeight}px`;
+  await settle();
+  const busyRow = root.querySelectorAll(".tlrow")[1];
+  const busyPerson = busyRow.querySelector(".tlperson");
+  const headHeight = root.querySelector(".tlhead").getBoundingClientRect().height;
+  const rowStart =
+    busyRow.getBoundingClientRect().top -
+    wrap().getBoundingClientRect().top +
+    wrap().scrollTop -
+    headHeight;
+  const checkIdentity = () => {
+    const bounds = wrap().getBoundingClientRect();
+    const headingBottom = root.querySelector(".tlhead").getBoundingClientRect().bottom;
+    for (const selector of [".avatar", ".pname", ".pstatus"]) {
+      const label = busyPerson.querySelector(selector).getBoundingClientRect();
+      assert(
+        label.top >= headingBottom - 1 && label.bottom <= bounds.bottom + 1,
+        `Busy Timeline identity ${selector} is off-screen: ${label.top}–${label.bottom}, viewport ${headingBottom}–${bounds.bottom}.`,
+      );
+    }
+    assert(
+      Math.abs(busyPerson.getBoundingClientRect().left - bounds.left) < 2,
+      "Busy Timeline identity lost horizontal pinning.",
+    );
+  };
+  wrap().scrollTop = rowStart;
+  await nextRender();
+  checkIdentity();
+  wrap().scrollTop = rowStart + 180;
+  await nextRender();
+  checkIdentity();
+  assert(
+    busyPerson.querySelector(".pname").textContent === "Jordan",
+    "Busy Timeline shows the wrong person's identity.",
+  );
+  busyPerson.querySelector(".avatar").click();
+  await settle();
+  assert(
+    !busyRow.querySelector(".tlbar"),
+    "Pinned identity no longer toggles its person's events.",
+  );
+  busyPerson.querySelector(".pname").click();
+  await settle();
+  assert(
+    busyRow.querySelectorAll(".tlbar").length === 8,
+    "Pinned identity no longer restores its person's events.",
+  );
+  wrap().scrollTop = rowStart + 180;
+  await nextRender();
+  checkIdentity();
+  wrap().scrollTop = rowStart + busyRow.getBoundingClientRect().height - 20;
+  await nextRender();
+  assert(
+    busyPerson.querySelector(".avatar").getBoundingClientRect().bottom <=
+      busyRow.getBoundingClientRect().bottom + 1,
+    "Timeline identity escapes its own row while scrolling to the next person.",
+  );
+  if (appStyle === null) app.removeAttribute("style");
+  else app.setAttribute("style", appStyle);
+  await settle();
   wrap().scrollTop = wrap().scrollHeight;
   await nextRender();
   assert(
@@ -191,10 +254,14 @@ export async function runCalendarTimelineChecks(card, hass, nextRender) {
     root.querySelector(".tlcanvas").style.height === "38px",
     "Legacy Timeline lane density changed.",
   );
+  assert(
+    getComputedStyle(root.querySelector(".tlidentity")).display === "contents",
+    "Sticky Timeline identity styles leaked into legacy.",
+  );
   card.setConfig(original);
   card.hass = hass;
   await settle();
   return [
-    `calendar timeline: ${innerWidth}px remaining height, responsive rows, scroll-to-now, Today, retained manual scroll, status, filters, dense overlaps, read-only details, legacy`,
+    `calendar timeline: ${innerWidth}px remaining height, responsive rows, bounded busy-row identity, scroll-to-now, Today, retained manual scroll, status, filters, dense overlaps, read-only details, legacy`,
   ];
 }

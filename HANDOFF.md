@@ -15,7 +15,13 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.25`, repairing Month's explicit Today action (D37).
+- Latest development build: `0.25.1-moran.26`, keeping Timeline identity visible in tall
+  person rows (D38). Chrome review reproduced a centered name below a short landscape
+  viewport. Wall avatar/name/presence now start at the row top and stick below the hour
+  axis within their own row; horizontal pinning, filtering and legacy remain intact.
+  No extra fixed section, calendar read, preference or scroll handler. STATUS owns QA
+  and delivery evidence. No HA deployment.
+- Previous development build r25 repaired Month's explicit Today action (D37).
   Clicking the month name reveals today's date/column inside the grid, below pinned weekdays.
   Already visible dates stay put. Current-data/layout waits cancel on newer grid input or
   obsolete navigation; ordinary updates do not recenter. Accessible name/tooltip explain
@@ -87,7 +93,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r25 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r26 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -112,7 +118,8 @@ when the task originated in the separate Home Assistant operations workspace.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
-   D34's restricted Day-overflow and D35–D37's date/Today gaps are repaired; do not reimplement
+   D34's restricted Day-overflow, D35–D37's date/Today gaps and D38's tall Timeline identity
+   are repaired; do not reimplement
    them or treat the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
@@ -122,6 +129,16 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R26 used the connected Chrome extension directly, with no new plugin or browser fallback.
+Month Today/overflow/details and selected-date Day/Agenda/Week flows passed desktop/phone
+review. Busy Timeline identity reproduced below a 390px screen; the added regression failed
+r25 before the correction. Chrome verified row-local identity, vertical scrolling and
+hide/restore and native keyboard zoom/Reset after rebuilding. Normal viewport restored,
+clean console, r26 review tab retained; existing annotation tabs untouched. Formatting,
+types, build, 192 UTC-launched units and all 122 compiled-browser scenarios pass. The eight
+expanded `timeline` cases cover short, embedded and reduced-motion configurations plus legacy.
+STATUS owns delivery receipts. Physical Safari and wall hardware are not newly verified.
 
 R25 reproduced r24's off-screen Today date on a short landscape Month. Six `month-today`
 cases pass, including current-data/layout waits, cancellation, midnight/kiosk, ordinary

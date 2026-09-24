@@ -855,6 +855,19 @@ export const wallShellStyles = css`
     flex: 1 0 auto;
   }
 
+  /* A busy person's row can exceed the viewport. Keep its identity below the
+     existing hour axis while that row is visible, without covering another row.
+     The outer tlperson still owns horizontal pinning and the filter target. */
+  .moran-wall-shell .tlidentity {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 8px;
+    position: sticky;
+    top: calc(26px + 1px + 6px); /* Hour axis, border, person padding. */
+    min-width: 0;
+  }
+
   .moran-wall-shell .tlnow span {
     white-space: nowrap;
   }

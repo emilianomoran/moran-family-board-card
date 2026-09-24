@@ -2944,10 +2944,14 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
                     }
                   }}
                 >
-                  ${this._avatar(p, i)}
-                  <div>
-                    <div class="pname">${this._personName(p, i)}</div>
-                    <div class="pstatus">${stateObj ? this._statusLabel(stateObj.state) : ""}</div>
+                  <div class="tlidentity">
+                    ${this._avatar(p, i)}
+                    <div>
+                      <div class="pname">${this._personName(p, i)}</div>
+                      <div class="pstatus">
+                        ${stateObj ? this._statusLabel(stateObj.state) : ""}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div
@@ -5001,6 +5005,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     .tlperson .pname {
       font-size: 12.5px;
     }
+    .tlidentity {
+      display: contents;
+    }
     .tlcanvas {
       position: relative;
       flex: 0 0 auto;
@@ -5623,7 +5630,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.25 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.26 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

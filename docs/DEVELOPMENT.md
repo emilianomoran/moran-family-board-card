@@ -38,6 +38,9 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    In Week, the date label starts at the busy row's top; click the week range for Today.
    In Month, scroll away and click the month name for Today. Add `&month-only=1` to also
    exercise horizontal date recovery on a narrow phone, without a Day destination.
+   In Timeline, use a short landscape window and scroll the crowded person's row vertically.
+   Avatar/name/presence should remain below the hour axis until that row leaves the viewport;
+   scrolling horizontally must keep the same identity pinned on the left.
    This query replaces the sample feed, not any real calendar data.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
@@ -98,7 +101,7 @@ assuming new filter names. Useful current filters:
 | `week-density` | List spacing/type, date-row anchors, fixed headings, target floors, long/all-day/midnight events, delayed/hidden/obsolete reads, two real reloads, independent Reset and native range input |
 | `zoom-preferences` | Actual reloads, independent Day/Timeline scales, per-view Reset, v1 migration, config invalidation, user/card isolation, opt-out and blocked/quota storage |
 | `chrome` | Compact rows, clock/spacing, disclosure, left dates, retained navigation |
-| `timeline` | Remaining height, growing rows/bars, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
+| `timeline` | Remaining height, growing rows/bars, row-bounded busy-person identity, initial/Today centering, manual scroll retention, slow/hidden loads, reduced motion, dense overlaps, pinned axes, Status/filter resizing, short panels and legacy isolation |
 | `responsive` | Reachable view/date controls, neutral capsule, themes/locales, embedded card |
 | `presentation` | Week/Month/Agenda readability, filters, counts, drilldown and fallbacks |
 | `month-overflow` | Reachable/collapsible Month cards, details/focus, scroll bounds, restricted weekends, refreshed data, owner-copy counts, narrow grid, locale, legacy and native keyboard/mouse/touch input |

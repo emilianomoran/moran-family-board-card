@@ -146,6 +146,8 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
 - Wall Timeline fills the remaining panel with growing person rows and bars. Overlaps
   retain readable minimum sizes; short panels scroll. Today's Timeline opens near now,
   and Today recenters it. Refreshes and resizing preserve manual time browsing.
+  Avatar/name/presence stay visible below the hour axis while scrolling a tall person's
+  row, but cannot escape that row. The pinned identity still toggles that person's events.
 - The installed wall pilot includes separate availability/next-event Status tiles, a Today
   action that recenters on now, browser-local view/person preferences, separated date cells,
   and a neutral segmented view switcher. See [verification and remaining work](docs/STATUS.md).

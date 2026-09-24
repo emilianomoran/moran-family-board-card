@@ -773,10 +773,32 @@ compact/restricted grids, both scroll axes, overflow, details/focus, ordinary up
 delayed/hidden/failed data, cancellation, locale, legacy and native Enter/mouse/touch activation.
 STATUS owns verification/delivery. No new Month zoom, redesign, HA deployment or release.
 
+### D38. Keep Timeline identity visible inside tall person rows
+
+**Bounded CAL-02 correction under “Check it in chrome and continue”, 2026-09-23.**
+The connected Chrome extension worked without another installation. Synthetic desktop and
+phone review confirmed Month Today/overflow/details, compact Month → Day → Agenda and
+selected-date Week behavior. Short landscape review then reproduced Timeline appointments
+with no visible person name: twelve overlapping appointments made the row 657px tall,
+centering its name at y≈464 below a 390px screen.
+
+R26 groups each Timeline avatar/name/presence label in `.tlidentity`. In wall mode it starts
+at the row's top and sticks below the existing hour axis while that person's row scrolls.
+The group remains bounded by that row; it cannot label the next person's appointments.
+The outer `.tlperson` retains horizontal pinning, filter interaction and keyboard focus.
+Legacy uses `display: contents` to preserve its previous layout. No new fixed section,
+toolbar, height reservation, scroll handler, calendar read, preference or configuration.
+
+The existing `timeline` suite now checks identity at row entry and during vertical/horizontal
+browsing, row-boundary containment, hide/restore and legacy isolation. Its new assertion
+failed against r25 before the correction. STATUS owns complete QA and delivery evidence.
+This is not a broader Timeline redesign, HA deployment or release.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Check in Chrome and continue, 2026-09-23 | Used the connected Chrome extension, verified existing navigation, then reproduced and repaired an off-screen name in tall Timeline rows (D38). Continue in the existing repo; no extra plugin, live-calendar write or deployment. |
 | Continue after r24, 2026-09-23 | Reproduced Month's Today action leaving the current date off-screen. D37 repairs explicit two-axis reveal with delayed-input safeguards; ordinary entry/paging and the overall Month layout are unchanged. |
 | Continue after r23, 2026-09-23 | Reproduced Week opening on Monday despite selecting Friday. D36 reveals the selected date and keeps the date label visible on entry, preserving manual scrolling and zoom. No broader redesign or live deployment. |
 | Continue after r22, 2026-09-22 | Reproduced Agenda opening at week start despite the selected Day date. D35 repairs date reveal and explicit Today/week navigation while preserving manual scrolling. No Agenda redesign, zoom, deployment or release. |

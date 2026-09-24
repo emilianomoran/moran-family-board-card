@@ -76,6 +76,11 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 - Wall Timeline uses a remaining-height flex scroll container. Rows and bars grow into
   spare height, but overlapping lanes retain 48px event targets. Legacy keeps its original
   fixed lane size. Do not reintroduce a viewport-height cap inside a full-height wall shell.
+- Wall Timeline's `.tlidentity` groups avatar/name/presence at its row's top (D38). It is
+  sticky below the existing 26px hour axis plus border and 6px person padding, constrained
+  by the outer `.tlperson`, which still pins horizontally and owns click/keyboard filtering.
+  Keep this offset aligned with hour-axis CSS. Legacy uses `display: contents` for the
+  wrapper; no measuring/timer/scroll handler or extra reserved row is needed.
 - `_maybeScrollToNow` handles Day and wall Timeline after loading and layout. Timeline
   measures the pinned names and shares `_timelineHourWidth` with its renderer. Respect
   the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.

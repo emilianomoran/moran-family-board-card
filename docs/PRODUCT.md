@@ -79,6 +79,9 @@ This replaces the early screenshot/concept, not the entire product design:
 - Timeline fills the remaining wall panel with growing person rows and event bars.
   Overlapping lanes keep 48px event targets; short panels scroll instead of clipping.
   Names remain pinned horizontally and the hour axis remains pinned vertically (D24).
+  Avatar/name/presence start at each row's top and remain visible below the hour axis
+  during vertical browsing of tall rows, bounded by that person's row (D38). This adds
+  no fixed header or reserved space; the identity still toggles the person's events.
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
 - Wall Day, Timeline and Week share a header zoom disclosure, not another fixed row. Each keeps

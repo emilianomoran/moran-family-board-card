@@ -3,12 +3,12 @@
 Last recorded: 2026-09-23. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.25`, repairing Month's explicit Today reveal
-(D37). The installed HA pilot remains r12; r13–r25 are not deployed or released. Source,
+Latest development build: `0.25.1-moran.26`, keeping Timeline identity visible in tall
+person rows (D38). The installed HA pilot remains r12; r13–r26 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 122 compiled-browser scenarios
-pass. Source `fbd01bf881b7b28c7e3f20f687082163f12d3630` is pushed to personal origin;
-remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
+pass. Local verification is complete; milestone push/hosted-check receipts are recorded below
+when confirmed. The prior r25 receipts remain historical.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +63,46 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Chrome review and tall Timeline identity, 2026-09-23
+
+The user requested Chrome specifically. The already-connected Chrome extension opened the
+synthetic loopback harness; no installation, substitute browser or live HA access was needed.
+Desktop 1512×785 and phone 390×844 review passed Month Today/overflow/details, compact
+Month date → Day → Agenda and Week selected-date reveal. Timeline's Today and native
+horizontal scrolling also worked.
+
+Short landscape 844×390 exposed a separate defect: twelve overlapping fixture events made
+Avery's row 657px high and centered its avatar/name at y≈464–504, below the panel's 390px
+bottom. The new regression also failed r25 in a short embedded panel (avatar y=420–460,
+visible area y=220–414). R26 starts the grouped identity at the row top and keeps it below
+the existing hour axis during vertical browsing, constrained to its own person row. It
+does not create a fixed section or consume extra calendar height. The outer filter target
+and horizontal pinning are unchanged; legacy renders the wrapper with `display: contents`.
+No configuration, calendar read, preference, timer, scroll handler or provider write was added.
+
+The expanded `timeline` checks assert visible avatar/name/presence at row entry and after
+180px of vertical browsing, retained horizontal pinning, containment at the row exit,
+hide/restore and legacy isolation. Existing height, overlap targets, Status, details,
+Today and manual-context checks remain. Chrome after rebuilding showed identity at
+y≈162–202 and still there after 390px of native vertical scrolling. Clicking its name
+hid all twelve fixture events and restored them on a second click. A dark 400px card in
+the normal 1512×785 Chrome window retained pinned identity without document overflow.
+Native keyboard zoom reached 250%; Reset returned to the configured scale. URL/title,
+meaningful content, no error overlay and a clean warning/error console were verified.
+Temporary viewport override was reset, and the Chrome review tab was left on the r26
+Timeline with unsaved synthetic preferences; existing annotation tabs were untouched.
+The frontend-testing skill guided reproduction, screenshots and interaction checks.
+
+Formatting, types, 192 UTC-launched units and build pass. Dist SHA-256:
+`7a2ca575530dd3c5c0b832afbf438f427739e8ec2cdbd383164357e947882562`.
+The loopback server's bundle matches dist. All 122 compiled-browser scenarios passed,
+including eight expanded `timeline` configurations and the existing date, details, density,
+recovery, routing, responsive and legacy checks. Ten updated Markdown files have no broken
+local links; the added-diff credential-pattern check found no matches. The pre-existing
+untracked debug note remains untouched. Push/hosted-check receipts follow when confirmed.
+Physical Safari/screen-reader speech/wall hardware are not newly verified;
+the installed HA r12 and private calendars were not changed.
 
 ### Month Today reveal, 2026-09-23
 
@@ -1151,7 +1191,7 @@ physical iPhone/Safari verification remains open.
 
 The [current backlog](BACKLOG.md) owns pending features, proposals and completion criteria.
 CAL-01's Day/Timeline/Week sliders and saved preferences are implemented through r19.
-R20 and r21 repair bounded CAL-02 access/navigation gaps. Continue from concrete feedback
+R20–r26 repair bounded CAL-02 access, date navigation and visible identity gaps. Continue from concrete feedback
 or a reproduced usability defect; broader design, Month/Agenda zoom and household modules
 are not silently included. Do not restart the completed density milestone.
 

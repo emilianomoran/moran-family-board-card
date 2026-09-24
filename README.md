@@ -75,6 +75,11 @@ Personen bleiben lokal im Browser gespeichert. Getrennte Datumszellen und der ne
 Ansichtsumschalter sind ebenfalls installiert. Nachweise und verbleibende Geräteprüfungen:
 [Aktueller Stand](docs/STATUS.md).
 
+In der Wall-Timeline bleiben Avatar, Name und Anwesenheitsstatus beim vertikalen Scrollen
+langer Personenzeilen unter der Zeitachse sichtbar, begrenzt auf die jeweilige Zeile.
+Die links fixierte Anzeige blendet weiterhin die Termine dieser Person ein oder aus;
+es entsteht keine zusätzliche Kopfzeile. Das Legacy-Layout bleibt unverändert.
+
 Der aktuelle Entwicklungsbuild bietet in Wall-Tag und -Timeline **Kalenderzoom** über die
 Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die Stundenhöhe
 (40–96px; 100% = 64px), Timeline die Stundenbreite (48–240px; 100% = 96px), nicht die Personenzeilenhöhe.
