@@ -1,6 +1,20 @@
-# Family Board Card
+# Moran Family Board Card
 
 **Deutsch** · [English](README.en.md)
+
+[Agent-Handoff](HANDOFF.md) · [Entwicklung](docs/DEVELOPMENT.md) ·
+[Backlog](docs/BACKLOG.md) · [Recherche](docs/research/README.md)
+
+Aktueller Entwicklungsbranch: `feature/moran-foundation`. Der aktive Pilot ist schreibgeschützt.
+Die Bilder unten zeigen Upstream bzw. historische Konzepte, nicht die aktuelle Kalenderoberfläche.
+
+[Projektdokumentation](docs/README.md) · [Entscheidungen und Gespräche](docs/DECISIONS.md) ·
+[Aktueller Stand](docs/STATUS.md) · [Architekturentscheidung](docs/adr/0001-implementation-base.md)
+
+Dies ist der Moran-gepflegte Fork von
+[`renespeaker/ha-family-board-card`](https://github.com/renespeaker/ha-family-board-card). Die
+englische README beschreibt zusätzlich die neue Zuordnung von Terminen aus gemeinsamen Kalendern
+zu Personenspalten.
 
 ![Family Board Card – Tagesansicht](docs/preview-day.png)
 
@@ -10,7 +24,11 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Wochenansicht** – Wochentage als Zeilen, Personen als Spalten, kompakte Termin-Chips.
 - **Monatsansicht** – klassisches Monats-Grid mit farbigen Terminen pro Person; Klick auf einen Tag springt in die Tagesansicht.
 - **Agenda-/Listenansicht** – chronologische Terminliste, nach Tagen gruppiert; ideal fürs Handy.
-- **„Jetzt / als Nächstes"-Leiste** – optionale Glanz-Zeile über den Ansichten: pro Person auf einen Blick, was gerade läuft (mit Puls-Punkt) oder als Nächstes ansteht (inkl. Countdown) – ideal fürs Wandtablet.
+  Im Wall-Modus wird beim Öffnen das gewählte Datum sichtbar. „Heute“ und der Wochenwechsel
+  positionieren die Liste erneut; Aktualisierungen und Größenänderungen unterbrechen das
+  manuelle Scrollen nicht. Leere Tage führen zur nächsten vorhandenen Datumsgruppe der Woche,
+  sonst zur letzten vorherigen Gruppe – immer mit deren tatsächlichem Datum.
+- **Status-Kacheln** (`show_focus`) – im Wall-Layout aktueller Frei-/Belegt-Status und nächster Termin mit eigenem Datum/Uhrzeit. Unvollständige Daten gelten nicht als frei; Ganztagstermine zählen nicht als belegt. Das Legacy-Layout behält die bisherige „Jetzt / als Nächstes“-Darstellung.
 - **Auto-Symbole** – optional bekommt jeder Termin per Stichwort ein passendes Emoji (Arzt → 🩺, Sport → 🏃, Geburtstag → 🎂, Schule → 🎒 …); eigene Regeln möglich. Titel, die schon ein Emoji haben, bleiben unberührt.
 - **Zeitstrahl-Ansicht** – Personen als Zeilen links, die Zeit läuft horizontal: Termine als Balken auf einem Zeitstrahl (Gantt-Stil); überlappende Termine stapeln sich in Unterzeilen.
 - **Ansichten wählbar** – im Editor festlegen, welche Umschalter (Tag/Zeitstrahl/Woche/Monat/Agenda) erscheinen.
@@ -25,7 +43,7 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Alltags-Politur** – vergangene Termine ausgegraut, Einfärben auch nach Kalender, Ort direkt in der Karten-App öffnen, störende Termine per Muster ausblenden.
 - **Live-Fortschritt & Countdown** – laufende Termine zeigen einen Fortschrittsbalken (abschaltbar), kommende in der Agenda ein „in 20 Min."; aktualisiert minütlich.
 - **Wetter** – Symbol + Temperatur pro Tag aus einer `weather.*`-Entität im Tages-/Agenda-Header (HA-Standort, nicht die Termin-Adresse).
-- **Dichte Tage bleiben lesbar** – überlappen mehr Termine als `max_columns` erlaubt, werden die zusätzlichen Spalten zu einem „+N"-Chip zusammengefasst (Klick öffnet die Agenda) statt zu unlesbar schmalen Streifen zu schrumpfen.
+- **Dichte Tage bleiben lesbar** – überlappen mehr Termine als `max_columns` erlaubt, werden die zusätzlichen Spalten zu einem „+N"-Chip zusammengefasst statt zu unlesbar schmalen Streifen zu schrumpfen. Der Chip öffnet die Agenda, wenn sie aktiviert ist. Im Wall-Tagesmodus ohne Agenda öffnet er eine aktuelle Terminliste für diese Person und dieses Datum; Details und Rückkehr zur Tagesansicht bleiben erreichbar.
 - **Lange Termine als Hintergrund-Band** – Dauertermine (z. B. OGS/Betreuung, „Freispiel") ab einer einstellbaren Länge laufen als dezentes Vollbreiten-Band hinter der Spalte, statt die kurzen Stunden nebeneinander zu quetschen. So bekommen die eigentlichen Termine die volle Breite.
 - **Auto-Fit-Höhe** – optional passt sich die Tagesansicht automatisch an die verfügbare Kartenhöhe an, sodass Start–Endstunde ohne Scrollen komplett sichtbar sind (ideal für Wandtablets/Kiosk).
 - **Füllt den Bildschirm** – Personenspalten wachsen mit der Kartenbreite mit (Panel-Ansicht/breite Karten); mit `full_height` reicht das Board bis zum unteren Bildschirmrand. Spaltenbreite, Achsenbreite und Abstände sind einstellbar.
@@ -43,29 +61,90 @@ Ein Familienkalender bzw. „Wer ist wann wo"-Board für [Home Assistant](https:
 - **Kompakt-Modus** – ein Schalter (`compact`) für kleinere Schriften und engere Abstände, statt drei Regler einzeln zu justieren.
 - **Personen beim Start ausgeblendet** – `hidden: true` pro Person; die Spalte startet eingeklappt und ein Klick auf den Kopf holt sie zurück.
 
-> Status: **v0.25 – vollständige Familien-Tagesplanung: 5 Ansichten, Schreibzugriff, Auto-Layout (Trim/Fit/Full-Height), Hintergrund-Bänder, Badges, Kiosk-Modus, mobil optimiert, Karte und Editor vollständig lokalisiert.**
+> Fork-Status: **Kalender-Entwicklungsstand auf Basis von Upstream v0.25.**
+> Das Wall-Layout ist in einem privaten Home-Assistant-Pilotbetrieb installiert,
+> Kalenderänderungen sind dort deaktiviert. Dies ist ein Entwicklungsstand, keine
+> veröffentlichte HACS-Version. Haushaltsmodule und ein direkter Bridge-Adapter bleiben
+> zurückgestellt. Aktuelle Entscheidungen und offene Arbeiten stehen in den verlinkten Projektdokumenten.
+> [Aktueller Stand](docs/STATUS.md) nennt den neuesten Entwicklungsbuild und die getrennt
+> installierte HA-Version. Ein neuer GitHub-Commit aktualisiert den Pilotbetrieb nicht automatisch.
 
-## Installation (HACS)
+Der Wall-Pilot trennt jetzt den aktuellen Frei-/Belegt-Status vom nächsten Termin und zeigt
+dessen Datum und Uhrzeit separat. „Heute“ scrollt zur aktuellen Zeit; Ansicht und ausgeblendete
+Personen bleiben lokal im Browser gespeichert. Getrennte Datumszellen und der neutrale
+Ansichtsumschalter sind ebenfalls installiert. Nachweise und verbleibende Geräteprüfungen:
+[Aktueller Stand](docs/STATUS.md).
 
-Die Karte ist Teil des offiziellen HACS-Stores:
+In der Wall-Timeline bleiben Avatar, Name und Anwesenheitsstatus beim vertikalen Scrollen
+langer Personenzeilen unter der Zeitachse sichtbar, begrenzt auf die jeweilige Zeile.
+Die links fixierte Anzeige blendet weiterhin die Termine dieser Person ein oder aus;
+es entsteht keine zusätzliche Kopfzeile. Das Legacy-Layout bleibt unverändert.
+Die aktuelle Uhrzeit bleibt beim vertikalen Scrollen an der Zeitachse sichtbar und folgt
+beim horizontalen Scrollen der roten Linie. Am Anfang und Ende des Zeitbereichs bleibt
+die Beschriftung innerhalb der Zeitfläche; fixierte Namen werden nicht übermalt.
+Titel langer und ganztägiger Termine bleiben beim horizontalen Scrollen innerhalb ihres
+Balkens sichtbar. Lange Titel werden gekürzt; die vollständigen Angaben bleiben in der
+schreibgeschützten Detailansicht erreichbar.
 
-1. HACS öffnen → nach **Family Board Card** suchen → installieren.
-2. Die Lovelace-Resource wird im Storage-Mode automatisch als `/hacsfiles/ha-family-board-card/ha-family-board-card.js` registriert (im YAML-Mode manuell eintragen).
-3. Karte aufs Dashboard setzen: `type: custom:family-board-card` – oder einfach „Family Board Card“ im Karten-Picker auswählen.
+Der aktuelle Entwicklungsbuild bietet in Wall-Tag und -Timeline **Kalenderzoom** über die
+Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die Stundenhöhe
+(40–96px; 100% = 64px), Timeline die Stundenbreite (48–240px; 100% = 96px), nicht die Personenzeilenhöhe.
+Datum, Uhrzeitposition und Personenspalten bleiben erhalten, soweit der Scrollbereich es
+zulässt. „Zurücksetzen“ stellt `hour_height`/`fit_height` in Tag oder `hour_width` in Timeline
+wieder her und löscht nur den gespeicherten Zoom der aktiven Ansicht. Bei aktiviertem
+`remember_preferences` (Wall-Standard) bleiben beide Zoomwerte unabhängig nach dem Neuladen
+erhalten: lokal in diesem Browser, je HA-Benutzer, Dashboard und Karte. Geänderte Dichte-
+Standardwerte verwerfen nur den Zoom der betroffenen Ansicht. Ohne diese Option bleibt
+Zoom auf die Sitzung beschränkt. Keine Termine, Datums-/Scrollpositionen oder geräteübergreifende
+Synchronisierung; Monat, Agenda und Legacy haben keinen Zoomregler.
+Kurze Termine zeigen vorrangig den Titel; Details und Agenda bieten mehr Platz.
+Im Wall-Monat führt ein Klick auf den Monatsnamen zu „Heute“ und macht Datum und Spalte
+sichtbar. Bereits sichtbare Daten bleiben an ihrer Position; neue Eingaben im Raster
+brechen verzögertes Scrollen ab. Normale Aktualisierungen setzen die Ansicht nicht zurück.
+Wall-Woche zeigt beim Öffnen, Wochenwechsel und Klick auf „Heute“ das gewählte Datum im
+verfügbaren Scrollbereich. Das Datum steht oben in seiner Zeile. Die horizontale Position
+bleibt erhalten; Aktualisierungen und Größenänderungen setzen manuelles Scrollen nicht zurück.
+Neue Eingaben brechen verzögerte Navigation ab. Datums-/Scrollpositionen werden nicht gespeichert.
+Wall-Woche nutzt dieselbe Lupe für die Listendichte, 75–150% (Standard 100%): links mehr
+Termine, rechts größere Schrift/Abstände. Titel bleiben vollständig umbrochen, Text mindestens
+12px und Terminkarten mindestens 48px hoch. Fixierte Überschriften und Personenspaltenbreiten
+bleiben gleich. Die sichtbare Datumszeile bleibt beim Zoomen im Rahmen der Scrollgrenzen
+erhalten. Woche speichert ihren Zoom unabhängig; „Zurücksetzen“ löscht nur diesen Wert.
+Der [aktuelle Stand](docs/STATUS.md) trennt Entwicklungsbuild und installierten Pilotbetrieb.
+
+Wall-Monat zeigt mit **+N weitere Termine** die übrigen Terminkarten eines Datums direkt
+in der Monatsansicht; **Weniger anzeigen** klappt sie wieder ein. Lange Titel werden vollständig
+umbrochen. Nur ein Datum ist gleichzeitig aufgeklappt; dieser Zustand wird nicht gespeichert.
+Ohne gültigen Sprung zur Tagesansicht lässt sich das breitere Monatsraster auf schmalen Karten
+horizontal verschieben. Ausgeblendete Wochenendtage führen nicht mehr zu einem anderen Wochentag.
+Die Datumssumme zählt eindeutige Termine; der Überlauf zählt die angezeigten Personenkopien.
+
+Wall-Ansichts- und Datumstabs lassen sich mit Links/Rechts sowie Pos1/Ende fokussieren;
+Enter/Leertaste wählt aus. Tab verlässt die Gruppe; beim Zurückkehren ist die gewählte
+Option erreichbar. Der Fokus allein wechselt weder Ansicht noch Datum. Verdeckte Tabs
+werden im eigenen Streifen sichtbar, ohne den Kalender zu verschieben. Datumstabs bleiben
+beim Umlauf in der angezeigten Woche; die bisherigen Navigationstasten blättern weiter.
+
+## Installation (HACS Custom Repository)
+
+1. HACS öffnen → Drei-Punkte-Menü → **Benutzerdefinierte Repositories**.
+2. `https://github.com/emilianomoran/moran-family-board-card` als Kategorie **Dashboard** hinzufügen.
+3. **Moran Family Board Card** installieren.
+4. Karte mit `type: custom:moran-family-board-card` hinzufügen.
 
 ### Manuell (schneller Test ohne HACS)
 
-`dist/ha-family-board-card.js` nach `config/www/` kopieren und als Resource hinzufügen:
+`dist/moran-family-board-card.js` nach `config/www/` kopieren und als Resource hinzufügen:
 
 ```yaml
-url: /local/ha-family-board-card.js
+url: /local/moran-family-board-card.js
 type: module
 ```
 
 ## Konfiguration
 
 ```yaml
-type: custom:family-board-card
+type: custom:moran-family-board-card
 title: Familienplan  # optional, eigener Kartentitel
 view: day            # day | week
 time_grid: 30        # 15 | 30 | 60
@@ -123,14 +202,14 @@ persons:
 | `hour_height`   | number  | `64`    | Höhe einer Stunde in px (40–96) – Tagesansicht skalieren (Wandtablet); bei `fit_height` die Obergrenze |
 | `hour_width`    | number  | `96`    | Zeitstrahl-Ansicht: Breite einer Stunde in px (48–240) |
 | `fit_height`    | boolean | `false` | Tagesansicht automatisch so verkleinern, dass Start–Endstunde ohne Scrollen komplett sichtbar sind (Wandtablet/Kiosk) |
-| `full_height`   | boolean | `false` | Board bis zum unteren Bildschirmrand strecken (Panel-/Wandtablet-Ansicht); Standard ist eine 58 %-Deckelung |
+| `full_height`   | boolean | `false` | Im Wall-Modus den gesamten Kalender bis zum unteren Bildschirmrand strecken, begrenzt durch einen kleineren Container; alle fünf Ansichten scrollen intern, auch in inhaltsgroßen HA-Panel-Ansichten. Ohne diese Option gilt die vorgegebene Containerhöhe. Legacy behält die Tagesansicht mit standardmäßiger 58-%-Begrenzung. |
 | `trim_hours`    | boolean | `true`  | Tagesansicht: leere Randstunden automatisch abschneiden, damit der belegte Teil des Tages die volle Höhe bekommt (min. 6-h-Fenster; `start_hour`/`end_hour` bleiben die Außengrenzen) |
 | `col_min_width` | number  | `120`   | Mindestbreite (px) pro Personenspalte, darunter wird horizontal gescrollt; Spalten wachsen darüber hinaus mit der Kartenbreite |
 | `background_hours` | number | `3`  | Timed-Termine ab dieser Länge (Std.) als dezentes Hintergrund-Band statt als Spalte; `0` = aus |
 | `max_columns`   | number  | `3`     | Max. nebeneinander liegende Spalten pro Person/Tag; bei mehr Überlappungen erscheint ein „+N"-Chip (1–8) |
 | `tentative_patterns` | Liste | –    | Termine mit passendem Titel-Muster als vorläufig (gestrichelt/transparent) markieren |
 | `first_day`     | string  | `monday`| Wochenstart: `monday` oder `sunday` |
-| `scroll_to_now` | boolean | `true`  | Tagesansicht beim Laden automatisch zur aktuellen Uhrzeit scrollen |
+| `scroll_to_now` | boolean | `true`  | Tagesansicht und Wall-Zeitstrahl für heute nach dem Laden zur aktuellen Uhrzeit scrollen. „Heute“ zentriert im Wall-Layout auch bei `false` oder ausgeblendeter Jetzt-Linie. Aktualisierungen und Größenänderungen im Zeitstrahl erhalten die manuelle Scrollposition. Der Legacy-Zeitstrahl bleibt unverändert. |
 | `refresh_interval` | number | `300` | Auto-Aktualisierung der Termine in Sekunden (0 = aus); zusätzlich bei Tablet-Aufwachen |
 
 Jede `calendar.*`-Entität funktioniert – egal ob `local_calendar` (lokal, ohne Cloud), Google oder CalDAV. Home Assistant liefert alle einheitlich.
@@ -162,7 +241,7 @@ Die Karte übernimmt automatisch Farben & Schrift des Themes. Für Feintuning gi
 Beispiel (card-mod):
 
 ```yaml
-type: custom:family-board-card
+type: custom:moran-family-board-card
 card_mod:
   style: |
     :host {
@@ -184,14 +263,14 @@ Noch eine Sprache? Ein Dictionary in [`src/localize.ts`](src/localize.ts) (Karte
 
 ```bash
 npm install
-npm run build        # baut dist/ha-family-board-card.js
+npm run build        # baut dist/moran-family-board-card.js
 npm run watch        # Rebuild bei Änderungen
 npm run lint         # tsc --noEmit (Typecheck)
 npm test             # Vitest (Event-Logik)
 npm run format       # Prettier
 ```
 
-Schneller Loop gegen die laufende HA-Instanz: `dist/ha-family-board-card.js` nach `config/www/` kopieren und die Seite hart neu laden.
+Schneller Loop gegen die laufende HA-Instanz: `dist/moran-family-board-card.js` nach `config/www/` kopieren und die Seite hart neu laden.
 
 Die fehleranfällige Event-Logik (Splitting über Mitternacht, Ganztags-Exklusivität, Zeitzonen, Überlappungs-Layout) liegt isoliert in [`src/events.ts`](src/events.ts) und ist über [`src/events.test.ts`](src/events.test.ts) abgedeckt.
 

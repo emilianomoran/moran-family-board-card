@@ -2,18 +2,15 @@ import { LitElement, html, css, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
 import { autoDetectPersons } from "./ha-family-board-card";
-import type { FamilyBoardConfig } from "./ha-family-board-card";
+import {
+  ALL_VIEWS,
+  normalizeLayout,
+  withLayout,
+  type FamilyBoardConfig,
+  type PersonConfig,
+} from "./config";
 import { langOf, localize } from "./localize";
 import { et } from "./editor-i18n";
-
-interface PersonConfig {
-  name?: string;
-  person?: string;
-  calendar?: string | string[];
-  color?: string;
-  badges?: string[];
-  hidden?: boolean;
-}
 
 /** Curated family palette for one-click color picking. */
 const PALETTE = [
@@ -31,13 +28,16 @@ const PALETTE = [
   "#90a4ae",
 ];
 
-const VIEW_VALUES = ["day", "timeline", "week", "month", "agenda"];
-
 // One ha-form per person row, with entity pickers filtered by domain.
 const PERSON_SCHEMA = [
   { name: "name", selector: { text: {} } },
   { name: "person", selector: { entity: { filter: { domain: "person" } } } },
   { name: "calendar", selector: { entity: { filter: { domain: "calendar" }, multiple: true } } },
+  { name: "match_title_prefixes", selector: { text: { multiple: true } } },
+  { name: "match_title_contains", selector: { text: { multiple: true } } },
+  { name: "match_title_regex", selector: { text: { multiple: true } } },
+  { name: "unmatched", selector: { boolean: {} } },
+  { name: "strip_title_prefix", selector: { boolean: {} } },
   { name: "badges", selector: { entity: { multiple: true } } },
   { name: "color", selector: { text: {} } },
   { name: "hidden", selector: { boolean: {} } },
@@ -88,7 +88,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
 
   /** Localized view options for the dropdown / multi-select. */
   private _viewOptions() {
-    return VIEW_VALUES.map((v) => ({ value: v, label: localize(this.hass, v) }));
+    return ALL_VIEWS.map((v) => ({ value: v, label: localize(this.hass, v) }));
   }
 
   /** True when nothing meaningful is configured yet -> show the wizard. */
@@ -97,18 +97,37 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   }
 
   private get _settingsData() {
-    return { ...this._config, time_grid: String(this._config.time_grid ?? 30) };
+    return {
+      ...this._config,
+      layout: normalizeLayout(this._config.layout),
+      remember_preferences:
+        this._config.remember_preferences ?? normalizeLayout(this._config.layout) === "wall",
+      time_grid: String(this._config.time_grid ?? 30),
+    };
   }
 
   /** Grouped settings schema; irrelevant fields are hidden contextually. */
   private _schema(): unknown[] {
     const cfg = this._config;
-    const views = Array.isArray(cfg.views) && cfg.views.length ? cfg.views : VIEW_VALUES;
+    const views = Array.isArray(cfg.views) && cfg.views.length ? cfg.views : ALL_VIEWS;
     const hasDay = views.includes("day");
     const hasTimeline = views.includes("timeline");
     const hasWeek = views.includes("week");
 
-    const layout: unknown[] = [];
+    const layout: unknown[] = [
+      {
+        name: "layout",
+        selector: {
+          select: {
+            mode: "dropdown",
+            options: [
+              { value: "default", label: this._t("o_default") },
+              { value: "wall", label: this._t("o_wall") },
+            ],
+          },
+        },
+      },
+    ];
     if (hasDay || hasTimeline) {
       layout.push(
         { name: "start_hour", selector: { number: { min: 0, max: 23, mode: "box" } } },
@@ -156,6 +175,8 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
         selector: { number: { min: 0, max: 60, step: 1, mode: "box", unit_of_measurement: "min" } },
       },
       { name: "scroll_to_now", selector: { boolean: {} } },
+      { name: "remember_preferences", selector: { boolean: {} } },
+      { name: "preferences_key", selector: { text: {} } },
       { name: "show_now_line", selector: { boolean: {} } },
       { name: "show_progress", selector: { boolean: {} } },
       { name: "weather_entity", selector: { entity: { filter: { domain: "weather" } } } },
@@ -216,6 +237,7 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
       ]),
       group(this._t("g_looks"), "mdi:palette", [
         { name: "show_focus", selector: { boolean: {} } },
+        { name: "read_only", selector: { boolean: {} } },
         { name: "drag_drop", selector: { boolean: {} } },
         { name: "compact", selector: { boolean: {} } },
         { name: "auto_icons", selector: { boolean: {} } },
@@ -266,14 +288,17 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   private _settingsChanged(ev: CustomEvent): void {
     ev.stopPropagation();
     const next = { ...ev.detail.value };
+    const layout = normalizeLayout(next.layout);
+    delete next.layout;
     if (typeof next.time_grid === "string") next.time_grid = Number(next.time_grid);
     // keep persons + calendars untouched by the settings form
-    this._emit({
+    const merged = {
       ...this._config,
       ...next,
       persons: this._persons,
       ...(this._config.calendars ? { calendars: this._config.calendars } : {}),
-    });
+    };
+    this._emit(withLayout(merged, layout));
   }
 
   /* ---- presets --------------------------------------------------- */
@@ -320,6 +345,17 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
     // drop empty optional fields so the YAML stays clean
     if (!value.color) delete value.color;
     if (Array.isArray(value.badges) && value.badges.length === 0) delete value.badges;
+    if (Array.isArray(value.match_title_prefixes) && value.match_title_prefixes.length === 0) {
+      delete value.match_title_prefixes;
+    }
+    if (Array.isArray(value.match_title_contains) && value.match_title_contains.length === 0) {
+      delete value.match_title_contains;
+    }
+    if (Array.isArray(value.match_title_regex) && value.match_title_regex.length === 0) {
+      delete value.match_title_regex;
+    }
+    if (!value.unmatched) delete value.unmatched;
+    if (!value.strip_title_prefix) delete value.strip_title_prefix;
     if (!value.hidden) delete value.hidden;
     // collapse a single-calendar array back to a string for tidy YAML
     if (Array.isArray(value.calendar)) {
@@ -800,4 +836,4 @@ export class FamilyBoardCardEditor extends LitElement implements LovelaceCardEdi
   `;
 }
 
-customElements.define("ha-family-board-card-editor", FamilyBoardCardEditor);
+customElements.define("moran-family-board-card-editor", FamilyBoardCardEditor);

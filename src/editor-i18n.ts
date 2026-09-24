@@ -9,6 +9,7 @@ type Dict = Record<string, string>;
 const EN: Dict = {
   /* ---- field labels ---------------------------------------------- */
   l_title: "Card title",
+  l_layout: "Layout",
   l_refresh_interval: "Auto refresh (sec., 0 = off)",
   l_view: "Default view",
   l_views: "Available views (switcher)",
@@ -25,6 +26,12 @@ const EN: Dict = {
   l_max_columns: "Max. columns per day",
   l_first_day: "Week starts on",
   l_scroll_to_now: "Auto-scroll to now",
+  l_remember_preferences: "Remember view, hidden people and zoom on this browser",
+  l_preferences_key: "Preferences ID (optional)",
+  h_remember_preferences:
+    "On by default in wall mode. Browser-local and per HA user; no events are saved. Wall Day, Timeline and Week zoom are independent. Changing density defaults resets that view's saved zoom; Reset clears its override.",
+  h_preferences_key:
+    "Give otherwise identical cards on the same dashboard path different IDs to keep their preferences separate.",
   l_color_by: "Color by",
   l_show_weekends: "Show weekend",
   l_show_now_line: "Now line",
@@ -38,6 +45,7 @@ const EN: Dict = {
   l_auto_icons: "Auto icons by keyword",
   l_icon_patterns: "Custom icon rules",
   l_show_focus: "“Now / next” bar",
+  l_read_only: "Read-only calendar",
   l_drag_drop: "Move events by dragging (day view)",
   l_weather_entity: "Weather entity",
   l_show_weather: "Show weather",
@@ -49,6 +57,11 @@ const EN: Dict = {
   l_name: "Display name",
   l_person: "Person (avatar & status)",
   l_calendar: "Calendars (multiple possible)",
+  l_match_title_prefixes: "Route title prefixes",
+  l_match_title_contains: "Route title contains",
+  l_match_title_regex: "Route title regular expressions",
+  l_unmatched: "Fallback lane for unmatched events",
+  l_strip_title_prefix: "Hide the matched prefix in event titles",
   l_color: "Custom color (hex, optional)",
   l_badges: "Badges (e.g. battery, sensors)",
   l_hidden: "Hidden on start",
@@ -57,6 +70,8 @@ const EN: Dict = {
 
   /* ---- helper texts ---------------------------------------------- */
   h_hide_patterns: "Text patterns, e.g. “Recess” – matches are hidden",
+  h_layout:
+    "Wall fills the available panel with a calendar-first day layout. Default keeps the existing card.",
   h_show_patterns: "Allow list: only events whose title contains one of the patterns",
   h_replace_patterns: "e.g. “Homeroom => Lesson” (without => the text is removed)",
   h_tentative_patterns: "Matches are drawn dashed / translucent",
@@ -71,9 +86,16 @@ const EN: Dict = {
   h_auto_icons: "e.g. doctor → 🩺, sport → 🏃, birthday → 🎂 (titles with emoji stay untouched)",
   h_icon_patterns: "Own rules, e.g. “Grandma => 👵”",
   h_show_focus: "Compact bar above the views: what is running now / coming next",
+  h_read_only: "View event details without creating, editing, deleting, or dragging events",
   h_drag_drop: "Writable calendars only; drag to move, bottom edge changes the duration",
   h_views: "Which switchers appear at the top",
   h_badges: "Small chips below the person header; click opens details",
+  h_match_title_prefixes:
+    "Only route titles beginning with one of these values; leading symbols and emoji are ignored",
+  h_match_title_contains: "Also route titles containing one of these values",
+  h_match_title_regex: "Advanced case-insensitive title patterns; invalid patterns are ignored",
+  h_unmatched: "Receives events from these calendars only when no normal lane claimed them",
+  h_strip_title_prefix: "For example, show ‘Rehearsal’ instead of ‘Avery: Rehearsal’",
   h_color: "Leave empty for the palette color",
   h_hidden: "Column starts collapsed; a click on the header brings it back",
   h_compact: "Smaller fonts and tighter spacing in a single switch",
@@ -85,6 +107,8 @@ const EN: Dict = {
   o_calendar: "Calendar",
   o_monday: "Monday",
   o_sunday: "Sunday",
+  o_default: "Default",
+  o_wall: "Wall",
 
   /* ---- group titles ---------------------------------------------- */
   g_views: "🗓️ Views",
@@ -132,6 +156,7 @@ const EN: Dict = {
 
 const DE: Dict = {
   l_title: "Kartentitel",
+  l_layout: "Layout",
   l_refresh_interval: "Auto-Aktualisierung (Sek., 0 = aus)",
   l_view: "Standardansicht",
   l_views: "Verfügbare Ansichten (Umschalter)",
@@ -148,6 +173,12 @@ const DE: Dict = {
   l_max_columns: "Max. Spalten pro Tag",
   l_first_day: "Wochenstart",
   l_scroll_to_now: "Auto-Scroll zu jetzt",
+  l_remember_preferences: "Ansicht, ausgeblendete Personen und Zoom in diesem Browser merken",
+  l_preferences_key: "Einstellungs-ID (optional)",
+  h_remember_preferences:
+    "Im Wall-Modus standardmäßig aktiv. Lokal im Browser und je HA-Benutzer; keine Termine werden gespeichert. Tag, Timeline und Woche behalten ihren Zoom unabhängig. Geänderte Dichte-Vorgaben oder Zurücksetzen löschen den Zoom der jeweiligen Ansicht.",
+  h_preferences_key:
+    "Unterschiedliche IDs trennen die Einstellungen identischer Karten auf demselben Dashboard-Pfad.",
   l_color_by: "Einfärben nach",
   l_show_weekends: "Wochenende anzeigen",
   l_show_now_line: "Jetzt-Linie",
@@ -161,6 +192,7 @@ const DE: Dict = {
   l_auto_icons: "Auto-Symbole nach Stichwort",
   l_icon_patterns: "Eigene Symbol-Regeln",
   l_show_focus: "„Jetzt / als Nächstes“-Leiste",
+  l_read_only: "Kalender nur lesen",
   l_drag_drop: "Termine per Ziehen verschieben (Tagesansicht)",
   l_weather_entity: "Wetter-Entität",
   l_show_weather: "Wetter anzeigen",
@@ -172,6 +204,11 @@ const DE: Dict = {
   l_name: "Anzeigename",
   l_person: "Person (Avatar & Status)",
   l_calendar: "Kalender (mehrere möglich)",
+  l_match_title_prefixes: "Titel-Präfixe zuordnen",
+  l_match_title_contains: "Titel enthält",
+  l_match_title_regex: "Reguläre Ausdrücke für Titel",
+  l_unmatched: "Auffangspalte für nicht zugeordnete Termine",
+  l_strip_title_prefix: "Zugeordnetes Präfix im Titel ausblenden",
   l_color: "Eigene Farbe (Hex, optional)",
   l_badges: "Badges (z. B. Akku, Sensoren)",
   l_hidden: "Beim Start ausgeblendet",
@@ -179,6 +216,8 @@ const DE: Dict = {
   l_map_url: "Karten-Link (Vorlage)",
 
   h_hide_patterns: "Textmuster, z. B. „Hofpause“ – Treffer werden ausgeblendet",
+  h_layout:
+    "Wand füllt das verfügbare Panel mit einer kalenderzentrierten Tagesansicht. Standard behält die bestehende Karte bei.",
   h_show_patterns: "Allow-Liste: nur Termine, deren Titel eines der Muster enthält",
   h_replace_patterns: "z. B. „Klassenverbund => Unterricht“ (ohne => wird der Text entfernt)",
   h_tentative_patterns: "Treffer werden gestrichelt/transparent dargestellt",
@@ -193,9 +232,18 @@ const DE: Dict = {
   h_auto_icons: "z. B. Arzt → 🩺, Sport → 🏃, Geburtstag → 🎂 (Titel mit Emoji bleiben unberührt)",
   h_icon_patterns: "eigene Regeln, z. B. „Oma => 👵“",
   h_show_focus: "Kompakte Leiste über den Ansichten: was läuft jetzt / kommt als Nächstes",
+  h_read_only:
+    "Termindetails ansehen, ohne Termine anzulegen, zu ändern, zu löschen oder zu ziehen",
   h_drag_drop: "Nur bei schreibbaren Kalendern; Ziehen verschiebt, unterer Rand ändert die Dauer",
   h_views: "Welche Umschalter oben erscheinen",
   h_badges: "Kleine Chips unter dem Personenkopf; Klick öffnet Details",
+  h_match_title_prefixes:
+    "Nur Titel mit einem dieser Anfänge zuordnen; führende Symbole und Emoji werden ignoriert",
+  h_match_title_contains: "Zusätzlich Titel zuordnen, die einen dieser Werte enthalten",
+  h_match_title_regex:
+    "Erweiterte Titelmuster ohne Groß-/Kleinschreibung; ungültige Muster werden ignoriert",
+  h_unmatched: "Erhält Termine aus diesen Kalendern nur, wenn keine normale Spalte sie zuordnet",
+  h_strip_title_prefix: "Zeigt zum Beispiel ‘Probe’ statt ‘Avery: Probe’",
   h_color: "Leer lassen für Palettenfarbe",
   h_hidden: "Spalte startet eingeklappt; ein Klick auf den Kopf holt sie zurück",
   h_compact: "Kleinere Schriften und engere Abstände in einem Schalter",
@@ -206,6 +254,8 @@ const DE: Dict = {
   o_calendar: "Kalender",
   o_monday: "Montag",
   o_sunday: "Sonntag",
+  o_default: "Standard",
+  o_wall: "Wand",
 
   g_views: "🗓️ Ansichten",
   g_layout: "📐 Layout & Größe",

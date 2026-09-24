@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moran Family Board development harness</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        --primary-color: #1296ed;
+        --primary-text-color: #111827;
+        --secondary-text-color: #526071;
+        --secondary-background-color: #f6f8fb;
+        --divider-color: #dfe5ec;
+        --card-background-color: #ffffff;
+        --ha-card-border-radius: 0;
+        --error-color: #e84235;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      :root[data-theme="dark"] {
+        --primary-text-color: #f2f2f7;
+        --secondary-text-color: #c7c7cc;
+        --secondary-background-color: #2c2c2e;
+        --divider-color: #48484a;
+        --card-background-color: #1c1c1e;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        background: var(--card-background-color);
+        color: var(--primary-text-color);
+      }
+      #host-chrome {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--divider-color);
+        background: var(--secondary-background-color);
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #host-chrome[hidden] {
+        display: none;
+      }
+      main {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      #timezone-warning {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 100;
+        max-width: 520px;
+        padding: 12px 16px;
+        border: 2px solid #e84235;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #111827;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      #timezone-warning[hidden] {
+        display: none;
+      }
+      moran-family-board-card {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+      }
+      ha-icon {
+        display: inline-flex;
+        width: 18px;
+        height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="host-chrome" hidden>Synthetic host chrome</header>
+    <main id="app"></main>
+    <aside id="timezone-warning" role="alert" hidden></aside>
+    <script type="module">
+      // Keep the development preview aligned with the latest compiled card after a refresh.
+      await import(`/dist/moran-family-board-card.js?preview=${Date.now()}`);
+
+      const EVIDENCE_TIME_ZONE = "America/Chicago";
+      const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
+      const query = new URLSearchParams(window.location.search);
+      if (query.get("host") === "content") {
+        const style = document.createElement("style");
+        style.textContent = "body{display:block;overflow:auto} main{height:auto} moran-family-board-card{display:inline;height:auto}";
+        document.head.append(style);
+      }
+      document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
+      const scenario = query.get("scenario") ?? "legacy";
+      const dailyUse = query.get("daily") === "1" || ["daily", "navigation", "pan", "zoom-preferences", "week-density"].includes(query.get("checks"));
+      let feed = query.get("feed") ?? "healthy";
+      if (scenario !== "legacy" && scenario !== "wall") {
+        throw new Error("Use scenario=legacy or scenario=wall.");
+      }
+
+      const chromeHeight = Number(query.get("chrome") ?? 0);
+      if (Number.isFinite(chromeHeight) && chromeHeight > 0) {
+        const hostChrome = document.querySelector("#host-chrome");
+        hostChrome.hidden = false;
+        hostChrome.style.height = `${chromeHeight}px`;
+        hostChrome.style.flexBasis = `${chromeHeight}px`;
+      }
+
+      const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const warning = document.querySelector("#timezone-warning");
+      if (detectedTimeZone !== EVIDENCE_TIME_ZONE) {
+        warning.hidden = false;
+        warning.textContent = `Harness stopped: expected ${EVIDENCE_TIME_ZONE}, detected ${detectedTimeZone}. Run npm run test:harness for deterministic evidence.`;
+        throw new Error(warning.textContent);
+      }
+
+      const timedEvent = (summary, startTime, endTime, location = "") => ({
+        summary,
+        location,
+        start: { dateTime: `2026-02-18T${startTime}:00-06:00` },
+        end: { dateTime: `2026-02-18T${endTime}:00-06:00` },
+      });
+
+      const calendarEvents = {
+        "calendar.fixture_family": [
+          {
+            summary: "Community Day",
+            start: { date: "2026-02-18" },
+            end: { date: "2026-02-19" },
+          },
+          timedEvent("Avery: School Drop-Off", "08:00", "09:00", "Community School"),
+          timedEvent("Jordan: Planning Session", "10:00", "11:30", "Community Center"),
+          timedEvent("Avery + Jordan: Family Appointment", "14:45", "16:15", "Civic Center"),
+          timedEvent("Neighborhood Potluck", "18:00", "19:00", "Community Hall"),
+        ],
+        "calendar.fixture_activities": [
+          timedEvent("Avery: Library Visit", "12:00", "13:00", "Public Library"),
+          timedEvent("Casey: Practice", "15:00", "16:30", "Recreation Center"),
+          timedEvent("Casey: Music Lesson", "15:30", "17:00", "Music Studio"),
+        ],
+      };
+      if (query.get("checks") === "calendar") {
+        calendarEvents["calendar.fixture_family"].push(
+          timedEvent("Jordan: Quick Check", "16:00", "16:45"),
+          timedEvent("Jordan: Overlap Review", "16:00", "17:00"),
+        );
+      }
+
+      // Opt-in, privacy-safe Status-tile review scenario; leave baseline fixtures stable.
+      if (query.get("status") === "1") {
+        calendarEvents["calendar.fixture_family"] = [
+          timedEvent("Jordan: Planning Session", "15:00", "16:30"),
+          timedEvent("Jordan: Pick-up", "17:00", "17:30"),
+          {
+            summary: "Avery: Project review",
+            start: { dateTime: "2026-02-19T09:00:00-06:00" },
+            end: { dateTime: "2026-02-19T10:00:00-06:00" },
+          },
+          {
+            summary: "Casey: Weekend workshop",
+            start: { dateTime: "2026-02-21T10:30:00-06:00" },
+            end: { dateTime: "2026-02-21T12:00:00-06:00" },
+          },
+        ];
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
+      if (query.get("agenda-context") === "1") {
+        const { agendaContextEvents } = await import("./calendar-agenda-context-check.mjs");
+        calendarEvents["calendar.fixture_family"] = agendaContextEvents;
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
+      if (query.get("timeline-labels") === "1") {
+        const { timelineLabelEvents } = await import("./calendar-timeline-labels-check.mjs");
+        calendarEvents["calendar.fixture_family"] = timelineLabelEvents;
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
+      const states = {
+        "calendar.fixture_family": {
+          entity_id: "calendar.fixture_family",
+          state: "off",
+          attributes: { friendly_name: "Fixture Family", supported_features: 0 },
+        },
+        "calendar.fixture_activities": {
+          entity_id: "calendar.fixture_activities",
+          state: "off",
+          attributes: { friendly_name: "Fixture Activities", supported_features: 0 },
+        },
+        "person.fixture_avery": {
+          entity_id: "person.fixture_avery",
+          state: "home",
+          attributes: { friendly_name: "Avery" },
+        },
+        "person.fixture_jordan": {
+          entity_id: "person.fixture_jordan",
+          state: "not_home",
+          attributes: { friendly_name: "Jordan" },
+        },
+        "person.fixture_casey": {
+          entity_id: "person.fixture_casey",
+          state: "home",
+          attributes: { friendly_name: "Casey" },
+        },
+        "person.fixture_household": {
+          entity_id: "person.fixture_household",
+          state: "home",
+          attributes: { friendly_name: "Household" },
+        },
+        "sensor.fixture_avery_battery": {
+          entity_id: "sensor.fixture_avery_battery",
+          state: "82",
+          attributes: {
+            friendly_name: "Avery fixture battery",
+            icon: "mdi:battery",
+            unit_of_measurement: "%",
+          },
+        },
+      };
+      if (feed === "missing") delete states["calendar.fixture_activities"];
+
+      const calendarCalls = { family: 0, activities: 0 };
+      const calendarRanges = [];
+      const hass = {
+        ...(dailyUse ? { user: { id: "fixture-local-user", name: "Fixture user" } } : {}),
+        states,
+        locale: { language: "en-US", time_format: "12" },
+        config: { unit_system: { temperature: "°F" } },
+        callApi: async (_method, path) => {
+          const calendar = Object.keys(calendarEvents).find((entityId) => path.includes(entityId));
+          if (calendar) {
+            const range = new URL(path, "http://fixture.invalid/");
+            calendarRanges.push({
+              calendar,
+              start: range.searchParams.get("start"),
+              end: range.searchParams.get("end"),
+            });
+          }
+          if (calendar === "calendar.fixture_family") calendarCalls.family += 1;
+          if (calendar === "calendar.fixture_activities") calendarCalls.activities += 1;
+          if (
+            (feed === "partial" && path.includes("calendar.fixture_activities")) ||
+            feed === "error"
+          ) {
+            throw new Error("Fixture calendar request failed");
+          }
+          return calendar ? calendarEvents[calendar] : [];
+        },
+        callWS: async () => ({}),
+      };
+
+      const sharedCalendars = ["calendar.fixture_family", "calendar.fixture_activities"];
+      const card = document.createElement("moran-family-board-card");
+      const panelWidth = Number(query.get("panel") ?? 0);
+      if (Number.isFinite(panelWidth) && panelWidth > 0) {
+        document.querySelector("#app").style.width = `${panelWidth}px`;
+      }
+      card.nowProvider = () => new Date(FIXED_NOW.getTime());
+      const config = {
+        type: "custom:moran-family-board-card",
+        title: scenario === "wall" && !query.has("checks")
+          ? "Moran Calendar"
+          : query.get("long-title") === "1" ? "Family Board · Preview" : "Family Board",
+        view: "day",
+        views: ["day", "timeline", "week", "month", "agenda"],
+        ...(query.get("month-only") === "1" ? {view:"month",views:["month"],remember_preferences:false} : {}),
+        ...(query.get("day-only") === "1" ? {views:["day"],max_columns:1,remember_preferences:false} : {}),
+        ...(query.get("agenda-context") === "1" ? {max_columns:1,remember_preferences:false} : {}),
+        ...(query.get("timeline-labels") === "1" ? {view:"timeline",remember_preferences:false} : {}),
+        ...(query.get("host") === "content" ? {full_height:true,remember_preferences:false} : {}),
+        start_hour: dailyUse ? 0 : 7,
+        end_hour: dailyUse ? 24 : 21,
+        trim_hours: false,
+        hour_height: 64,
+        show_now_line: true,
+        scroll_to_now: dailyUse && query.get("checks") !== "pan",
+        ...(["navigation", "pan"].includes(query.get("checks")) ? { remember_preferences: false } : {}),
+        ...(query.get("checks") === "pan" ? { full_height: true } : {}),
+        ...(dailyUse
+          ? {
+              read_only: true,
+              preferences_key:
+                query.get("checks") === "daily"
+                  ? `fixture-daily-${document.documentElement.clientWidth}`
+                  : "fixture-daily-preview",
+            }
+          : {}),
+        refresh_interval: 0,
+        drag_drop: false,
+        filter_duplicates: query.get("checks") === "calendar",
+        show_focus: ["calendar", "pan"].includes(query.get("checks")) || query.get("status") === "1",
+        persons: [
+          {
+            name: "Avery",
+            person: "person.fixture_avery",
+            calendar: sharedCalendars,
+            color: "#8fa8f5",
+            match_title_prefixes:
+              query.get("checks") === "calendar" ? ["Avery:"] : ["Avery:", "Avery + Jordan:"],
+            strip_title_prefix: true,
+            badges: scenario === "wall" ? ["sensor.fixture_avery_battery"] : undefined,
+          },
+          {
+            name: "Jordan",
+            person: "person.fixture_jordan",
+            calendar: sharedCalendars,
+            color: "#62cfbe",
+            match_title_prefixes:
+              query.get("checks") === "calendar" ? ["Jordan:"] : ["Jordan:", "Avery + Jordan:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Casey",
+            person: "person.fixture_casey",
+            calendar: sharedCalendars,
+            color: "#f58eae",
+            match_title_prefixes: ["Casey:"],
+            strip_title_prefix: true,
+          },
+          {
+            name: "Household",
+            person: "person.fixture_household",
+            calendar: sharedCalendars,
+            color: "#e5b85c",
+            unmatched: true,
+          },
+        ],
+      };
+      card.setConfig(scenario === "wall" ? { ...config, layout: "wall" } : config);
+      card.hass = hass;
+      document.querySelector("#app").append(card);
+
+      const nextRender = async () => {
+        await card.updateComplete;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      };
+
+      const writeCheckResult = (status, details) => {
+        const report = document.createElement("output");
+        report.id = "harness-check-result";
+        report.dataset.harnessCheck = status;
+        report.dataset.scenario = scenario;
+        report.textContent = details;
+        document.body.append(report);
+      };
+
+      const runCalendarHealthChecks = async () => {
+        const checkedFeed = feed;
+        for (let attempt = 0; attempt < 100; attempt += 1) {
+          await nextRender();
+          if (!card._loading && card._calendarResults.length === 2) break;
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        const expected = {
+          healthy: {
+            statuses: ["ok", "ok"],
+            raws: 11,
+            partial: false,
+            error: false,
+            calls: [1, 1],
+          },
+          partial: {
+            statuses: ["ok", "error"],
+            raws: 8,
+            partial: true,
+            error: false,
+            calls: [1, 1],
+          },
+          missing: {
+            statuses: ["ok", "missing"],
+            raws: 8,
+            partial: true,
+            error: false,
+            calls: [1, 0],
+          },
+          error: {
+            statuses: ["error", "error"],
+            raws: 0,
+            partial: false,
+            error: true,
+            calls: [1, 1],
+          },
+        }[feed];
+        if (!expected) throw new Error(`Unknown fixture feed: ${feed}`);
+        const statuses = card._calendarResults.map((result) => result.status);
+        if (
+          card._loading ||
+          statuses.join(",") !== expected.statuses.join(",") ||
+          [calendarCalls.family, calendarCalls.activities].join(",") !== expected.calls.join(",") ||
+          card._raw.length !== expected.raws ||
+          card._partialLoad !== expected.partial ||
+          card._loadError !== expected.error
+        ) {
+          throw new Error(`Calendar health ${feed} did not preserve source and event status.`);
+        }
+        const banner = card.shadowRoot
+          ?.querySelector(".banner .status-message")
+          ?.textContent?.trim();
+        const expectedBanner = expected.partial
+          ? "Some calendars could not be loaded. Showing available events."
+          : expected.error
+            ? "Calendar could not be loaded."
+            : undefined;
+        if (banner !== expectedBanner) {
+          throw new Error(`Calendar health ${feed} rendered an incorrect status banner.`);
+        }
+        const caseyActivity = card._focusFor(2);
+        if (
+          (feed === "healthy" && caseyActivity.current?.sourceSummary !== "Casey: Music Lesson") ||
+          (feed !== "healthy" && (caseyActivity.current || card._focusComplete(2)))
+        ) {
+          throw new Error(`Calendar health ${feed} selected an incorrect current activity.`);
+        }
+        if (feed !== "healthy") {
+          const caseyChip = card.shadowRoot.querySelectorAll(".focus .fchip")[2];
+          if (!caseyChip?.querySelector(".ffree")?.textContent.includes("schedule unavailable")) {
+            throw new Error(`Calendar health ${feed} falsely reported an empty lane as free.`);
+          }
+        }
+        card.requestUpdate();
+        await nextRender();
+        if (
+          [calendarCalls.family, calendarCalls.activities].join(",") !== expected.calls.join(",")
+        ) {
+          throw new Error(`Calendar health ${feed} refetched an unchanged visible range.`);
+        }
+        // The joint source event must appear in both owner lanes even though
+        // this check configured only the two individual prefixes.
+        if (feed !== "error") {
+          const shortEvent = [...card.shadowRoot.querySelectorAll(".board .event")].find((event) =>
+            event.textContent.includes("Quick Check"),
+          );
+          const shortTitle = shortEvent?.querySelector(".etitle")?.getBoundingClientRect();
+          const shortBounds = shortEvent?.getBoundingClientRect();
+          if (
+            !shortEvent?.classList.contains("wall-short") ||
+            !shortTitle ||
+            !shortBounds ||
+            shortTitle.height < 14 ||
+            shortTitle.top < shortBounds.top ||
+            shortTitle.bottom > shortBounds.bottom + 1
+          ) {
+            throw new Error("A 45-minute wall event collapsed or clipped its title.");
+          }
+          const overlap = [...card.shadowRoot.querySelectorAll(".board .event")].find((event) =>
+            event.textContent.includes("Overlap Review"),
+          );
+          const overlapTitle = overlap?.querySelector(".etitle")?.getBoundingClientRect();
+          const overlapBounds = overlap?.getBoundingClientRect();
+          if (
+            !overlapTitle ||
+            !overlapBounds ||
+            overlapTitle.height < 18 ||
+            overlapTitle.bottom > overlapBounds.bottom + 1
+          ) {
+            throw new Error("An overlapped hour-long wall event collapsed its title.");
+          }
+          const joint = card._raw.filter((raw) => raw.sourceSummary?.includes("Avery + Jordan:"));
+          if (
+            joint.length !== 2 ||
+            joint
+              .map((raw) => raw.personIdx)
+              .sort()
+              .join(",") !== "0,1"
+          ) {
+            throw new Error("Joint event did not reach both configured owner lanes.");
+          }
+          card._view = "agenda";
+          await nextRender();
+          const agendaCopies = [...card.shadowRoot.querySelectorAll(".agenda-row")].filter((row) =>
+            row.textContent.includes("Avery + Jordan: Family Appointment"),
+          );
+          if (agendaCopies.length !== 2) {
+            throw new Error("Agenda duplicate filtering lost a joint owner.");
+          }
+          card._view = "day";
+          await nextRender();
+        }
+        if (feed === "healthy") {
+          const before = calendarRanges.length;
+          card._view = "week";
+          await nextRender();
+          card.shadowRoot.querySelector('button[aria-label="Next week"]').click();
+          for (
+            let attempt = 0;
+            attempt < 100 && (calendarRanges.length < before + 2 || card._loading);
+            attempt++
+          ) {
+            await nextRender();
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (card._loading || calendarRanges.length !== before + 2 || card._weekOffset !== 1) {
+            throw new Error("Next week did not request both calendars for its new date range.");
+          }
+          const oldStart = new Date(calendarRanges[before - 1].start);
+          const nextStart = new Date(calendarRanges[before + 1].start);
+          if (Math.round((nextStart - oldStart) / 86400000) !== 7) {
+            throw new Error("Next week did not advance the calendar API range by seven dates.");
+          }
+          card._view = "month";
+          for (
+            let attempt = 0;
+            attempt < 100 && (calendarRanges.length < before + 4 || card._loading);
+            attempt++
+          ) {
+            await nextRender();
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (card._loading || calendarRanges.length !== before + 4) {
+            throw new Error("Month view did not request its wider calendar API range.");
+          }
+        }
+        if (feed !== "healthy") {
+          const initialFeed = feed;
+          feed = "healthy";
+          if (initialFeed === "missing") {
+            states["calendar.fixture_activities"] = {
+              entity_id: "calendar.fixture_activities",
+              state: "off",
+              attributes: { friendly_name: "Fixture Activities", supported_features: 0 },
+            };
+            card.hass = { ...hass, states: { ...states } };
+          } else {
+            await card._refetch();
+          }
+          for (let attempt = 0; attempt < 100; attempt += 1) {
+            await nextRender();
+            if (
+              !card._loading &&
+              card._calendarResults.map((result) => result.status).join(",") === "ok,ok"
+            ) {
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          }
+          if (
+            card._loading ||
+            card._raw.length !== 11 ||
+            card._partialLoad ||
+            card._loadError ||
+            card.shadowRoot.querySelector(".banner")
+          ) {
+            throw new Error(`Calendar health ${initialFeed} did not recover to a complete feed.`);
+          }
+        }
+        return [`calendar health: ${checkedFeed}; recovered: ${feed}`];
+      };
+
+      const runInteractionChecks = async () => {
+        if (Intl.DateTimeFormat().resolvedOptions().timeZone !== EVIDENCE_TIME_ZONE) {
+          throw new Error(`Browser check did not use ${EVIDENCE_TIME_ZONE}.`);
+        }
+        if (window.innerWidth !== 1920 || window.innerHeight !== 1080) {
+          throw new Error(
+            `Browser check viewport is ${window.innerWidth}x${window.innerHeight}, expected 1920x1080.`,
+          );
+        }
+        await nextRender();
+        const root = card.shadowRoot;
+        if (!root) throw new Error("Card shadow root did not render.");
+
+        const personHeaders = [...root.querySelectorAll(".board .header-row .phead:not(.off)")];
+        const expectedAvatarSize = scenario === "wall" ? 40 : 34;
+        const geometryMarker = `avatar-geometry: 4x${expectedAvatarSize}x${expectedAvatarSize}`;
+        if (personHeaders.length !== 4) {
+          throw new Error(
+            `${scenario}: rendered ${personHeaders.length} visible Day person headers, expected 4.`,
+          );
+        }
+        for (const [index, personHeader] of personHeaders.entries()) {
+          const avatar = personHeader.querySelector(":scope > .avatar");
+          if (!avatar) {
+            throw new Error(`${scenario}: Day person header ${index + 1} has no avatar.`);
+          }
+          const { width, height } = avatar.getBoundingClientRect();
+          if (width === 0 || height === 0) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is not visible (${width}x${height}).`,
+            );
+          }
+          if (
+            Math.abs(width - height) > 0.5 ||
+            Math.abs(width - expectedAvatarSize) > 0.5 ||
+            Math.abs(height - expectedAvatarSize) > 0.5
+          ) {
+            throw new Error(
+              `${scenario}: Day person avatar ${index + 1} is ${width}x${height}, expected ${expectedAvatarSize}x${expectedAvatarSize}.`,
+            );
+          }
+        }
+
+        if (scenario === "legacy") {
+          if (root.querySelector(".moran-wall-shell")) {
+            throw new Error("Legacy scenario unexpectedly rendered the wall shell.");
+          }
+          if (!root.querySelector("ha-card")) {
+            throw new Error("Legacy scenario did not render the existing card root.");
+          }
+          return [geometryMarker, "legacy: existing card root"];
+        }
+
+        const wall = root.querySelector(".moran-wall-shell");
+        if (!wall) throw new Error("Wall scenario did not render the wall shell.");
+        if (chromeHeight > 0) {
+          const mainRect = document.querySelector("#app").getBoundingClientRect();
+          const wallRect = wall.getBoundingClientRect();
+          if (
+            document.documentElement.scrollHeight > window.innerHeight ||
+            wallRect.top < mainRect.top - 1 ||
+            wallRect.bottom > mainRect.bottom + 1
+          ) {
+            throw new Error(
+              "Wall shell overflowed the available host panel below synthetic chrome.",
+            );
+          }
+        }
+        const todayAction = wall.querySelector(".wall-datebar .nav-now");
+        if (
+          todayAction?.textContent.trim() !== "Today" ||
+          todayAction.getAttribute("aria-label") !== "Show today"
+        ) {
+          throw new Error("Wall Day current-date action is not labeled Today / Show today.");
+        }
+        if (wall.querySelector(".wall-datebar .dayname")?.getAttribute("aria-label") !== "Today: Feb 18") {
+          throw new Error("Wall Day heading does not include today's short date.");
+        }
+        const dateTabs = [...wall.querySelectorAll(":scope > .wall-datebar > .tabs [role='tab']")];
+        if (
+          dateTabs.length !== 7 ||
+          dateTabs.some(
+            (tab) =>
+              !tab.querySelector(".wall-day-weekday") || !tab.querySelector(".wall-day-number"),
+          ) ||
+          dateTabs.find((tab) => tab.classList.contains("on"))?.getAttribute("aria-current") !==
+            "date"
+        ) {
+          throw new Error("Wall Day date strip is missing a date or current-day selection.");
+        }
+        const axisLabels = [...wall.querySelectorAll(".board .axis .hour")].map((hour) =>
+          hour.textContent.trim(),
+        );
+        if (
+          axisLabels[0] !== "7 AM" ||
+          !axisLabels.includes("12 PM") ||
+          !axisLabels.includes("3 PM")
+        ) {
+          throw new Error("Wall Day hour axis does not follow the 12-hour locale preference.");
+        }
+
+        for (const [index, header] of personHeaders.entries()) {
+          const { height } = header.getBoundingClientRect();
+          if (
+            Math.abs(height - 80) > 0.5 ||
+            header.scrollWidth > header.clientWidth + 1 ||
+            header.scrollHeight > header.clientHeight + 1
+          ) {
+            throw new Error(
+              `Wall Day person header ${index + 1} is not contained at 80px ` +
+                `(height=${height}, width=${header.clientWidth}/${header.scrollWidth}, ` +
+                `height=${header.clientHeight}/${header.scrollHeight}).`,
+            );
+          }
+        }
+
+        const badge = personHeaders[0].querySelector(":scope > .pbadges .pbadge");
+        const personHeader = badge?.closest(".phead");
+        if (!badge || !personHeader) {
+          throw new Error(
+            "Wall Day first person header did not render its optional fixture badge.",
+          );
+        }
+        if (!personHeaders.slice(1).some((header) => !header.querySelector(".pbadge"))) {
+          throw new Error("Wall Day did not render a person header without an optional badge.");
+        }
+        const badgeRect = badge.getBoundingClientRect();
+        if (badgeRect.width < 48 || badgeRect.height < 48) {
+          throw new Error(
+            `Wall Day first person badge is ${badgeRect.width}x${badgeRect.height}, expected at least 48x48.`,
+          );
+        }
+
+        const calls = { moreInfo: 0, togglePerson: 0 };
+        card._moreInfo = () => {
+          calls.moreInfo += 1;
+        };
+        card._togglePerson = () => {
+          calls.togglePerson += 1;
+        };
+        for (const key of ["Enter", " "]) {
+          const badgeEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeBadge = { ...calls };
+          badge.dispatchEvent(badgeEvent);
+          if (
+            !badgeEvent.defaultPrevented ||
+            calls.moreInfo !== beforeBadge.moreInfo + 1 ||
+            calls.togglePerson !== beforeBadge.togglePerson
+          ) {
+            throw new Error(
+              `Wall Day person badge did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+
+          const headerEvent = new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          });
+          const beforeHeader = { ...calls };
+          personHeader.dispatchEvent(headerEvent);
+          if (
+            !headerEvent.defaultPrevented ||
+            calls.togglePerson !== beforeHeader.togglePerson + 1 ||
+            calls.moreInfo !== beforeHeader.moreInfo
+          ) {
+            throw new Error(
+              `Wall Day person header did not independently handle ${key === " " ? "Space" : key}.`,
+            );
+          }
+        }
+
+        const beforeBadgeClick = { ...calls };
+        badge.click();
+        if (
+          calls.moreInfo !== beforeBadgeClick.moreInfo + 1 ||
+          calls.togglePerson !== beforeBadgeClick.togglePerson
+        ) {
+          throw new Error("Wall Day person badge click also toggled its parent lane.");
+        }
+
+        const beforeHeaderClick = { ...calls };
+        personHeader.click();
+        if (
+          calls.togglePerson !== beforeHeaderClick.togglePerson + 1 ||
+          calls.moreInfo !== beforeHeaderClick.moreInfo
+        ) {
+          throw new Error("Wall Day person header click did not independently toggle its lane.");
+        }
+
+        const actionMethods = [
+          "_goToDate",
+          "_moreInfo",
+          "_openDayView",
+          "_openEvent",
+          "_showDayAgenda",
+          "_togglePerson",
+        ];
+        for (const method of actionMethods) {
+          if (typeof card[method] === "function") card[method] = () => {};
+        }
+
+        const results = [
+          geometryMarker,
+          `wall-header: 4x80 contained; badge: ${badgeRect.width}x${badgeRect.height}`,
+        ];
+        const viewButtons = [...wall.querySelectorAll('.switch button[role="tab"]')];
+        for (const viewButton of viewButtons) {
+          viewButton.click();
+          await nextRender();
+
+          const activeView = viewButton.textContent.trim();
+          const activeWall = root.querySelector(".moran-wall-shell");
+          const focusable = [
+            ...activeWall.querySelectorAll(
+              'button:not([disabled]), [role="button"][tabindex="0"], [role="tab"][tabindex="0"]',
+            ),
+          ];
+          if (focusable.length === 0) throw new Error(`${activeView}: no focusable targets found.`);
+
+          for (const target of focusable) {
+            const rect = target.getBoundingClientRect();
+            const compactView = target.closest('.switch');
+            const compactDate = target.closest('.wall-date-tools');
+            const headerToggle = target.matches('.wall-status-toggle, .wall-density-toggle');
+            const dayEvent = target.matches('.board .event');
+            const minWidth = compactDate ? 28 : headerToggle ? 40 : 48;
+            const minHeight = compactView ? 34 : compactDate ? 36 : headerToggle ? 40 : dayEvent ? 16 : 48;
+            if (rect.width < minWidth || rect.height < minHeight) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} is ${rect.width}x${rect.height}.`,
+              );
+            }
+
+            target.focus();
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            const focused = getComputedStyle(target);
+            if (
+              document.activeElement !== card ||
+              root.activeElement !== target ||
+              focused.outlineStyle === "none" ||
+              Number.parseFloat(focused.outlineWidth) < 2
+            ) {
+              throw new Error(
+                `${activeView}: ${target.className || target.localName} has no computed focus outline ` +
+                  `(document=${document.activeElement?.localName}, shadow=${root.activeElement?.className}, ` +
+                  `style=${focused.outlineStyle}, width=${focused.outlineWidth}, ` +
+                  `focus=${target.matches(":focus")}, connected=${target.isConnected}, ` +
+                  `wall=${Boolean(target.closest(".moran-wall-shell"))}).`,
+              );
+            }
+
+            if (!(target instanceof HTMLButtonElement)) {
+              for (const key of ["Enter", " "]) {
+                const event = new KeyboardEvent("keydown", {
+                  key,
+                  bubbles: true,
+                  cancelable: true,
+                });
+                target.dispatchEvent(event);
+                if (!event.defaultPrevented) {
+                  throw new Error(
+                    `${activeView}: ${target.className || target.localName} did not handle ${key === " " ? "Space" : key}.`,
+                  );
+                }
+              }
+            }
+          }
+          results.push(`${activeView}: ${focusable.length} targets`);
+        }
+        return results;
+      };
+
+      const runResponsiveChecks = async () => {
+        await nextRender();
+        const root = card.shadowRoot;
+        const wall = root?.querySelector(".moran-wall-shell");
+        const header = wall?.querySelector(".moran-wall-header");
+        const viewSwitcher = header?.querySelector(".switch");
+        const dayhead = wall?.querySelector(".wall-datebar");
+        const weeknav = dayhead?.querySelector(".weeknav");
+        if (!wall || !header || !viewSwitcher || !dayhead || !weeknav) {
+          throw new Error("Responsive wall Day view is missing a navigation surface.");
+        }
+
+        const viewportWidth = document.documentElement.clientWidth;
+        const cardWidth = wall.getBoundingClientRect().width;
+        const expectedCardWidth = panelWidth > 0 ? panelWidth : viewportWidth;
+        if (Math.abs(cardWidth - expectedCardWidth) > 1) {
+          throw new Error(
+            `Wall shell is ${cardWidth}px wide, expected ${expectedCardWidth}px in this panel.`,
+          );
+        }
+        if (document.documentElement.scrollWidth > viewportWidth + 1) {
+          throw new Error(
+            `Page scrolls horizontally at ${viewportWidth}px (${document.documentElement.scrollWidth}px).`,
+          );
+        }
+        const contained = (element, label, container = wall) => {
+          const rect = element.getBoundingClientRect();
+          const outer = container.getBoundingClientRect();
+          if (
+            rect.width < 1 ||
+            rect.left < outer.left - 1 ||
+            rect.right > outer.right + 1 ||
+            rect.left < -1 ||
+            rect.right > viewportWidth + 1
+          ) {
+            throw new Error(
+              `${label} is clipped at ${viewportWidth}px (x=${rect.left.toFixed(1)}–${rect.right.toFixed(1)}, container=${outer.left.toFixed(1)}–${outer.right.toFixed(1)}).`,
+            );
+          }
+        };
+        contained(wall, "Wall shell");
+        contained(header, "Wall header");
+        contained(viewSwitcher, "View switcher", header);
+        contained(weeknav, "Date navigation", dayhead);
+        for (const button of viewSwitcher.querySelectorAll("button")) {
+          button.scrollIntoView({block:'nearest',inline:'nearest'}); await nextRender();
+          contained(button, `${button.textContent.trim()} view tab`, viewSwitcher);
+          const rect = button.getBoundingClientRect();
+          if (rect.width < 48 || rect.height < 34 || rect.height > 40) {
+            throw new Error(`${button.textContent.trim()} view tab is outside compact dimensions.`);
+          }
+        }
+        for (const button of weeknav.querySelectorAll("button")) {
+          contained(button, "Date navigation button", weeknav);
+          const rect = button.getBoundingClientRect();
+          if (rect.width < 28 || rect.height < 36) {
+            throw new Error("Compact date navigation button is too small.");
+          }
+        }
+        const dayTabs = wall.querySelector(":scope > .wall-datebar > .tabs");
+        const dayButtons = [...(dayTabs?.querySelectorAll("button") ?? [])];
+        if (!dayTabs || dayButtons.length !== 7) {
+          throw new Error("Wall Day view did not render seven weekday tabs.");
+        }
+        contained(dayTabs, "Weekday tab row");
+        const tabsRect = dayTabs.getBoundingClientRect();
+        const dateRects = dayButtons.map((button) => button.getBoundingClientRect());
+        if (
+          Math.max(...dateRects.map((rect) => rect.width)) -
+            Math.min(...dateRects.map((rect) => rect.width)) >
+          1
+        ) {
+          throw new Error("Date cells do not have equal widths.");
+        }
+        if (
+          dayTabs.clientWidth >= 448 &&
+          (Math.abs(dateRects[0].left - tabsRect.left) > 1 ||
+            Math.abs(dateRects[6].right - tabsRect.right) > 1)
+        ) {
+          throw new Error("Date cells are clustered instead of filling the strip.");
+        }
+        if (getComputedStyle(dayTabs).scrollSnapType !== "x mandatory") {
+          throw new Error("Narrow date strip lost its cell snap points.");
+        }
+        const todayButton = dayButtons.find((button) => button.hasAttribute("aria-current"));
+        const todayMarker = getComputedStyle(
+          todayButton.querySelector(".wall-day-number"),
+        ).backgroundColor;
+        if (todayMarker === "rgba(0, 0, 0, 0)") throw new Error("Today marker is not visible.");
+        if (dayTabs.scrollHeight > dayTabs.clientHeight + 1) {
+          throw new Error("Weekday tabs wrap below their fixed-height row.");
+        }
+        if (dayTabs.clientWidth < 400 && dayTabs.scrollWidth <= dayTabs.clientWidth + 1) {
+          throw new Error("Weekday row cannot scroll at narrow card widths.");
+        }
+        for (const button of dayButtons) {
+          const rect = button.getBoundingClientRect();
+          const styles = getComputedStyle(button);
+          if (rect.height < 72 || rect.width < 64 || styles.borderRadius !== "0px") {
+            throw new Error(`Date controls regressed to compressed pill tabs: ${rect.width}x${rect.height}, radius ${styles.borderRadius}, strip ${dayTabs.clientHeight}px.`);
+          }
+          if (button !== dayButtons[6] && styles.borderInlineEndWidth !== "1px") {
+            throw new Error("Date cell divider is missing.");
+          }
+          if (
+            parseFloat(getComputedStyle(button.querySelector(".wall-day-number")).fontSize) < 24
+          ) {
+            throw new Error("Date numbers regressed to compact text.");
+          }
+          if (
+            rect.top < tabsRect.top - 1 ||
+            rect.bottom > tabsRect.bottom + 1 ||
+            rect.width < 48 ||
+            rect.height < 48
+          ) {
+            throw new Error(
+              `${button.textContent.trim()} weekday tab escapes its row or is smaller than 48px.`,
+            );
+          }
+          if (dayTabs.scrollWidth > dayTabs.clientWidth + 1) {
+            button.scrollIntoView({ block: "nearest", inline: "nearest" });
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+          }
+          contained(button, `${button.textContent.trim()} weekday tab`, dayTabs);
+        }
+        dayButtons[6].click();
+        await nextRender();
+        if (dayButtons[6].getAttribute("aria-selected") !== "true") {
+          throw new Error("Selecting the last date did not update the date strip.");
+        }
+        if (
+          getComputedStyle(dayButtons[6]).backgroundColor ===
+          getComputedStyle(dayButtons[0]).backgroundColor
+        ) {
+          throw new Error("Selected date does not highlight the whole cell.");
+        }
+        if (
+          getComputedStyle(todayButton.querySelector(".wall-day-number")).backgroundColor !==
+          todayMarker
+        ) {
+          throw new Error("Selecting another day moved or removed today's marker.");
+        }
+        dayButtons[6].focus();
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        if (
+          root.activeElement !== dayButtons[6] ||
+          parseFloat(getComputedStyle(dayButtons[6]).outlineOffset) >= 0
+        ) {
+          throw new Error(
+            `Date keyboard focus is clipped outside the strip (offset=${getComputedStyle(dayButtons[6]).outlineOffset}, focused=${root.activeElement === dayButtons[6]}).`,
+          );
+        }
+        if (!dayhead.querySelector(".dayname").getAttribute("aria-label").includes("Feb 22")) {
+          throw new Error("Date cell selection did not update the calendar heading.");
+        }
+        const priorDate = dayButtons[6].getAttribute("aria-label");
+        weeknav.querySelector('button[aria-label="Next day"]').click();
+        await nextRender();
+        if (
+          dayButtons[6].getAttribute("aria-label") === priorDate ||
+          dayTabs.querySelector("[aria-current='date']")
+        ) {
+          throw new Error(
+            "Next day across the week boundary did not refresh date labels or remove Today.",
+          );
+        }
+        dayhead.querySelector(".nav-now").click();
+        await nextRender();
+        const selectedDay = dayTabs.querySelector("[role='tab'][aria-selected='true']");
+        if (!selectedDay || selectedDay.getAttribute("aria-current") !== "date") {
+          throw new Error("Today navigation did not restore the selected current date.");
+        }
+        contained(selectedDay, "Selected date after Today navigation", dayTabs);
+        dayTabs.scrollLeft = 0;
+        const board = wall.querySelector(".board");
+        if (!board || board.clientWidth > viewportWidth + 1) {
+          throw new Error("Day grid did not stay inside its own scrollable panel.");
+        }
+        if (dayTabs.scrollWidth > dayTabs.clientWidth + 1) {
+          const selection = selectedDay.getAttribute("aria-label");
+          dayTabs.scrollLeft = 37;
+          await nextRender();
+          const maxScroll = dayTabs.scrollWidth - dayTabs.clientWidth;
+          const snapPoints = [0, maxScroll, ...dayButtons.map((_, i) => i * 64)];
+          if (!snapPoints.some((point) => Math.abs(point - dayTabs.scrollLeft) <= 1)) {
+            throw new Error("Date strip stopped between cell snap points.");
+          }
+          if (
+            dayTabs.querySelector("[aria-selected='true']").getAttribute("aria-label") !== selection
+          ) {
+            throw new Error("Scrolling the date strip unexpectedly changed the selected date.");
+          }
+        }
+        card.setConfig({ ...card._config, first_day: "sunday", show_weekends: true });
+        await nextRender();
+        let configuredDates = [...root.querySelectorAll(".moran-wall-shell .wall-datebar > .tabs button")];
+        if (!configuredDates[0].getAttribute("aria-label").startsWith("Sunday")) {
+          throw new Error("Date cells ignored Sunday-first configuration.");
+        }
+        card.setConfig({ ...card._config, show_weekends: false });
+        await nextRender();
+        configuredDates = [...root.querySelectorAll(".moran-wall-shell .wall-datebar > .tabs button")];
+        const firstRect = configuredDates[0].getBoundingClientRect();
+        const lastRect = configuredDates.at(-1).getBoundingClientRect();
+        if (
+          configuredDates.length !== 5 ||
+          Math.abs(lastRect.right - firstRect.left - Math.max(dayTabs.clientWidth, 320)) > 1
+        ) {
+          throw new Error("Weekday-only date cells did not fill the strip.");
+        }
+        const { runViewSwitcherChecks } = await import("./view-switcher-check.mjs");
+        await runViewSwitcherChecks(card, nextRender);
+        return [
+          `responsive wall: ${expectedCardWidth}px menu and date controls contained; light/dark view capsule verified`,
+        ];
+      };
+
+      if (query.has("checks") && query.get("checks") !== "pan") {
+        (query.get("checks") === "host-sizing"
+          ? import("./calendar-host-sizing-check.mjs").then(({ runHostSizingChecks }) =>
+              runHostSizingChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "month-today"
+          ? import("./calendar-month-today-check.mjs").then(({ runMonthTodayChecks }) =>
+              runMonthTodayChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "week-context"
+          ? import("./calendar-week-context-check.mjs").then(({ runWeekContextChecks }) =>
+              runWeekContextChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "agenda-context"
+          ? import("./calendar-agenda-context-check.mjs").then(({ runAgendaContextChecks }) =>
+              runAgendaContextChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "day-overflow"
+          ? import("./calendar-day-overflow-check.mjs").then(({ runDayOverflowChecks }) =>
+              runDayOverflowChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "tabs"
+          ? import("./calendar-tab-navigation-check.mjs").then(({ runTabNavigationChecks }) =>
+              runTabNavigationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "month-overflow"
+          ? import("./calendar-month-overflow-check.mjs").then(({ runMonthOverflowChecks }) =>
+              runMonthOverflowChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "week-density"
+          ? import("./calendar-week-density-check.mjs").then(({ runWeekDensityChecks }) =>
+              runWeekDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "zoom-preferences"
+          ? import("./calendar-zoom-preferences-check.mjs").then(({ runZoomPreferencesChecks }) =>
+              runZoomPreferencesChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline-density"
+          ? import("./calendar-timeline-density-check.mjs").then(({ runTimelineDensityChecks }) =>
+              runTimelineDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "density"
+          ? import("./calendar-density-check.mjs").then(({ runCalendarDensityChecks }) =>
+              runCalendarDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline-labels"
+          ? import("./calendar-timeline-labels-check.mjs").then(({ runTimelineLabelChecks }) =>
+              runTimelineLabelChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline-marker"
+          ? import("./calendar-timeline-marker-check.mjs").then(({ runCalendarTimelineMarkerChecks }) =>
+              runCalendarTimelineMarkerChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline"
+          ? import("./calendar-timeline-check.mjs").then(({ runCalendarTimelineChecks }) =>
+              runCalendarTimelineChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "chrome"
+          ? import("./calendar-chrome-check.mjs").then(({ runCalendarChromeChecks }) =>
+              runCalendarChromeChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "presentation"
+          ? import("./calendar-presentation-check.mjs").then(({ runCalendarPresentationChecks }) =>
+              runCalendarPresentationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "views"
+          ? import("./calendar-view-context-check.mjs").then(({ runCalendarViewContextChecks }) =>
+              runCalendarViewContextChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "details"
+          ? import("./calendar-details-check.mjs").then(({ runCalendarDetailsChecks }) =>
+              runCalendarDetailsChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "navigation"
+          ? import("./calendar-navigation-check.mjs").then(({ runCalendarNavigationChecks }) =>
+              runCalendarNavigationChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "daily"
+          ? import("./calendar-daily-use-check.mjs").then(({ runCalendarDailyUseChecks }) =>
+              runCalendarDailyUseChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "status"
+            ? import("./calendar-status-check.mjs").then(({ runCalendarStatusChecks }) =>
+                runCalendarStatusChecks(card, hass, nextRender),
+              )
+            : query.get("checks") === "alignment"
+              ? import("./calendar-alignment-check.mjs").then(({ runCalendarAlignmentChecks }) =>
+                  runCalendarAlignmentChecks(card, hass, nextRender),
+                )
+              : query.get("checks") === "calendar"
+                ? runCalendarHealthChecks()
+                : query.get("checks") === "recovery"
+                  ? import("./calendar-recovery-check.mjs").then(({ runCalendarRecoveryChecks }) =>
+                      runCalendarRecoveryChecks(card, hass, nextRender),
+                    )
+                  : query.get("checks") === "integrity"
+                    ? import("./calendar-integrity-check.mjs").then(
+                        ({ runCalendarIntegrityChecks }) =>
+                          runCalendarIntegrityChecks(card, hass, nextRender),
+                      )
+                    : query.get("checks") === "lifecycle"
+                      ? import("./calendar-lifecycle-check.mjs").then(
+                          ({ runCalendarLifecycleChecks }) =>
+                            runCalendarLifecycleChecks(card, hass, nextRender),
+                        )
+                      : query.get("checks") === "responsive"
+                        ? runResponsiveChecks()
+                        : runInteractionChecks()
+        )
+          .then((results) => writeCheckResult("pass", results.join("; ")))
+          .catch((error) => {
+            writeCheckResult("fail", error instanceof Error ? error.message : String(error));
+            console.error(error);
+          })
+          .finally(() => {
+            // The density runner follows geometry checks with real range-input events.
+            if (["density", "timeline-density", "week-density", "month-overflow", "day-overflow", "agenda-context", "week-context", "month-today", "tabs"].includes(query.get("checks"))) return;
+            card.remove();
+            window.stop();
+          });
+      }
+    </script>
+  </body>
+</html>
