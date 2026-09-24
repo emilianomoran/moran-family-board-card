@@ -7,7 +7,8 @@ Latest development build: `0.25.1-moran.27`, keeping Timeline's current-time lab
 pinned hour axis (D39). The installed HA pilot remains r12; r13–r27 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 128 compiled-browser
-scenarios pass. Milestone delivery is in progress; prior r26 receipts remain historical.
+scenarios pass. Source `12303ce83da909b4ce57331b19e143080bb8ef34` is pushed to personal
+origin; remote HEAD matched and hosted CI/Validate passed. Prior r26 receipts remain historical.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -105,7 +106,12 @@ Formatting, typecheck, 192 UTC-launched units, build and all 128 compiled-browse
 pass, including all existing Timeline density, cross-view, alignment and recovery checks.
 Dist SHA-256:
 `bde1268ca389bb4878ff749337b1b1c716c90b801d85cff3b164867a13aae712`.
-The served loopback bundle matches dist. Delivery receipts follow when complete.
+The served loopback bundle matches dist. Source and milestone docs were pushed as
+`12303ce83da909b4ce57331b19e143080bb8ef34`; `git ls-remote` matched. Hosted
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35947857004)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35947857013)
+both succeeded for that exact source commit. The non-failing action-runtime/runner warnings
+remain tracked under ENG-06. A subsequent docs-only receipt preserves the r27 source/bundle.
 No HA deployment, provider writes, main merge, tag or release. Physical Safari,
 screen-reader speech and wall hardware remain unverified by this milestone.
 

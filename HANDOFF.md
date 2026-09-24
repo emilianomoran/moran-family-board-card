@@ -19,8 +19,10 @@ when the task originated in the separate Home Assistant operations workspace.
   the pinned hour axis (D39). Vertical people scrolling no longer loses the label;
   horizontal time browsing keeps it attached to the line. Range-edge labels stay inside
   the time area, and pinned names cover the marker. No extra header height, timer,
-  listener, read or preference; legacy unchanged. STATUS owns verification and delivery.
-  No HA deployment.
+  listener, read or preference; legacy unchanged. Source
+  `12303ce83da909b4ce57331b19e143080bb8ef34` is pushed to personal origin; remote HEAD
+  matched and hosted CI/Validate passed. STATUS owns evidence; later docs-only receipts
+  retain this build. No HA deployment.
 - Previous development build r26 kept Timeline identity visible in tall
   person rows (D38). Chrome review reproduced a centered name below a short landscape
   viewport. Wall avatar/name/presence now start at the row top and stick below the hour
