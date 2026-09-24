@@ -87,6 +87,11 @@ This replaces the early screenshot/concept, not the entire product design:
   The current-time label stays in that pinned hour axis while scrolling people, aligned
   with the red line during horizontal browsing. At time-range edges it shifts inward to
   stay readable; pinned names/corner cover the marker when panning past it (D39).
+  Long timed/all-day event titles follow horizontal panning within their own bars,
+  bounded by the card width. Optional time sits below the title to avoid overlap while
+  panning. Ellipsis and read-only details keep long titles reachable.
+  Titles leave with their event's trailing edge; no floating label remains over empty
+  time, and event duration/lane geometry does not change (D40).
 - Wall Day, Timeline and Week share a header zoom disclosure, not another fixed row. Each keeps
   independent density: Day hour height, Timeline hour width, Week list spacing/type. With `remember_preferences`
   enabled (wall default), each manual scale survives reload in this browser for this HA

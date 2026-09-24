@@ -84,6 +84,13 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 - `_maybeScrollToNow` handles Day and wall Timeline after loading and layout. Timeline
   measures the pinned names and shares `_timelineHourWidth` with its renderer. Respect
   the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.
+- Wall Timeline's existing `.tlbar .etitle` and `.etime` are horizontally sticky after pinned names,
+  constrained by its event bar and the host's `cqw` width (D40). The bar uses `overflow:
+  clip`, not `hidden`, to avoid an intermediate scroll container. Optional time sits
+  below the title with a 2px gap, avoiding inline collisions and fitting the existing
+  48px minimum lane. Both leave with the event end; event geometry/DOM/handlers and the
+  existing time-visibility guard are unchanged. Legacy stays static. No measured
+  scroll state, wrapper, timer or new listener is needed.
 - Wall Timeline's `.tlnow-label` lives in the existing sticky `.tlhours` axis (D39), not
   inside the full-height `.tlnow` line. Both use the same minute/scale; the chip centers
   on the line's 2px border with a CSS transform clamped to the time area's boundaries.

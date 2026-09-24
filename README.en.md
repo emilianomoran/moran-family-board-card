@@ -150,6 +150,8 @@ A family calendar — a “who is where, when” board — for [Home Assistant](
   row, but cannot escape that row. The pinned identity still toggles that person's events.
   The current-time label stays on the hour axis during vertical scrolling and follows
   the red line horizontally. Range-edge labels stay inside the time area, behind pinned names.
+  Long and all-day event titles remain readable while panning through their bars. Titles
+  stay within their event, truncate to available width and retain full read-only details.
 - The installed wall pilot includes separate availability/next-event Status tiles, a Today
   action that recenters on now, browser-local view/person preferences, separated date cells,
   and a neutral segmented view switcher. See [verification and remaining work](docs/STATUS.md).

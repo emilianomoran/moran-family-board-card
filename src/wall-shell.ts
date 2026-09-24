@@ -868,6 +868,25 @@ export const wallShellStyles = css`
     min-width: 0;
   }
 
+  /* Hidden overflow makes the bar a scroll container and prevents a sticky child
+     from following tlwrap. Clip keeps rounded event bounds without that container. */
+  .moran-wall-shell .tlbar {
+    overflow: clip;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .moran-wall-shell .tlbar :is(.etitle, .etime) {
+    position: sticky;
+    left: calc(var(--fb-tl-label, 150px) + 8px);
+    min-width: 0;
+    max-width: min(100%, calc(100cqw - var(--fb-tl-label, 150px) - 24px));
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* Keep the current-time label in the existing sticky hour axis. The line must
      pass behind pinned names and the axis, not paint over their text. */
   .moran-wall-shell .tlnow {

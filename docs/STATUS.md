@@ -3,12 +3,12 @@
 Last recorded: 2026-09-23. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.27`, keeping Timeline's current-time label on its
-pinned hour axis (D39). The installed HA pilot remains r12; r13–r27 are not deployed or released. Source,
-tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-Formatting, types, build, 192 UTC-launched unit tests and all 128 compiled-browser
-scenarios pass. Source `12303ce83da909b4ce57331b19e143080bb8ef34` is pushed to personal
-origin; remote HEAD matched and hosted CI/Validate passed. Prior r26 receipts remain historical.
+Latest development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
+readable while panning within their bars (D40). The installed HA pilot remains r12;
+r13–r28 are not deployed or released. Source, tests, built bundle and docs belong to
+this milestone on `feature/moran-foundation`.
+Formatting, types, build, 192 UTC-launched unit tests and all 134 compiled-browser
+scenarios pass. Milestone delivery is in progress. Prior r27 receipts remain historical.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +63,48 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Readable long Timeline event titles, 2026-09-23
+
+Continued CAL-02 review with the connected Chrome extension reproduced unlabeled
+all-day bars on r27. At 390×844 and scrollLeft 942, Community Day's bar crossed the
+visible panel but its title bounds were x=−780 to −657. The baseline regression failed
+r27 too (desktop title x=−372 to −249, pinned names ending x=150).
+
+R28 is a wall-only CSS correction: the existing event title is sticky horizontally
+after the names, bounded by event/card width, with ellipsis for long text. Optional time
+follows below the title with a 2px gap; both lines fit the existing 48px minimum lane.
+Desktop screenshot review caught partly obscured inline time in the first iteration;
+the stacked layout removes that collision. At the trailing edge, both lines leave with
+their bar; nothing floats over empty time. `overflow:
+clip` avoids an intermediate scroll container while preserving rounded event clipping.
+No changed event times/geometry, extra fixed section, DOM wrapper, state, listener,
+timer, read or preference. Legacy's static title and hidden overflow remain untouched.
+
+All six focused `timeline-labels` cases pass: desktop 1920×1080, phone 390×844/320×568,
+landscape 844×390, a 400px embedded card and reduced motion. Coverage includes all-day,
+long, overnight and short events, 48/96/240px hour widths, custom-range continuation,
+trailing containment, stacked time/ellipsis, resize, source refresh, person hiding, read-only
+details/return focus and legacy. All 134 compiled-browser scenarios pass, including
+the existing Timeline, navigation, density, layout, source-health and recovery checks.
+
+Chrome final desktop review at 1512×785 and light/dark phone review at 390×844 verified
+readable titles and complete time ranges on separate lines, including native panning.
+Phone titles start at x=158 after the 150px names; long titles truncate within x=374.
+Clicking the long event's time opened the full correct read-only occurrence; Escape
+retained scrollLeft 1332 and event focus. Native zoom reached 250% and 50%; Reset
+restored 100%. In a 400px card inside a 1512×785 desktop, native panning reached 1710.5
+with its title bounded at x=158–384 and time below. Today returned to scrollLeft 1408;
+the visible all-day title opened the correct all-day date. Escape retained browsing/focus, and Enter reopened
+the same event. The normal viewport was restored and the generic long-event preview
+was left in Chrome, with no runtime warnings/errors. Existing annotation tabs were untouched.
+The frontend-testing skill guided reproduction, actual input checks and rendered review.
+
+Formatting, typecheck, 192 UTC-launched units and build pass. Dist SHA-256:
+`ae82dc77acfaff03bd3bf8cfd7fa715c5e6bda714dad09dab20ff920f46c60c5`.
+The served loopback bytes match dist. Chrome loaded the r28 version banner. Delivery
+receipts follow when complete. No live HA deployment, provider
+write, main merge, tag or release. Physical Safari/wall hardware remain unverified.
 
 ### Timeline current-time label, 2026-09-23
 
@@ -1249,7 +1291,7 @@ physical iPhone/Safari verification remains open.
 
 The [current backlog](BACKLOG.md) owns pending features, proposals and completion criteria.
 CAL-01's Day/Timeline/Week sliders and saved preferences are implemented through r19.
-R20–r27 repair bounded CAL-02 access, date navigation and visible identity/time-reference gaps. Continue from concrete feedback
+R20–r28 repair bounded CAL-02 access, date navigation and visible identity/event/time-reference gaps. Continue from concrete feedback
 or a reproduced usability defect; broader design, Month/Agenda zoom and household modules
 are not silently included. Do not restart the completed density milestone.
 

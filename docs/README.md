@@ -47,6 +47,7 @@ Updated 2026-09-23. Private access/configuration remains outside this repo by de
 - D37: Month Today reveals the current date/column without resetting ordinary browsing.
 - D38: Chrome verification and visible, row-bounded Timeline identity for dense overlaps.
 - D39: Timeline's current-time label stays on the pinned hour axis while scrolling people.
+- D40: Long/all-day Timeline event titles remain readable within their bars during panning.
 
 These entries preserve decisions and corrections, not raw private transcripts. Their
 dates and evidence distinguish user acceptance from an agent's proposed next step.

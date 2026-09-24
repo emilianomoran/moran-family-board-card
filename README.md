@@ -82,6 +82,9 @@ es entsteht keine zusätzliche Kopfzeile. Das Legacy-Layout bleibt unverändert.
 Die aktuelle Uhrzeit bleibt beim vertikalen Scrollen an der Zeitachse sichtbar und folgt
 beim horizontalen Scrollen der roten Linie. Am Anfang und Ende des Zeitbereichs bleibt
 die Beschriftung innerhalb der Zeitfläche; fixierte Namen werden nicht übermalt.
+Titel langer und ganztägiger Termine bleiben beim horizontalen Scrollen innerhalb ihres
+Balkens sichtbar. Lange Titel werden gekürzt; die vollständigen Angaben bleiben in der
+schreibgeschützten Detailansicht erreichbar.
 
 Der aktuelle Entwicklungsbuild bietet in Wall-Tag und -Timeline **Kalenderzoom** über die
 Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die Stundenhöhe

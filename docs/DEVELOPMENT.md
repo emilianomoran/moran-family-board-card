@@ -44,6 +44,10 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    The current-time label must stay in the pinned hour axis while scrolling people;
    horizontal time scrolling moves the label with the red line, not with the viewport.
    This query replaces the sample feed, not any real calendar data.
+   Add `&timeline-labels=1` instead for long timed, all-day, overnight and short events,
+   opening Timeline without saved preferences. Pan through the day: titles should remain
+   readable after the pinned names, then leave with their own event's trailing edge.
+   Click a visible title to open full read-only details; Escape should retain browsing/focus.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
    `npm run watch` rebuilds continuously but does not run a web server or reload the browser.
@@ -93,6 +97,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `timeline-labels` | Readable all-day/long/overnight titles while panning, zoom/resize bounds, trailing-edge containment, stacked time/truncation, details/focus, refresh, person filtering and legacy |
 | `timeline-marker` | Current-time label on the pinned hour axis, vertical/horizontal browsing, clock ticks, 12/24-hour formatting, zoom/range-edge containment, stacking/input isolation, disabled/other-date states and legacy |
 | `month-today` | Explicit Today date/column reveal, both axes, overflow collapse, current-data/layout waits and cancellation, manual context/details, compact/restricted grids, locale/legacy and native Enter/mouse/touch |
 | `week-context` | Selected-date entry, Today/week paging, visible row labels, manual browsing/details, density anchors, hidden/delayed/failed reads and cancellation, weekday settings, legacy and native wheel/keyboard/touch scrolling |

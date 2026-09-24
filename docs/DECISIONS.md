@@ -817,10 +817,36 @@ failed r26 before the fix. Marker checks have their own suite to keep the existi
 suite within its timeout; no assertions or timeouts were weakened. STATUS owns QA/delivery.
 No HA deployment, release or broader Timeline redesign is implied.
 
+### D40. Keep long Timeline event titles readable while panning
+
+**Bounded CAL-02 correction under “Continue”, 2026-09-23.** Chrome review of r27
+showed an all-day event as a blank colored bar after horizontal scrolling. At 390×844,
+the bar crossed the visible time area but its title was at x=−780 to −657. The same
+left-anchored text affected long timed and overnight events. The new regression failed
+r27 with the all-day title at x=−372 to −249 on desktop.
+
+R28 keeps the existing title sticky horizontally, just after the pinned names, within
+its own event bar. Width is bounded by the bar and card; long titles use ellipsis and
+retain full read-only details. As the event's trailing edge leaves, the title leaves
+with it instead of floating over empty time. Optional time is placed below the title;
+both lines follow panning independently and fit the existing 48px minimum lane. This
+avoids the partly obscured inline time caught during desktop screenshot review.
+The existing time-visibility guard is retained. Event times, duration geometry, lanes,
+continuation markers and details targets remain unchanged. No extra fixed section,
+wrapper, state, timer, listener, fetch, preference or configuration is introduced.
+
+This is wall-only CSS: `overflow: clip` preserves rounded bar clipping without making
+the bar a scroll container, so the title can follow the existing Timeline scroller.
+Legacy keeps its original static text/hidden overflow. The six `timeline-labels` cases
+cover all-day/long/overnight/short events, zoom, resize, trailing edges, source refresh,
+person filtering, details/focus and legacy. STATUS owns full QA and delivery evidence.
+No broader Timeline redesign, live HA deployment or release is implied.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r27, 2026-09-23 | Chrome reproduced unlabeled long/all-day Timeline bars during time browsing. D40 keeps existing titles visible within their event boundaries; no new fixed section, event semantics or live deployment. |
 | Continue after r26, 2026-09-23 | Chrome reproduced the current-time label disappearing while scrolling people. D39 moves the label into the existing pinned hour axis, preserves horizontal clock position and protects pinned names; no extra fixed section or live deployment. |
 | Check in Chrome and continue, 2026-09-23 | Used the connected Chrome extension, verified existing navigation, then reproduced and repaired an off-screen name in tall Timeline rows (D38). Continue in the existing repo; no extra plugin, live-calendar write or deployment. |
 | Continue after r24, 2026-09-23 | Reproduced Month's Today action leaving the current date off-screen. D37 repairs explicit two-axis reveal with delayed-input safeguards; ordinary entry/paging and the overall Month layout are unchanged. |

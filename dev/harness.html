@@ -188,6 +188,12 @@
         calendarEvents["calendar.fixture_activities"] = [];
       }
 
+      if (query.get("timeline-labels") === "1") {
+        const { timelineLabelEvents } = await import("./calendar-timeline-labels-check.mjs");
+        calendarEvents["calendar.fixture_family"] = timelineLabelEvents;
+        calendarEvents["calendar.fixture_activities"] = [];
+      }
+
       const states = {
         "calendar.fixture_family": {
           entity_id: "calendar.fixture_family",
@@ -278,6 +284,7 @@
         ...(query.get("month-only") === "1" ? {view:"month",views:["month"],remember_preferences:false} : {}),
         ...(query.get("day-only") === "1" ? {views:["day"],max_columns:1,remember_preferences:false} : {}),
         ...(query.get("agenda-context") === "1" ? {max_columns:1,remember_preferences:false} : {}),
+        ...(query.get("timeline-labels") === "1" ? {view:"timeline",remember_preferences:false} : {}),
         start_hour: dailyUse ? 0 : 7,
         end_hour: dailyUse ? 24 : 21,
         trim_hours: false,
@@ -1090,6 +1097,10 @@
           : query.get("checks") === "density"
           ? import("./calendar-density-check.mjs").then(({ runCalendarDensityChecks }) =>
               runCalendarDensityChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "timeline-labels"
+          ? import("./calendar-timeline-labels-check.mjs").then(({ runTimelineLabelChecks }) =>
+              runTimelineLabelChecks(card, hass, nextRender),
             )
           : query.get("checks") === "timeline-marker"
           ? import("./calendar-timeline-marker-check.mjs").then(({ runCalendarTimelineMarkerChecks }) =>
