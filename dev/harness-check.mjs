@@ -116,6 +116,14 @@ class CdpClient {
 }
 
 const scenarios = [
+  ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "timeline-marker", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "timeline marker:",
+  })),
+  {name: "wall", checks: "timeline-marker", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "timeline marker:"},
+  {name: "wall", checks: "timeline-marker", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "timeline marker:"},
   ...[[844,390], [1920,1080], [390,844], [320,568]].map(([width,height]) => ({
     name: "wall", checks: "month-today", chromeHeight: 64, width, height,
     expectedGeometryMarker: "month today:",

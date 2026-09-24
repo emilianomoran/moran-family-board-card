@@ -15,7 +15,13 @@ when the task originated in the separate Home Assistant operations workspace.
 
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.26`, keeping Timeline identity visible in tall
+- Latest development build: `0.25.1-moran.27`, keeping Timeline's current-time label on
+  the pinned hour axis (D39). Vertical people scrolling no longer loses the label;
+  horizontal time browsing keeps it attached to the line. Range-edge labels stay inside
+  the time area, and pinned names cover the marker. No extra header height, timer,
+  listener, read or preference; legacy unchanged. STATUS owns verification and delivery.
+  No HA deployment.
+- Previous development build r26 kept Timeline identity visible in tall
   person rows (D38). Chrome review reproduced a centered name below a short landscape
   viewport. Wall avatar/name/presence now start at the row top and stick below the hour
   axis within their own row; horizontal pinning, filtering and legacy remain intact.
@@ -95,7 +101,7 @@ when the task originated in the separate Home Assistant operations workspace.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
 - Installed HA version remains `0.25.1-moran.12`, source
   `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r26 presentation changes target the laptop prototype; they are not deployed to HA.
+  The r13–r27 presentation changes target the laptop prototype; they are not deployed to HA.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -120,7 +126,7 @@ when the task originated in the separate Home Assistant operations workspace.
 3. Pick work from [BACKLOG](docs/BACKLOG.md) under the current user request. **CAL-01's
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
-   D34's restricted Day-overflow, D35–D37's date/Today gaps and D38's tall Timeline identity
+   D34's restricted Day-overflow, D35–D37's date/Today gaps and D38–D39's Timeline identity/time label
    are repaired; do not reimplement
    them or treat the fallback presentations as final design approval.
    Do not assume Month/Agenda zoom or
@@ -131,6 +137,16 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R27 reproduced the time label scrolling above the viewport while its line remained visible.
+The `timeline-marker` suite now owns focused geometry, clock-update, zoom, 12/24-hour,
+range-edge, disabled/other-date and legacy checks across six configurations. It is separate
+from `timeline` to retain that suite's existing timeout and assertions. Chrome short-landscape
+and dark phone checks verified native vertical/horizontal movement and pinned-name masking.
+Embedded-card review also verified midnight edges, event click-through/focus and zoom Reset.
+Formatting, types, build, 192 UTC-launched units and all 128 compiled-browser scenarios pass.
+Normal Chrome viewport restored and r27 review tab retained. STATUS owns delivery receipts;
+no physical-device or HA claim is added.
 
 R26 used the connected Chrome extension directly, with no new plugin or browser fallback.
 Month Today/overflow/details and selected-date Day/Agenda/Week flows passed desktop/phone

@@ -84,6 +84,9 @@ This replaces the early screenshot/concept, not the entire product design:
   no fixed header or reserved space; the identity still toggles the person's events.
   Today's Timeline opens near now; Today recenters it. Ordinary refreshes and resizing
   preserve manual time browsing, and other dates do not jump to today's clock (D25).
+  The current-time label stays in that pinned hour axis while scrolling people, aligned
+  with the red line during horizontal browsing. At time-range edges it shifts inward to
+  stay readable; pinned names/corner cover the marker when panning past it (D39).
 - Wall Day, Timeline and Week share a header zoom disclosure, not another fixed row. Each keeps
   independent density: Day hour height, Timeline hour width, Week list spacing/type. With `remember_preferences`
   enabled (wall default), each manual scale survives reload in this browser for this HA

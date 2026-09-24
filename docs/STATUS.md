@@ -3,12 +3,11 @@
 Last recorded: 2026-09-23. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.26`, keeping Timeline identity visible in tall
-person rows (D38). The installed HA pilot remains r12; r13–r26 are not deployed or released. Source,
+Latest development build: `0.25.1-moran.27`, keeping Timeline's current-time label on its
+pinned hour axis (D39). The installed HA pilot remains r12; r13–r27 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
-Formatting, types, build, 192 UTC-launched unit tests and all 122 compiled-browser scenarios
-pass. Source `efcb6946fdec87b97e687856cdc34f3da1ff33bf` is pushed to personal origin;
-remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
+Formatting, types, build, 192 UTC-launched unit tests and all 128 compiled-browser
+scenarios pass. Milestone delivery is in progress; prior r26 receipts remain historical.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -63,6 +62,52 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Timeline current-time label, 2026-09-23
+
+Continued CAL-02 review in the connected Chrome extension reproduced a disappearing
+current-time label: on r26 at 844×390, vertical scroll 195 moved its top from y=131 to
+y=−64 while the pinned hour axis remained y=129–156 and the red line stayed visible.
+The initial regression failed against r26 too (label y=15–32, pinned axis y=193–220).
+
+R27 puts wall Timeline's label in the existing pinned `.tlhours` axis. It follows the
+same minute/zoom offset as the line, clamping only its text at the displayed range's
+edges. The line and label now paint behind pinned names/corner and ignore pointer input.
+No new header height, controls, data requests, timer, scrolling handler or saved state.
+Legacy's original line-owned label and display conditions are unchanged.
+
+Six focused `timeline-marker` cases pass: 1920×1080, 390×844, 320×568, 844×390,
+a 400px embedded card and reduced motion. Coverage includes vertical/horizontal movement,
+clock ticks without moving manual browsing, 12/24-hour labels, 48/240px hour widths,
+midnight and custom 7–21 range edges, pointer/stacking isolation, hidden-line/other-date
+states and legacy. The checks were split out of the existing Timeline suite after their
+combined normal-motion run exceeded its timeout; the timeout and previous assertions
+were not weakened. The first full run caught an actual midnight-label regression:
+the new chip displaced `.tlhour:last-child`. An explicit `.tlhour-end` class now keeps
+the final static hour inside the range regardless of the chip. Existing density
+assertions were retained unchanged; the complete 128-scenario rerun passed.
+
+Chrome light landscape showed the corrected label at y=131–148 after the same 195px
+scroll. Dark 390×844 phone review retained it after a 158px scroll to the bottom. Native
+horizontal panning moved the label with its line and visibly hid both behind pinned
+names after passing now; Today returned to now. At 250% zoom, clicking an event through
+the red line opened its read-only details; Escape restored event focus and Reset returned
+zoom to 100%. A 400px card inside a 1512×785 desktop retained the chip at y=131–148
+after a 217px vertical scroll. Native horizontal scrolling to the range end showed the
+final midnight label fully inside the panel (right edge x=400), then Today returned to now.
+No console warnings/errors were observed. The normal 1512×785 viewport was restored,
+the r27 Timeline preview reloaded and retained in Chrome, and existing annotation tabs
+were untouched. Final browser capture showed the complete labels and navigation without
+an error overlay.
+The frontend-testing skill guided reproduction, screenshots and native interactions.
+
+Formatting, typecheck, 192 UTC-launched units, build and all 128 compiled-browser scenarios
+pass, including all existing Timeline density, cross-view, alignment and recovery checks.
+Dist SHA-256:
+`bde1268ca389bb4878ff749337b1b1c716c90b801d85cff3b164867a13aae712`.
+The served loopback bundle matches dist. Delivery receipts follow when complete.
+No HA deployment, provider writes, main merge, tag or release. Physical Safari,
+screen-reader speech and wall hardware remain unverified by this milestone.
 
 ### Chrome review and tall Timeline identity, 2026-09-23
 
@@ -1198,7 +1243,7 @@ physical iPhone/Safari verification remains open.
 
 The [current backlog](BACKLOG.md) owns pending features, proposals and completion criteria.
 CAL-01's Day/Timeline/Week sliders and saved preferences are implemented through r19.
-R20–r26 repair bounded CAL-02 access, date navigation and visible identity gaps. Continue from concrete feedback
+R20–r27 repair bounded CAL-02 access, date navigation and visible identity/time-reference gaps. Continue from concrete feedback
 or a reproduced usability defect; broader design, Month/Agenda zoom and household modules
 are not silently included. Do not restart the completed density milestone.
 

@@ -41,6 +41,8 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    In Timeline, use a short landscape window and scroll the crowded person's row vertically.
    Avatar/name/presence should remain below the hour axis until that row leaves the viewport;
    scrolling horizontally must keep the same identity pinned on the left.
+   The current-time label must stay in the pinned hour axis while scrolling people;
+   horizontal time scrolling moves the label with the red line, not with the viewport.
    This query replaces the sample feed, not any real calendar data.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
@@ -91,6 +93,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `timeline-marker` | Current-time label on the pinned hour axis, vertical/horizontal browsing, clock ticks, 12/24-hour formatting, zoom/range-edge containment, stacking/input isolation, disabled/other-date states and legacy |
 | `month-today` | Explicit Today date/column reveal, both axes, overflow collapse, current-data/layout waits and cancellation, manual context/details, compact/restricted grids, locale/legacy and native Enter/mouse/touch |
 | `week-context` | Selected-date entry, Today/week paging, visible row labels, manual browsing/details, density anchors, hidden/delayed/failed reads and cancellation, weekday settings, legacy and native wheel/keyboard/touch scrolling |
 | `agenda-context` | Selected-date entry/Day overflow, Today/week paging, manual browsing/details, sparse/empty/failed reads, hidden/delayed/cancelled navigation, legacy and native wheel/keyboard/touch scrolling |

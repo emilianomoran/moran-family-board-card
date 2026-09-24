@@ -84,6 +84,14 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
 - `_maybeScrollToNow` handles Day and wall Timeline after loading and layout. Timeline
   measures the pinned names and shares `_timelineHourWidth` with its renderer. Respect
   the once-per-entry key, explicit Today override, hidden-panel retry and stale-frame guards.
+- Wall Timeline's `.tlnow-label` lives in the existing sticky `.tlhours` axis (D39), not
+  inside the full-height `.tlnow` line. Both use the same minute/scale; the chip centers
+  on the line's 2px border with a CSS transform clamped to the time area's boundaries.
+  Line z-index 3 sits below pinned people (4) and the axis (5); the axis's corner covers
+  its label when horizontally panned behind names. Both ignore pointer input. Preserve
+  the existing show-now/date/range conditions and legacy line-owned label. No scroll handler
+  or separate timer is needed. The final static hour uses `.tlhour-end`, not `:last-child`,
+  because the optional current-time chip is another child of the hour axis.
 - The shared wall date strip keeps weekday and number centered within a 40px group at
   the cell's 12px left inset. Do not center that group across the whole cell (D26).
 - Wall tabs use transient `_viewTabFocus` / `_dayTabFocus` for a roving entry stop (D33).

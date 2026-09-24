@@ -845,7 +845,7 @@ export const wallShellStyles = css`
     transform: none;
   }
 
-  .moran-wall-shell .tlhour:last-child {
+  .moran-wall-shell .tlhour-end {
     transform: translateX(-100%);
   }
 
@@ -868,7 +868,15 @@ export const wallShellStyles = css`
     min-width: 0;
   }
 
-  .moran-wall-shell .tlnow span {
+  /* Keep the current-time label in the existing sticky hour axis. The line must
+     pass behind pinned names and the axis, not paint over their text. */
+  .moran-wall-shell .tlnow {
+    z-index: 3;
+  }
+
+  .moran-wall-shell .tlnow-label {
+    z-index: 1;
+    pointer-events: none;
     white-space: nowrap;
   }
 

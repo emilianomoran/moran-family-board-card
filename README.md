@@ -79,6 +79,9 @@ In der Wall-Timeline bleiben Avatar, Name und Anwesenheitsstatus beim vertikalen
 langer Personenzeilen unter der Zeitachse sichtbar, begrenzt auf die jeweilige Zeile.
 Die links fixierte Anzeige blendet weiterhin die Termine dieser Person ein oder aus;
 es entsteht keine zusätzliche Kopfzeile. Das Legacy-Layout bleibt unverändert.
+Die aktuelle Uhrzeit bleibt beim vertikalen Scrollen an der Zeitachse sichtbar und folgt
+beim horizontalen Scrollen der roten Linie. Am Anfang und Ende des Zeitbereichs bleibt
+die Beschriftung innerhalb der Zeitfläche; fixierte Namen werden nicht übermalt.
 
 Der aktuelle Entwicklungsbuild bietet in Wall-Tag und -Timeline **Kalenderzoom** über die
 Lupe im Kopfbereich: links mehr Stunden, rechts mehr Details. Tag verändert die Stundenhöhe

@@ -794,10 +794,34 @@ browsing, row-boundary containment, hide/restore and legacy isolation. Its new a
 failed against r25 before the correction. STATUS owns complete QA and delivery evidence.
 This is not a broader Timeline redesign, HA deployment or release.
 
+### D39. Keep Timeline's current-time label on its pinned axis
+
+**Bounded CAL-02 correction under “Continue”, 2026-09-23.** Chrome review of r26
+reproduced the red current-time line remaining visible while its label scrolled above
+the screen. A 195px vertical scroll moved the label from y=131 to y=−64 while the
+hour axis stayed at y=129–156. Vertical scrolling changes people, not time, so the
+label belongs to that existing pinned axis.
+
+R27 renders the wall-only label inside `.tlhours`, keeping the same formatting and
+clock offset as the line. It stays centered where space permits and shifts inside
+the time area's start/end boundaries when needed. Horizontal browsing still moves
+it with the actual clock position; it is not an edge-pinned “now” indicator. The line
+and label paint behind the pinned names/corner, and neither intercepts pointer input.
+No additional header height, toolbar, scroll listener, clock timer, provider read,
+preference or configuration was added. Legacy retains its line-owned label.
+
+The focused `timeline-marker` suite covers vertical/horizontal movement, clock ticks,
+12/24-hour labels, both zoom extremes, full/custom time-range edges, hidden-line/other-date
+states and legacy across six responsive/reduced-motion cases. The original regression
+failed r26 before the fix. Marker checks have their own suite to keep the existing Timeline
+suite within its timeout; no assertions or timeouts were weakened. STATUS owns QA/delivery.
+No HA deployment, release or broader Timeline redesign is implied.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue after r26, 2026-09-23 | Chrome reproduced the current-time label disappearing while scrolling people. D39 moves the label into the existing pinned hour axis, preserves horizontal clock position and protects pinned names; no extra fixed section or live deployment. |
 | Check in Chrome and continue, 2026-09-23 | Used the connected Chrome extension, verified existing navigation, then reproduced and repaired an off-screen name in tall Timeline rows (D38). Continue in the existing repo; no extra plugin, live-calendar write or deployment. |
 | Continue after r24, 2026-09-23 | Reproduced Month's Today action leaving the current date off-screen. D37 repairs explicit two-axis reveal with delayed-input safeguards; ordinary entry/paging and the overall Month layout are unchanged. |
 | Continue after r23, 2026-09-23 | Reproduced Week opening on Monday despite selecting Friday. D36 reveals the selected date and keeps the date label visible on entry, preserving manual scrolling and zoom. No broader redesign or live deployment. |

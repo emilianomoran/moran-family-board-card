@@ -2886,6 +2886,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       nowMin >= startMin &&
       nowMin <= endMin;
     const LANE = wall ? 54 : 30;
+    // The 2px line's center is one pixel after the time offset. The wall label's
+    // transform stays centered when it fits, clamping its edges to the time area.
+    const nowPosition = (nowMin - startMin) * px;
 
     return html`
       ${this._layout === "wall"
@@ -2914,13 +2917,24 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
             <div class="tlcorner"></div>
             <div class="tlhours" style="width:${width}px">
               ${hours.map(
-                (h) =>
-                  html`<span class="tlhour" style="left:${(h * 60 - startMin) * px}px"
+                (h, i) =>
+                  html`<span
+                    class=${i === hours.length - 1 ? "tlhour tlhour-end" : "tlhour"}
+                    style="left:${(h * 60 - startMin) * px}px"
                     >${this._layout === "wall"
                       ? formatHourLabel(this.hass, h)
                       : `${pad(h)}:00`}</span
                   >`,
               )}
+              ${wall && showNow
+                ? html`<span
+                    class="tlnow-label"
+                    style="left:${nowPosition + 1}px;
+                      transform:translateX(clamp(-${nowPosition + 1}px, -50%,
+                        calc(${width - nowPosition - 1}px - 100%)))"
+                    >${formatMinutes(this.hass, nowMin)}</span
+                  >`
+                : nothing}
             </div>
           </div>
           ${this._persons.map((p, i) => {
@@ -3018,9 +3032,9 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
           ${showNow
             ? html`<div
                 class="tlnow"
-                style="left:calc(var(--fb-tl-label, 150px) + ${(nowMin - startMin) * px}px)"
+                style="left:calc(var(--fb-tl-label, 150px) + ${nowPosition}px)"
               >
-                <span>${formatMinutes(this.hass, nowMin)}</span>
+                ${wall ? nothing : html`<span>${formatMinutes(this.hass, nowMin)}</span>`}
               </div>`
             : nothing}
         </div>
@@ -5051,7 +5065,8 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
       z-index: 6;
       pointer-events: none;
     }
-    .tlnow span {
+    .tlnow span,
+    .tlnow-label {
       position: absolute;
       top: 2px;
       left: -1px;
@@ -5630,7 +5645,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.26 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.27 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

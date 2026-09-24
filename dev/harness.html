@@ -1091,6 +1091,10 @@
           ? import("./calendar-density-check.mjs").then(({ runCalendarDensityChecks }) =>
               runCalendarDensityChecks(card, hass, nextRender),
             )
+          : query.get("checks") === "timeline-marker"
+          ? import("./calendar-timeline-marker-check.mjs").then(({ runCalendarTimelineMarkerChecks }) =>
+              runCalendarTimelineMarkerChecks(card, hass, nextRender),
+            )
           : query.get("checks") === "timeline"
           ? import("./calendar-timeline-check.mjs").then(({ runCalendarTimelineChecks }) =>
               runCalendarTimelineChecks(card, hass, nextRender),
