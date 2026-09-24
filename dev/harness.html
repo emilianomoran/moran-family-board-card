@@ -107,6 +107,11 @@
       const EVIDENCE_TIME_ZONE = "America/Chicago";
       const FIXED_NOW = new Date("2026-02-18T15:32:00-06:00");
       const query = new URLSearchParams(window.location.search);
+      if (query.get("host") === "content") {
+        const style = document.createElement("style");
+        style.textContent = "body{display:block;overflow:auto} main{height:auto} moran-family-board-card{display:inline;height:auto}";
+        document.head.append(style);
+      }
       document.documentElement.dataset.theme = query.get("theme") === "dark" ? "dark" : "light";
       const scenario = query.get("scenario") ?? "legacy";
       const dailyUse = query.get("daily") === "1" || ["daily", "navigation", "pan", "zoom-preferences", "week-density"].includes(query.get("checks"));
@@ -285,6 +290,7 @@
         ...(query.get("day-only") === "1" ? {views:["day"],max_columns:1,remember_preferences:false} : {}),
         ...(query.get("agenda-context") === "1" ? {max_columns:1,remember_preferences:false} : {}),
         ...(query.get("timeline-labels") === "1" ? {view:"timeline",remember_preferences:false} : {}),
+        ...(query.get("host") === "content" ? {full_height:true,remember_preferences:false} : {}),
         start_hour: dailyUse ? 0 : 7,
         end_hour: dailyUse ? 24 : 21,
         trim_hours: false,
@@ -1058,7 +1064,11 @@
       };
 
       if (query.has("checks") && query.get("checks") !== "pan") {
-        (query.get("checks") === "month-today"
+        (query.get("checks") === "host-sizing"
+          ? import("./calendar-host-sizing-check.mjs").then(({ runHostSizingChecks }) =>
+              runHostSizingChecks(card, hass, nextRender),
+            )
+          : query.get("checks") === "month-today"
           ? import("./calendar-month-today-check.mjs").then(({ runMonthTodayChecks }) =>
               runMonthTodayChecks(card, hass, nextRender),
             )

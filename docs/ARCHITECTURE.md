@@ -122,7 +122,16 @@ Default rendering remains legacy; only exact `layout: wall` selects the wall she
   before restoring it. Keep `_maybeScrollToNow` from superseding this anchor. Only wall Day
   reads the override. Config/reload restores only a matching browser preference;
   otherwise it uses configuration/fit. D30 supersedes D27's session-only rule.
-- Wall Day uses flex remaining height, not `_applyFullHeight`'s legacy viewport cap.
+- Wall `full_height` gives the entire shell a definite remaining-viewport height (D41),
+  capped by its existing `max-height: 100%` in a smaller bounded host. Without it, the
+  existing host-height contract remains. This is essential in HA's content-sized panel
+  parents, where percentage height alone becomes auto. `_applyFullHeight` sizes the shell
+  before restoring list navigation; individual views retain their flex scrollers.
+  The existing ResizeObserver also observes the shell, because HA's inline custom-element
+  host does not emit box-size changes. Target swaps/disconnect clean up observation.
+  A paired window resize listener handles height-only viewport changes; no scroll polling,
+  calendar read or preference is added. Hidden-panel navigation still waits for measurement.
+- Wall Day uses flex remaining height, not `_applyFullHeight`'s legacy per-board viewport cap.
   Duration-scaled Day blocks have a 16px floor; do not restore the blanket 48px minimum
   that makes compact appointments overlap. Timeline retains its separate 48px lane minimum.
 - Wall Timeline uses independent `_timelineZoomWidth`, read through `_timelineHourWidth`.

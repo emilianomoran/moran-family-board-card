@@ -1174,6 +1174,13 @@ export const wallShellStyles = css`
     }
   }
 
+  @container (max-width: 360px) {
+    /* Keep seven 44px date targets when a small phone also needs a scrollbar. */
+    .moran-wall-shell .monthwrap.compact-month {
+      padding-inline: 0;
+    }
+  }
+
   @container (max-width: 700px) {
     .moran-wall-shell .moran-wall-header {
       padding-inline: 8px;

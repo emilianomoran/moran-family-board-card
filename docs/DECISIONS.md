@@ -842,10 +842,42 @@ cover all-day/long/overnight/short events, zoom, resize, trailing edges, source 
 person filtering, details/focus and legacy. STATUS owns full QA and delivery evidence.
 No broader Timeline redesign, live HA deployment or release is implied.
 
+## D41 — Bound the full-height wall in the real HA host
+
+**Implemented for the read-only usability candidate, 2026-09-24.** The user requested
+continued work through a major release milestone without routine pauses. The concrete
+checkpoint is [CALENDAR-RC](CALENDAR-RC.md): integration-tested five-view daily use,
+not a new public-release, main-merge or event-write authorization.
+
+Actual HA r28 rendered Agenda thousands of pixels tall because its inline card and panel
+ancestors were content-sized. Its inner scroller had equal client/scroll heights; Today
+could not reveal the selected group. The prior fixed-height harness concealed the issue.
+A new content-sized-host regression reproduces it against r28.
+
+When wall `full_height` is enabled, size the whole shell to the remaining viewport,
+retaining its existing percentage max-height for smaller bounded hosts. Do not put
+another cap inside individual views. Day/Timeline/Week/Month/Agenda keep their existing
+flex scrolling, filters, details and date/zoom policies. Without full-height, retain
+host-provided sizing. The default remains false; legacy's Day sizing is unchanged.
+
+Use the existing ResizeObserver for the rendered shell as well as the outer card:
+an inline HA host alone cannot report hidden/reveal box changes. Clean up replaced
+targets and disconnected cards. A paired viewport-resize listener covers height-only
+changes; no new calendar reads, polling, saved preferences, controls or fixed rows.
+The expanded regression also reproduced a pending Agenda date jump lost on reveal
+before the shell observation correction. Delivery and actual-HA proof belong in STATUS.
+
+The complete regression run also caught a 320px Month edge case: the now-bounded
+scroller's visible scrollbar left date cells only 43px wide. At card widths up to
+360px, remove compact Month's side padding so seven date targets retain the existing
+44px minimum without horizontal scrolling. Keep the scrollbar and test threshold;
+connected Chrome measured 44.14px targets at 320px after the correction.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Continue through a major release milestone, 2026-09-24 | Work toward the read-only calendar usability candidate without routine gates: real-HA sizing repair, five-view regression/native review, tested push, targeted pilot update and durable handoff. D41 records the correction; public publication/editing remain separate. |
 | Update HA, 2026-09-23 | Deployed tested/pushed r28 to the existing read-only pilot with targeted backups and a resource-only update. Configuration, other registrations and calendar data unchanged; no Core upgrade/restart or public release. Live Chrome review found an Agenda content-sized-host/Today-scroll gap, recorded under CAL-02 for the next bounded fix, not silently marked passed. STATUS owns deployment evidence. |
 | Continue after r27, 2026-09-23 | Chrome reproduced unlabeled long/all-day Timeline bars during time browsing. D40 keeps existing titles visible within their event boundaries; no new fixed section, event semantics or live deployment. |
 | Continue after r26, 2026-09-23 | Chrome reproduced the current-time label disappearing while scrolling people. D39 moves the label into the existing pinned hour axis, preserves horizontal clock position and protects pinned names; no extra fixed section or live deployment. |

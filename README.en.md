@@ -350,7 +350,7 @@ editor. Recurring instances require the edit dialog's recurrence scope and canno
 | `hour_height` | number | `64` | Height of one hour in px (40–96) – scales the day view (wall tablet); with `fit_height` this is the upper bound |
 | `hour_width` | number | `96` | Timeline view: width of one hour in px (48–240) |
 | `fit_height` | boolean | `false` | Shrink the day view automatically so that start–end hour are fully visible without scrolling (wall tablet / kiosk) |
-| `full_height` | boolean | `false` | Stretch the board to the bottom of the screen (panel / wall tablet view); the default is a 58 % cap |
+| `full_height` | boolean | `false` | In wall mode, size the entire calendar to the remaining viewport, capped by a smaller bounded host; all five views scroll internally, including content-sized HA panel views. Without it, wall mode uses the host's supplied height. Legacy retains its Day-only viewport sizing and default 58 % board cap. |
 | `trim_hours` | boolean | `true` | Day view: cut away empty hours at the edges so the busy part of the day gets the full height (min. 6 h window; `start_hour`/`end_hour` stay the outer bounds) |
 | `col_min_width` | number | `120` | Minimum width (px) per person column, below that the board scrolls horizontally; above it the columns grow with the card width |
 | `background_hours` | number | `3` | Timed events from this length (hrs.) on are drawn as a subtle background band instead of a column; `0` = off |

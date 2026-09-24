@@ -117,6 +117,14 @@ class CdpClient {
 
 const scenarios = [
   ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
+    name: "wall", checks: "host-sizing", chromeHeight: 64, width, height,
+    expectedGeometryMarker: "host sizing:",
+  })),
+  {name: "wall", checks: "host-sizing", chromeHeight: 64, width: 1920, panelWidth: 400,
+    expectedGeometryMarker: "host sizing:"},
+  {name: "wall", checks: "host-sizing", chromeHeight: 64, width: 390, height: 844,
+    reducedMotion: true, expectedGeometryMarker: "host sizing:"},
+  ...[[1920,1080], [390,844], [320,568], [844,390]].map(([width,height]) => ({
     name: "wall", checks: "timeline-labels", chromeHeight: 64, width, height,
     expectedGeometryMarker: "timeline labels:",
   })),

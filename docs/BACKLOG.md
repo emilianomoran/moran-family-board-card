@@ -1,6 +1,6 @@
 # Calendar backlog
 
-Status: current queue, consolidated 2026-09-23. Priority below is a recommended order,
+Status: current queue, consolidated 2026-09-24. Priority below is a recommended order,
 not new user authorization. [Decisions](DECISIONS.md) own product choices;
 [STATUS](STATUS.md) owns delivery evidence. No GSD phases or mandatory gates.
 
@@ -39,9 +39,10 @@ There is no approved Month/Agenda zoom design. Preserve preference
 migration/invalidation tests when extending scales; never store appointments. Do not add
 features during a documentation-only request.
 
-### CAL-02 next: Agenda sizing in the actual HA host
+### CAL-02 candidate: sizing in the actual HA host
 
-Observed during the authorized r28 HA update, 2026-09-23; not fixed. At phone width,
+Observed during the authorized r28 HA update, 2026-09-23; corrected locally in r29 (D41),
+with full-suite/live verification in progress under [CALENDAR-RC](CALENDAR-RC.md). At phone width,
 the HA host allowed Agenda/card height to follow all event content. The internal Agenda
 element had equal client/scroll heights, so its selected-date/Today action could not
 scroll today's group into view. This is not established as an r28 regression; r12 was

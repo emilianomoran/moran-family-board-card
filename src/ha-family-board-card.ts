@@ -311,6 +311,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
   private _restoreFocus?: HTMLElement;
   private _overflowRestoreFocus?: HTMLElement;
   private _ro?: ResizeObserver;
+  private _wallResizeTarget?: HTMLElement;
   private _lastInteract = Date.now();
   private _lastCalendarDate?: Date;
 
@@ -546,6 +547,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     window.addEventListener("pageshow", this._onVisible);
     window.addEventListener("online", this._onOnline);
     window.addEventListener("offline", this._onOffline);
+    window.addEventListener("resize", this._onViewportResize);
     this._startTimer();
     this.addEventListener("pointerdown", this._onInteract);
     // minute tick so countdowns and progress bars stay live when idle
@@ -555,6 +557,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     if (typeof ResizeObserver !== "undefined") {
       this._ro = new ResizeObserver(() =>
         requestAnimationFrame(() => {
+          if (!this.isConnected) return;
           this._measureFit();
           this._restoreTimelineScroll();
           this._restoreWeekScroll();
@@ -593,6 +596,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     window.removeEventListener("pageshow", this._onVisible);
     window.removeEventListener("online", this._onOnline);
     window.removeEventListener("offline", this._onOffline);
+    window.removeEventListener("resize", this._onViewportResize);
     this.removeEventListener("pointerdown", this._onInteract);
     this._stopTimer();
     if (this._tick) {
@@ -601,6 +605,7 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
     this._ro?.disconnect();
     this._ro = undefined;
+    this._wallResizeTarget = undefined;
     window.removeEventListener("pointermove", this._onDragMove);
     window.removeEventListener("pointerup", this._onDragUp);
   }
@@ -822,6 +827,10 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
     }
   }
 
+  private _onViewportResize = (): void => {
+    if (this.isConnected) this._measureFit();
+  };
+
   /**
    * When `fit_height` is on, shrink the day grid so the whole start..end range
    * fits inside the board without scrolling. Only ever scales DOWN from the
@@ -864,11 +873,29 @@ export class FamilyBoardCard extends LitElement implements LovelaceCard {
    * 58vh cap stays for normal dashboards.
    */
   private _applyFullHeight(): void {
+    const shell = this.renderRoot.querySelector<HTMLElement>(".moran-wall-shell");
+    // Inline HA wrappers do not emit ResizeObserver box changes. Observe the
+    // rendered wall as well so a hidden/revealed or bounded panel can restore navigation.
+    if (this._ro && shell !== (this._wallResizeTarget ?? null)) {
+      if (this._wallResizeTarget) this._ro.unobserve(this._wallResizeTarget);
+      this._wallResizeTarget = shell ?? undefined;
+      if (shell) this._ro.observe(shell);
+    }
+    if (this._layout === "wall") {
+      if (!shell) return;
+      // HA panel parents can be content-sized, so 100% alone resolves to auto.
+      // Give the whole shell a definite height; its existing max-height: 100%
+      // still respects a smaller bounded embedding. Each view keeps its flex scroller.
+      const top = Math.max(0, shell.getBoundingClientRect().top + window.scrollY);
+      const height = this._config?.full_height
+        ? `${Math.max(200, Math.round(window.innerHeight - top))}px`
+        : "";
+      if (shell.style.height !== height) shell.style.height = height;
+      return;
+    }
     const board = this.renderRoot?.querySelector(".board") as HTMLElement | null;
     if (!board) return;
-    // Wall already owns a bounded flex panel. Legacy viewport math samples the
-    // entrance animation and leaves a changing height cap during zoom/reflow.
-    if (this._layout === "wall" || !this._config?.full_height) {
+    if (!this._config?.full_height) {
       if (board.style.height) {
         board.style.height = "";
         board.style.maxHeight = "";
@@ -5645,7 +5672,7 @@ if (!customElements.get("moran-family-board-card")) {
 });
 
 console.info(
-  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.28 ",
+  "%c MORAN-FAMILY-BOARD-CARD %c v0.25.1-moran.29 ",
   "background:#5B8CFF;color:#fff;border-radius:3px 0 0 3px",
   "background:#222;color:#fff;border-radius:0 3px 3px 0",
 );

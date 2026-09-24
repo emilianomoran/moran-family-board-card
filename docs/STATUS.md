@@ -1,20 +1,16 @@
 # Current status and next work
 
-Last recorded: 2026-09-23. This is the current project status, not a release announcement.
+Last recorded: 2026-09-24. This is the current project status, not a release announcement.
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
-Latest development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
-readable while panning within their bars (D40). The existing HA pilot was updated from
-r12 to r28 on 2026-09-23 at 23:10 CDT. This is a private preview deployment, not a
-GitHub/HACS release. Source, tests, built bundle and docs belong to
-`feature/moran-foundation`. Live review found an Agenda host-sizing/Today-scroll gap;
-see the deployment receipt below and CAL-02 before continuing implementation.
-Formatting, types, build, 192 UTC-launched unit tests and all 134 compiled-browser
-scenarios pass. Source `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal
-origin; remote HEAD matched and hosted CI/Validate passed. Prior r27 receipts remain historical.
-Git/remote history is the delivery source of truth.
-Earlier receipts below remain historical.
-No merge, tag or release is included in this milestone.
+Latest development build: `0.25.1-moran.29`, correcting full-height wall sizing in
+HA's content-sized host (D41). The [read-only usability candidate](CALENDAR-RC.md)
+is in progress. R28 remains installed until the tested candidate is deployed; its
+Agenda/Today issue is reproduced and corrected locally. Formatting, types, 192
+UTC-launched unit tests, build and all 140 compiled-browser scenarios pass. Connected
+Chrome local review passed. This source milestone is ready for commit/push; exact-SHA
+hosted checks, targeted deployment and actual-HA verification are next.
+Earlier dated receipts retain their original delivery state. No merge, tag or release.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
 tests now pass under `TZ=UTC npm test`, with DST assertions unchanged. This is not a change
@@ -66,6 +62,40 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### Full-height HA host correction, 2026-09-24 — candidate in progress
+
+Actual HA desktop r28 reproduced a 4012px-tall Agenda in a 729px viewport. The new
+synthetic host failed r28 with its bottom at 7535px against a 1080px viewport.
+The existing bounded harness did not model HA's inline card/content-sized ancestors.
+R29 gives the shell (not each grid) a definite height under `full_height`; existing
+percentage max-height respects smaller fixed containers. All five view scrollers retain
+their layout. A second failing regression exposed missing hidden/reveal observation for
+the inline host; observing the wall shell with the existing observer repairs it.
+
+Six focused host-sizing cases pass across desktop, phone, small phone, landscape,
+400px embedding and reduced motion. They cover all views, selected Agenda/Today,
+manual browsing, refreshed data, read-only details/focus, Status expansion, bounded
+resize, hidden/reveal, empty weeks, height-only viewport resize, opt-out and legacy.
+No calendar reads are caused by sizing. The complete 140-scenario compiled-browser
+suite passes, along with formatting, types, 192 UTC-launched unit tests and build.
+Deployment receipts follow when finished; synthetic tests alone do not establish
+actual-HA success.
+
+The full-suite run caught Month targets narrowed to 43px by a visible scrollbar at
+320px. Removing compact side padding at widths up to 360px restores 44.14px targets;
+the scrollbar, seven visible weekdays and existing minimum-target assertions remain.
+All five focused presentation cases now pass, as do all six host-sizing cases.
+
+Connected Chrome local review covered desktop 1512×729, phone 390×844, small phone
+320×568 and a 400px card embedded in a desktop, including dark mode. Agenda fills the
+remaining panel, reveals its selected day and scrolls without scrolling the document.
+Native event details/Escape retained row focus and browsing. Week entry/Today/manual
+scroll, Month date-to-Day and Day overflow-to-Agenda retained date context. The 320px
+Month grid has no horizontal overflow. At 844×390, native Timeline scrolling retained
+the pinned names/current-time label and readable long-event titles inside the fitted panel.
+Screenshots were reviewed and the synthetic page had no warning/error entries. These are
+browser-size checks, not physical-device proof.
 
 ### HA r28 deployment, 2026-09-23
 

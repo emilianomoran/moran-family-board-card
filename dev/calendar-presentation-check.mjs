@@ -71,7 +71,8 @@ export async function runCalendarPresentationChecks(card, hass, nextRender) {
   if (shellWidth<=600) {
     assert(getComputedStyle(summary).display!=='none', 'Phone Month has no compact summary.');
     assert(getComputedStyle(cell.querySelector('.mchips')).display==='none', 'Tiny Month chips remain interactive on phone.');
-    assert(cell.getBoundingClientRect().width >= 44 && cell.getBoundingClientRect().height >= 64, 'Month date targets are too small.');
+    assert(cell.getBoundingClientRect().width >= 44 && cell.getBoundingClientRect().height >= 64,
+      `Month date targets are too small: ${cell.getBoundingClientRect().width}x${cell.getBoundingClientRect().height}, panel ${root.querySelector('.monthwrap').clientWidth}px, shell ${shellWidth}px.`);
     assert(root.querySelector('.monthwrap').scrollWidth<=root.querySelector('.monthwrap').clientWidth+1, 'Phone Month requires horizontal scrolling.');
   } else {
     assert(getComputedStyle(summary).display==='none', 'Desktop Month unexpectedly uses phone summaries.');

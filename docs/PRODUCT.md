@@ -38,6 +38,9 @@ rail is not an acceptance target. There is no standalone React implementation to
 
 This replaces the early screenshot/concept, not the entire product design:
 
+- With `full_height`, the wall calendar owns the remaining viewport and respects a
+  smaller explicitly bounded host. Each view scrolls internally even when HA's parent
+  grows with content. Without it, the existing host-provided sizing remains (D41).
 - One 48px header; neutral iOS-like view capsule capped at 40px with 34px pills.
 - Wall view/date tabs have one keyboard entry stop per group. Left/Right and Home/End
   move focus; Enter/Space selects. Tab leaves the group and re-entry targets its selection.

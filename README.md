@@ -202,7 +202,7 @@ persons:
 | `hour_height`   | number  | `64`    | Höhe einer Stunde in px (40–96) – Tagesansicht skalieren (Wandtablet); bei `fit_height` die Obergrenze |
 | `hour_width`    | number  | `96`    | Zeitstrahl-Ansicht: Breite einer Stunde in px (48–240) |
 | `fit_height`    | boolean | `false` | Tagesansicht automatisch so verkleinern, dass Start–Endstunde ohne Scrollen komplett sichtbar sind (Wandtablet/Kiosk) |
-| `full_height`   | boolean | `false` | Board bis zum unteren Bildschirmrand strecken (Panel-/Wandtablet-Ansicht); Standard ist eine 58 %-Deckelung |
+| `full_height`   | boolean | `false` | Im Wall-Modus den gesamten Kalender bis zum unteren Bildschirmrand strecken, begrenzt durch einen kleineren Container; alle fünf Ansichten scrollen intern, auch in inhaltsgroßen HA-Panel-Ansichten. Ohne diese Option gilt die vorgegebene Containerhöhe. Legacy behält die Tagesansicht mit standardmäßiger 58-%-Begrenzung. |
 | `trim_hours`    | boolean | `true`  | Tagesansicht: leere Randstunden automatisch abschneiden, damit der belegte Teil des Tages die volle Höhe bekommt (min. 6-h-Fenster; `start_hour`/`end_hour` bleiben die Außengrenzen) |
 | `col_min_width` | number  | `120`   | Mindestbreite (px) pro Personenspalte, darunter wird horizontal gescrollt; Spalten wachsen darüber hinaus mit der Kartenbreite |
 | `background_hours` | number | `3`  | Timed-Termine ab dieser Länge (Std.) als dezentes Hintergrund-Band statt als Spalte; `0` = aus |

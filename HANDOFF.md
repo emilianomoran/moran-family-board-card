@@ -1,6 +1,6 @@
 ---
 project: moran-family-board-card
-date: 2026-09-23
+date: 2026-09-24
 machine: "local macOS development host (hostname omitted)"
 source: handoff-mattpocock
 ---
@@ -13,9 +13,14 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## First things to know
 
+- Current work: [read-only calendar usability candidate](docs/CALENDAR-RC.md), requested
+  2026-09-24 without routine pauses. R29 fixes full-height content-sized HA parents and
+  hidden/reveal navigation (D41), plus small-phone Month targets. All 140 browser scenarios,
+  192 UTC-launched units, format/types/build and local Chrome review pass. Source push,
+  hosted checks and HA delivery remain to be recorded in STATUS. No publication/editing scope.
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
-- Latest development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
+- Previous development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
   readable while panning (D40). Wall titles follow the existing scroller inside their
   event bars, truncate to the card width and depart with the trailing edge. Optional time
   follows below the title without colliding. Event geometry, details, filters and legacy
@@ -142,11 +147,10 @@ when the task originated in the separate Home Assistant operations workspace.
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
    D34's restricted Day-overflow, D35–D37's date/Today gaps and D38–D40's Timeline identity/labels
    are implemented and synthetically verified; do not reimplement them or treat the fallback
-   presentations as final design approval. The next concrete defect is Agenda in actual HA's
-   content-sized host: its card grows to content height, so the internal scroller cannot
-   reveal Today. Add an HA-like unbounded-parent regression, fix sizing and selected-date
-   reveal, and verify actual HA as well as bounded desktop/phone fixtures. This was found
-   during r28 deployment; it has not been compared with r12 or fixed. See CAL-02/STATUS.
+   presentations as final design approval. R29 locally corrects the actual-HA Agenda
+   content-sized-host/Today defect and adds five-view host regressions (D41). The
+   [candidate checklist](docs/CALENDAR-RC.md) and STATUS own remaining full-suite,
+   push and actual-HA delivery checks; do not assume deployment from a local build.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow

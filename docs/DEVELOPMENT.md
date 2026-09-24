@@ -48,6 +48,10 @@ no chat history and no Home Assistant credentials. Read [AGENTS](../AGENTS.md) f
    opening Timeline without saved preferences. Pan through the day: titles should remain
    readable after the pinned names, then leave with their own event's trailing edge.
    Click a visible title to open full read-only details; Escape should retain browsing/focus.
+   Add `&host=content` to model HA's content-sized parent and inline card host with
+   `full_height: true`. Combine with `&agenda-context=1` for a crowded week: Agenda/Week
+   should reveal the selected date without making the whole document several screens tall.
+   This opts out of saved preferences and never changes a real HA dashboard.
 
 4. After source edits, rebuild and reload. The fixture imports **dist**, not live TypeScript.
    `npm run watch` rebuilds continuously but does not run a web server or reload the browser.
@@ -97,6 +101,7 @@ assuming new filter names. Useful current filters:
 
 | Filter | Primary coverage |
 |---|---|
+| `host-sizing` | Content-sized/inline HA host across five views, Agenda Today/details/manual scroll, smaller bounded hosts, hidden/reveal, empty content, height-only resize, opt-out and legacy |
 | `timeline-labels` | Readable all-day/long/overnight titles while panning, zoom/resize bounds, trailing-edge containment, stacked time/truncation, details/focus, refresh, person filtering and legacy |
 | `timeline-marker` | Current-time label on the pinned hour axis, vertical/horizontal browsing, clock ticks, 12/24-hour formatting, zoom/range-edge containment, stacking/input isolation, disabled/other-date states and legacy |
 | `month-today` | Explicit Today date/column reveal, both axes, overflow collapse, current-data/layout waits and cancellation, manual context/details, compact/restricted grids, locale/legacy and native Enter/mouse/touch |

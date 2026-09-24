@@ -2,7 +2,7 @@
 
 This repository owns the Moran Calendar product record. A fresh agent should not need
 the original conversation or the private HA workspace to understand or develop it.
-Updated 2026-09-23. Private access/configuration remains outside this repo by design.
+Updated 2026-09-24. Private access/configuration remains outside this repo by design.
 
 ## Start here
 
@@ -18,6 +18,7 @@ Updated 2026-09-23. Private access/configuration remains outside this repo by de
 |---|---|
 | User decisions, corrections and conversation outcomes | [DECISIONS](DECISIONS.md) |
 | Implemented/deployed state and verification evidence | [STATUS](STATUS.md) |
+| Current major product checkpoint and release boundaries | [Calendar usability candidate](CALENDAR-RC.md) |
 | Code map, runtime flow and invariants | [ARCHITECTURE](ARCHITECTURE.md) |
 | Why this fork instead of another card or React | [ADR 0001](adr/0001-implementation-base.md) |
 | Skylight, Fantastical and alternative-card findings | [Research](research/README.md) |
@@ -28,6 +29,7 @@ Updated 2026-09-23. Private access/configuration remains outside this repo by de
 
 ## Conversation coverage
 
+- D41: real HA host sizing, hidden-panel recovery and the read-only calendar usability candidate.
 - D01–D04: Skylight-inspired scope, dedicated HA fork, read path and architecture choice.
 - D05–D08: no GSD gates, responsive presentation, Fantastical navigation and full-day pilot.
 - D09–D13: Status tiles, durable records, daily use, view capsule and pilot delivery.
