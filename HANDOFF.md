@@ -13,11 +13,15 @@ when the task originated in the separate Home Assistant operations workspace.
 
 ## First things to know
 
-- Current work: [read-only calendar usability candidate](docs/CALENDAR-RC.md), requested
-  2026-09-24 without routine pauses. R29 fixes full-height content-sized HA parents and
-  hidden/reveal navigation (D41), plus small-phone Month targets. All 140 browser scenarios,
-  192 UTC-launched units, format/types/build and local Chrome review pass. Source push,
-  hosted checks and HA delivery remain to be recorded in STATUS. No publication/editing scope.
+- Major checkpoint completed: [read-only calendar usability candidate](docs/CALENDAR-RC.md),
+  requested and deployed 2026-09-24. R29 fixes full-height content-sized HA parents,
+  hidden/reveal navigation and small-phone Month targets (D41). All 140 browser scenarios,
+  192 UTC-launched units, format/types/build and local/actual-HA Chrome review pass.
+  Source `03ed24507ab12a2100b0ea5edf3db5421b4c0cc2` is pushed; exact-SHA CI/Validate pass.
+  STATUS owns evidence. No main merge, public publication, editing or hardware certification.
+  Known follow-up CAL-06: Agenda can lose its scroll position when source availability
+  changes; data recovers and Today restores the date. Do not confuse it with the now-fixed
+  host-sizing issue or claim flawless recovery. Ordinary refresh/details retain position.
 - Work on `feature/moran-foundation`. `main` still holds the upstream baseline. Check
   the actual branch and working tree before editing; do not switch or overwrite work blindly.
 - Previous development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
@@ -29,7 +33,7 @@ when the task originated in the separate Home Assistant operations workspace.
   `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal origin; remote HEAD
   matched and hosted CI/Validate passed. STATUS owns evidence; later docs-only receipts
   retain this build. R28 was deployed to the existing HA pilot on 2026-09-23 at 23:10 CDT;
-  STATUS owns the live checks and open Agenda host-sizing finding.
+  STATUS retains that deployment's Agenda host-sizing finding, now closed by r29.
 - Previous development build r27 kept Timeline's current-time label on
   the pinned hour axis (D39). Vertical people scrolling no longer loses the label;
   horizontal time browsing keeps it attached to the line. Range-edge labels stay inside
@@ -116,10 +120,10 @@ when the task originated in the separate Home Assistant operations workspace.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` now passes all 192; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
-- Installed HA version is `0.25.1-moran.28`, source
-  `44644e1b16f9a4ef727fab7ac888252fde76d922`, deployed 2026-09-23 at 23:10 CDT.
+- Installed HA version is `0.25.1-moran.29`, source
+  `03ed24507ab12a2100b0ea5edf3db5421b4c0cc2`, deployed 2026-09-24 at 10:35 CDT.
   Only the existing preview resource changed; configuration and other registrations did not.
-  R12 is retained for targeted rollback in private operations records. Individual no-deploy
+  R28 is retained for targeted rollback in private operations records. Individual no-deploy
   receipts above describe development-time state; r13–r28 reached HA together in this update.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
@@ -147,10 +151,11 @@ when the task originated in the separate Home Assistant operations workspace.
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
    D34's restricted Day-overflow, D35–D37's date/Today gaps and D38–D40's Timeline identity/labels
    are implemented and synthetically verified; do not reimplement them or treat the fallback
-   presentations as final design approval. R29 locally corrects the actual-HA Agenda
-   content-sized-host/Today defect and adds five-view host regressions (D41). The
-   [candidate checklist](docs/CALENDAR-RC.md) and STATUS own remaining full-suite,
-   push and actual-HA delivery checks; do not assume deployment from a local build.
+   presentations as final design approval. R29 closes the actual-HA Agenda
+   content-sized-host/Today defect with five-view host regressions and actual-HA proof (D41).
+   The [candidate checklist](docs/CALENDAR-RC.md) is complete. Next concrete engineering
+   follow-up is CAL-06's availability-transition browsing anchor; otherwise follow new
+   user feedback. Do not re-run the closed sizing work or infer public-release authority.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
@@ -159,6 +164,16 @@ when the task originated in the separate Home Assistant operations workspace.
    remote branch, not just a successful local commit. Keep release/deploy/push states separate.
 
 ## Evidence and remaining limits
+
+R29 passes 192 UTC-launched units and all 140 browser scenarios, plus format/types/build
+and hosted checks. Actual HA Agenda now fits the desktop/phone viewport and reveals Today.
+All five phone views, desktop Agenda/Timeline, native scrolling, filters, Status disclosure,
+read-only details/focus, full-day range and zoom/Reset were reviewed in connected Chrome.
+A calendar entity was unavailable before deployment despite successful range reads; a
+targeted HA entity refresh restored availability and the open card recovered its data.
+No provider settings/appointments changed. This exposed CAL-06; see STATUS for precise limits.
+Normal viewport, Timeline/Today, all people, collapsed Status and default zoom were restored.
+The development and deployment histories below remain dated evidence, not current blockers.
 
 R28 reproduced an all-day bar with its title offscreen after horizontal panning; the
 regression also failed r27. Six `timeline-labels` cases pass, covering long/all-day/overnight

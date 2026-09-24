@@ -873,6 +873,13 @@ scroller's visible scrollbar left date cells only 43px wide. At card widths up t
 44px minimum without horizontal scrolling. Keep the scrollbar and test threshold;
 connected Chrome measured 44.14px targets at 320px after the correction.
 
+Delivered 2026-09-24: source/bundle pushed with exact-SHA CI/Validate passing, all 140
+browser scenarios and 192 units passing, then resource-only HA deployment and actual
+desktop/phone review. The candidate checkpoint is complete, not a public release.
+A pre-deployment HA source-unavailability episode recovered after a targeted entity-data
+refresh. Its availability-key snapshot reset exposed a separate Agenda browsing-position
+edge case (CAL-06); retain truthful source-health states when addressing that follow-up.
+
 ## Discussion sequence and disposition
 
 | Discussion | Outcome and current disposition |

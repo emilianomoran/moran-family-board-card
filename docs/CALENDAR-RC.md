@@ -1,6 +1,7 @@
 # Read-only calendar usability release candidate
 
-Status: in progress, 2026-09-24. User requested continued work through a major release
+Status: completed and deployed to the existing HA pilot, 2026-09-24, build
+`0.25.1-moran.29`. User requested continued work through a major release
 milestone without routine pauses. This is the next product checkpoint, not permission
 to publish a GitHub/HACS release, merge main, enable editing or redesign the product.
 
@@ -16,10 +17,10 @@ in the existing HA pilot, with a repeatable regression suite and portable handof
 - [x] Pass types, format, units, build and the complete compiled-browser suite (192 units,
   140 compiled-browser scenarios).
 - [x] Review native interactions and screenshots in connected Chrome at desktop/phone sizes.
-- [ ] Commit/push the tested source and bundle; verify exact-SHA hosted checks.
-- [ ] Safely update only the existing HA preview resource, retain rollback and verify
+- [x] Commit/push the tested source and bundle; verify exact-SHA hosted checks.
+- [x] Safely update only the existing HA preview resource, retain rollback and verify
   actual HA Agenda/Today plus the other views. No source-calendar writes or Core restart.
-- [ ] Refresh STATUS, decisions, backlog and handoff with evidence and remaining limits.
+- [x] Refresh STATUS, decisions, backlog and handoff with evidence and remaining limits.
 
 The existing zoom, overflow, keyboard navigation, pinned Timeline identity/time/title and
 date-context work is included, not reimplemented. Reopen defects when evidence contradicts
@@ -44,6 +45,11 @@ the harness. Product acceptance does not mean every future usability preference 
 [BACKLOG](BACKLOG.md) distinguishes implemented behavior from future proposals.
 
 ## Boundaries after this checkpoint
+
+Known follow-up CAL-06: when a calendar entity changes availability, Agenda's snapshot
+invalidation can reset browsing position. Data recovers and explicit Today restores its
+date; ordinary same-availability refresh/details retain position. This candidate is not
+a claim of flawless failure/recovery context. See STATUS for the actual-HA evidence.
 
 Final wall hardware, physical Safari/network-handoff testing, public-distribution dependency
 and installation audits, editing, household modules and full visual design remain separate.

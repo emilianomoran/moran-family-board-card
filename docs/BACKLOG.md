@@ -9,7 +9,7 @@ not new user authorization. [Decisions](DECISIONS.md) own product choices;
 | ID | Priority / state | Outcome and completion criteria | Source |
 |---|---|---|---|
 | CAL-01 | Day, Timeline, Week and browser-local persistence implemented through r19 | Independent scales, anchored scrolling, Reset, native keyboard/touch support and scoped reload persistence with opt-out. Further refinement follows concrete user feedback; Month/Agenda zoom is not assumed. | D19, D27, D29–D31 |
-| CAL-02 | Month overflow r20; keyboard tabs r21; restricted Day overflow r22; Agenda date reveal r23; Week date reveal r24; Month Today reveal r25; tall Timeline identity r26; pinned Timeline time label r27; readable long-event titles r28; broader design deferred | Consistent, readable navigation and density across all five views at desktop, phone and portrait sizes. Preserve D32's Month fallback, D33's keyboard navigation, D34's restricted Day list/details, D35–D37's date/Today and manual-scroll context, D38–D40's visible Timeline identity/labels and D18–D21 fixes. Continue with concrete feedback or reproduced usability defects, not an assumed full redesign. | D06, D07, D18, D32–D40 |
+| CAL-02 | Read-only usability candidate completed/deployed through r29; broader design deferred | Five-view usability, density, overflow, keyboard/date context and Timeline labels are integration-tested. R29 closes actual-HA full-height/Agenda Today sizing and narrow Month targets. Preserve D32–D41 and D18–D21. Continue with concrete feedback or reproduced defects, not an assumed full redesign. CAL-06 owns the remaining recovery-position edge case. | D06, D07, D18, D32–D41 |
 | CAL-03 | Hardware-dependent; open | Validate the actual portrait/landscape wall installation. Record resolution, device pixel ratio, browser/kiosk wrapper, distance and touch reach. Confirm full-day access, reload/wake and legibility. Desktop emulation cannot certify physical hardware. | D06 |
 
 ### CAL-01 implementation handoff
@@ -39,21 +39,19 @@ There is no approved Month/Agenda zoom design. Preserve preference
 migration/invalidation tests when extending scales; never store appointments. Do not add
 features during a documentation-only request.
 
-### CAL-02 candidate: sizing in the actual HA host
+### CAL-02 candidate: completed in the actual HA host
 
-Observed during the authorized r28 HA update, 2026-09-23; corrected locally in r29 (D41),
-with full-suite/live verification in progress under [CALENDAR-RC](CALENDAR-RC.md). At phone width,
+Observed during the authorized r28 HA update, 2026-09-23; corrected and deployed in r29
+on 2026-09-24 (D41), closing [CALENDAR-RC](CALENDAR-RC.md). At phone width,
 the HA host allowed Agenda/card height to follow all event content. The internal Agenda
 element had equal client/scroll heights, so its selected-date/Today action could not
 scroll today's group into view. This is not established as an r28 regression; r12 was
 not compared. Existing bounded-harness D35 tests still pass but miss this host shape.
 
-Add a synthetic content-sized HA-like parent, then constrain the intended wall scroll
-region without breaking legacy or bounded cards. Verify entry/Today/date reveal, manual
-browsing, resize, source refresh, details/focus and short/empty weeks at desktop/phone
-sizes; finish with actual HA review. Check other views for the same host condition
-before claiming their behavior. No new fixed toolbar, zoom mode or calendar writes.
-See [deployment evidence](STATUS.md#ha-r28-deployment-2026-09-23).
+The new content-sized/inline host regressions cover all five views and hidden/resize
+states, with no added toolbar, zoom mode or calendar writes. All 140 browser scenarios
+and 192 units pass. Actual HA desktop/phone review verifies Today, fitted scrollers,
+filters, details/focus, full-day access and zoom. See [STATUS](STATUS.md) for exact evidence.
 
 ## Proposals and engineering follow-ups
 
@@ -63,6 +61,7 @@ These are agent recommendations or unresolved questions, not already approved fe
 |---|---|---|
 | CAL-04 | Medium; product policy open | Decide whether Status tiles need a view-independent lookahead, a “soon” threshold, all-day busy behavior or overlap explanation. Keep current availability truthful while deciding. No new polling without a measured reason. |
 | CAL-05 | Medium; future interaction exploration | Evaluate an animated or scroll-driven date pager only if it improves usability. Preserve separate people/time panning, discrete selection and time context. Current one-day heading gestures already work. No claim of exact Fantastical gesture parity. |
+| CAL-06 | Medium; observed recovery-context gap | Preserve Agenda's date/row browsing anchor when an HA source changes availability. Actual r29 recovered events but reset Agenda to scrollTop 0; Today restored the correct date. `_maybeFetch` includes availability in the key and `_fetchEvents` clears the obsolete snapshot, temporarily removing rows. Add a failing synthetic availability-transition case; retain truthful partial/error states, avoid stale event display and cancel restoration after newer user input. No extra reads or provider-setting changes. Ordinary refresh/detail context already passes. |
 | ENG-01 | Before public release; re-audit required | Re-run dependency audit, separate runtime and development exposure, then upgrade in an isolated tested change. Old September 11 advisory counts are historical, not current facts. Never use force-upgrades as an incidental UI step. |
 | ENG-02 | Medium; coverage gap | Add visual-editor configuration round-trip tests before significant editor work. Preserve unknown fields and shared config normalization; inspect current coverage first. |
 | ENG-03 | Medium; measured work only | Reduce controller coupling or redundant processing when a feature/performance measurement warrants it. Extract focused seams, not a React rewrite or a speculative new state framework. |

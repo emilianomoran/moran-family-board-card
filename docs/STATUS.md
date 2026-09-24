@@ -5,11 +5,14 @@ See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
 Latest development build: `0.25.1-moran.29`, correcting full-height wall sizing in
 HA's content-sized host (D41). The [read-only usability candidate](CALENDAR-RC.md)
-is in progress. R28 remains installed until the tested candidate is deployed; its
-Agenda/Today issue is reproduced and corrected locally. Formatting, types, 192
-UTC-launched unit tests, build and all 140 compiled-browser scenarios pass. Connected
-Chrome local review passed. This source milestone is ready for commit/push; exact-SHA
-hosted checks, targeted deployment and actual-HA verification are next.
+is complete and installed in the existing HA pilot as of 2026-09-24 at 10:35 CDT.
+Source `03ed24507ab12a2100b0ea5edf3db5421b4c0cc2` is pushed to personal origin; remote
+HEAD matched. [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/36021165504)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/36021165410)
+passed for that exact source. Formatting, types, 192 UTC-launched unit tests, build and
+all 140 compiled-browser scenarios pass. Local and actual-HA Chrome review passed.
+The Agenda host-sizing defect is closed; CAL-06 records a separate source-recovery
+scroll-context edge case. Final visual design/hardware and public publication remain separate.
 Earlier dated receipts retain their original delivery state. No merge, tag or release.
 
 ENG-05's code repair is implemented: Vitest sets Chicago before workers start. All 192
@@ -37,10 +40,10 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `44644e1b16f9a4ef727fab7ac888252fde76d922`, version
-`0.25.1-moran.28`, on `feature/moran-foundation`, deployed 2026-09-23 at 23:10 CDT.
+Installed application checkpoint: `03ed24507ab12a2100b0ea5edf3db5421b4c0cc2`, version
+`0.25.1-moran.29`, on `feature/moran-foundation`, deployed 2026-09-24 at 10:35 CDT.
 This source is pushed to personal origin, not published as a GitHub/HACS release.
-The private pilot uses a dated bundle; r12 remains available for targeted rollback.
+The private pilot uses a dated bundle; prior r28 remains available for targeted rollback.
 Laptop preview servers are separate from the installed HA dashboard and do not update
 its bundle automatically.
 
@@ -63,7 +66,7 @@ its broader design remains deferred, not silently authorized by closing this bas
 
 ## Verification completed
 
-### Full-height HA host correction, 2026-09-24 — candidate in progress
+### Full-height HA host correction, 2026-09-24 — candidate completed and deployed
 
 Actual HA desktop r28 reproduced a 4012px-tall Agenda in a 729px viewport. The new
 synthetic host failed r28 with its bottom at 7535px against a 1080px viewport.
@@ -79,8 +82,7 @@ manual browsing, refreshed data, read-only details/focus, Status expansion, boun
 resize, hidden/reveal, empty weeks, height-only viewport resize, opt-out and legacy.
 No calendar reads are caused by sizing. The complete 140-scenario compiled-browser
 suite passes, along with formatting, types, 192 UTC-launched unit tests and build.
-Deployment receipts follow when finished; synthetic tests alone do not establish
-actual-HA success.
+Actual-HA verification below confirms the repair beyond the synthetic fixtures.
 
 The full-suite run caught Month targets narrowed to 43px by a visible scrollbar at
 320px. Removing compact side padding at widths up to 360px restores 44.14px targets;
@@ -96,6 +98,36 @@ Month grid has no horizontal overflow. At 844×390, native Timeline scrolling re
 the pinned names/current-time label and readable long-event titles inside the fitted panel.
 Screenshots were reviewed and the synthetic page had no warning/error entries. These are
 browser-size checks, not physical-device proof.
+
+Updated only the existing pilot's resource URL, after private targeted backups, fresh
+drift checks, committed-bundle verification and atomic upload. Served SHA-256:
+`106cbdbaf1c90d70c415892f4dec97397c4412af9e00e84d07c7109087920454`.
+Repeated verification confirmed unchanged dashboard configuration, all other resources
+and all dashboard registrations; r28 is retained. `ha core check` passed. No Core
+upgrade/restart, integration settings change, appointment write, main merge or public release.
+
+Actual HA Chrome desktop 1512×729 Agenda now ends at y=729 rather than growing to
+4012px. Today reveals its heading at the panel top (y=225 with HA chrome and filters).
+Native scrolling stays inside the panel; read-only details/Escape preserve row focus and
+scrollTop 2424. At 390×844, the Agenda ends at y=844 with Today at y=236. Person filtering
+and Status expand/collapse preserve the fitted panel. Week entry/Today and horizontal
+panning retain pinned context; populated Month fits seven columns and drills into the
+chosen Day; Day scrolls through 11 PM to midnight; Timeline fills the remaining height,
+positions the current-time marker and supports native panning and 50%/100% zoom/Reset.
+Screenshots and console were reviewed using the frontend-testing skill. No new Family
+Board warning/error was observed; existing HA routing/custom-sidebar and other-card
+messages remain. Timeline/Today, all seven people, collapsed Status, 100% zoom and normal
+viewport were restored. The updated HA page remains open in Chrome.
+
+Live source-health episode during review: one calendar entity had become unavailable
+before deployment although its range-read endpoint still returned events. The card correctly
+showed partial data, not a healthy empty calendar. A targeted HA entity-data refresh restored
+availability; the already-open card recovered both sources without a reload. Why HA marked
+that entity unavailable was not established. No provider settings or appointments changed.
+This also exposed **CAL-06**: availability changes invalidate the snapshot and can reset
+Agenda's scroll position; explicit Today restores it. Ordinary same-availability refresh and
+details retain browsing. This is a recorded candidate limitation, not a claim of perfect
+recovery context or a reason to reopen the waived provider-timing test.
 
 ### HA r28 deployment, 2026-09-23
 
@@ -120,7 +152,7 @@ HA routing/custom-sidebar and other-card messages remain, so the global console 
 claimed clean. Original Timeline/Today, people visibility, collapsed Status tiles and
 normal viewport were restored; the updated HA page was left open in Chrome.
 
-**Open CAL-02 finding:** actual HA's content-sized host lets Agenda grow instead of
+**Historical CAL-02 finding, closed by r29 above:** actual HA's content-sized host lets Agenda grow instead of
 constraining its internal scroller. At 390×844, the card was about 4949px high and
 `.agenda` had equal 4780px client/scroll heights with scrollTop 0. Today's group was
 below the viewport, and explicit Today did not reveal it. This host shape is missing
