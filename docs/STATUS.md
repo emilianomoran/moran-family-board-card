@@ -7,8 +7,8 @@ Latest development build: `0.25.1-moran.26`, keeping Timeline identity visible i
 person rows (D38). The installed HA pilot remains r12; r13–r26 are not deployed or released. Source,
 tests, built bundle and docs belong to this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 122 compiled-browser scenarios
-pass. Local verification is complete; milestone push/hosted-check receipts are recorded below
-when confirmed. The prior r25 receipts remain historical.
+pass. Source `efcb6946fdec87b97e687856cdc34f3da1ff33bf` is pushed to personal origin;
+remote HEAD matched and hosted CI/Validate passed. Later docs-only receipts retain this build.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -100,7 +100,14 @@ The loopback server's bundle matches dist. All 122 compiled-browser scenarios pa
 including eight expanded `timeline` configurations and the existing date, details, density,
 recovery, routing, responsive and legacy checks. Ten updated Markdown files have no broken
 local links; the added-diff credential-pattern check found no matches. The pre-existing
-untracked debug note remains untouched. Push/hosted-check receipts follow when confirmed.
+untracked debug note remains untouched.
+Delivery: source `efcb6946fdec87b97e687856cdc34f3da1ff33bf` was committed and pushed to
+personal origin's `feature/moran-foundation`; `git ls-remote` matched local HEAD.
+Push [CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35945711393)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35945711307)
+completed successfully for that source. Existing non-failing Actions runtime/runner notices
+remain ENG-06; no incidental workflow/dependency upgrade. Later receipt-only commits retain
+this bundle. No main merge, tag or release.
 Physical Safari/screen-reader speech/wall hardware are not newly verified;
 the installed HA r12 and private calendars were not changed.
 

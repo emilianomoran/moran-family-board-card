@@ -19,8 +19,10 @@ when the task originated in the separate Home Assistant operations workspace.
   person rows (D38). Chrome review reproduced a centered name below a short landscape
   viewport. Wall avatar/name/presence now start at the row top and stick below the hour
   axis within their own row; horizontal pinning, filtering and legacy remain intact.
-  No extra fixed section, calendar read, preference or scroll handler. STATUS owns QA
-  and delivery evidence. No HA deployment.
+  No extra fixed section, calendar read, preference or scroll handler. Source
+  `efcb6946fdec87b97e687856cdc34f3da1ff33bf` is pushed to personal origin; remote HEAD
+  matched and hosted CI/Validate passed. STATUS owns evidence; later docs-only receipts
+  retain this build. No HA deployment.
 - Previous development build r25 repaired Month's explicit Today action (D37).
   Clicking the month name reveals today's date/column inside the grid, below pinned weekdays.
   Already visible dates stay put. Current-data/layout waits cancel on newer grid input or
