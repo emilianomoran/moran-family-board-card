@@ -20,7 +20,10 @@ when the task originated in the separate Home Assistant operations workspace.
   event bars, truncate to the card width and depart with the trailing edge. Optional time
   follows below the title without colliding. Event geometry, details, filters and legacy
   are preserved. CSS-only behavior; no extra fixed section,
-  DOM wrapper, state, read or listener. STATUS owns verification/delivery. No HA deployment.
+  DOM wrapper, state, read or listener. Source
+  `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal origin; remote HEAD
+  matched and hosted CI/Validate passed. STATUS owns evidence; later docs-only receipts
+  retain this build. No HA deployment.
 - Previous development build r27 kept Timeline's current-time label on
   the pinned hour axis (D39). Vertical people scrolling no longer loses the label;
   horizontal time browsing keeps it attached to the line. Range-edge labels stay inside

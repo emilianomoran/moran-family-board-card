@@ -8,7 +8,8 @@ readable while panning within their bars (D40). The installed HA pilot remains r
 r13–r28 are not deployed or released. Source, tests, built bundle and docs belong to
 this milestone on `feature/moran-foundation`.
 Formatting, types, build, 192 UTC-launched unit tests and all 134 compiled-browser
-scenarios pass. Milestone delivery is in progress. Prior r27 receipts remain historical.
+scenarios pass. Source `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal
+origin; remote HEAD matched and hosted CI/Validate passed. Prior r27 receipts remain historical.
 Git/remote history is the delivery source of truth.
 Earlier receipts below remain historical.
 No merge, tag or release is included in this milestone.
@@ -102,9 +103,17 @@ The frontend-testing skill guided reproduction, actual input checks and rendered
 
 Formatting, typecheck, 192 UTC-launched units and build pass. Dist SHA-256:
 `ae82dc77acfaff03bd3bf8cfd7fa715c5e6bda714dad09dab20ff920f46c60c5`.
-The served loopback bytes match dist. Chrome loaded the r28 version banner. Delivery
-receipts follow when complete. No live HA deployment, provider
-write, main merge, tag or release. Physical Safari/wall hardware remain unverified.
+The served loopback bytes match dist. Chrome loaded the r28 version banner.
+
+Source `44644e1b16f9a4ef727fab7ac888252fde76d922` was committed and pushed to personal
+origin's `feature/moran-foundation`; `git ls-remote` matched local HEAD. Hosted push
+[CI](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35951602766)
+and [Validate](https://github.com/emilianomoran/moran-family-board-card/actions/runs/35951602738)
+passed, as did the corresponding PR checks. Existing non-failing Actions runtime/runner
+notices remain tracked under ENG-06. This subsequent docs-only receipt does not change
+the r28 bundle. The unrelated local planning note remains untouched and untracked.
+No live HA deployment, provider write, main merge, tag or release. Physical Safari/wall
+hardware remain unverified.
 
 ### Timeline current-time label, 2026-09-23
 
