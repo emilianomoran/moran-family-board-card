@@ -4,9 +4,11 @@ Last recorded: 2026-09-23. This is the current project status, not a release ann
 See [DECISIONS.md](DECISIONS.md) for scope and discussion history.
 
 Latest development build: `0.25.1-moran.28`, keeping long/all-day Timeline event titles
-readable while panning within their bars (D40). The installed HA pilot remains r12;
-r13–r28 are not deployed or released. Source, tests, built bundle and docs belong to
-this milestone on `feature/moran-foundation`.
+readable while panning within their bars (D40). The existing HA pilot was updated from
+r12 to r28 on 2026-09-23 at 23:10 CDT. This is a private preview deployment, not a
+GitHub/HACS release. Source, tests, built bundle and docs belong to
+`feature/moran-foundation`. Live review found an Agenda host-sizing/Today-scroll gap;
+see the deployment receipt below and CAL-02 before continuing implementation.
 Formatting, types, build, 192 UTC-launched unit tests and all 134 compiled-browser
 scenarios pass. Source `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal
 origin; remote HEAD matched and hosted CI/Validate passed. Prior r27 receipts remain historical.
@@ -39,12 +41,12 @@ a direct browser connection to Calendar Bridge, or a second event database.
 | Status tiles | Availability and dated next appointment are separate; deployed in `0.25.1-moran.4`. |
 | Daily-use navigation | Today, saved preferences, separated dates, neutral view tabs, one-day paging, and time-preserving person filters deployed through `0.25.1-moran.6`. |
 
-Installed application checkpoint: `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, version
-`0.25.1-moran.12`, on `feature/moran-foundation`, deployed 2026-09-21 at 10:28 CDT.
-The private pilot uses a dated bundle.
-This checkpoint was committed locally, not pushed or published as a GitHub/HACS release
-in the recorded deployment work. Laptop preview servers are separate from the installed
-HA dashboard and do not update its bundle automatically.
+Installed application checkpoint: `44644e1b16f9a4ef727fab7ac888252fde76d922`, version
+`0.25.1-moran.28`, on `feature/moran-foundation`, deployed 2026-09-23 at 23:10 CDT.
+This source is pushed to personal origin, not published as a GitHub/HACS release.
+The private pilot uses a dated bundle; r12 remains available for targeted rollback.
+Laptop preview servers are separate from the installed HA dashboard and do not update
+its bundle automatically.
 
 Delivery policy added 2026-09-21: starting at the next verified milestone, commit and push
 the current working branch, including docs and the built bundle where applicable (D22).
@@ -64,6 +66,43 @@ The next product milestone is consistent presentation/usability across the five 
 its broader design remains deferred, not silently authorized by closing this baseline.
 
 ## Verification completed
+
+### HA r28 deployment, 2026-09-23
+
+The user requested “Update ha”. Updated only the existing preview's module resource
+after a targeted backup, fresh configuration/registration drift checks, and atomic
+upload of the tested bundle. Served SHA-256:
+`ae82dc77acfaff03bd3bf8cfd7fa715c5e6bda714dad09dab20ff920f46c60c5`.
+Repeated API/hash verification passed. Dashboard configuration, all other resource
+registrations and all dashboard registrations are unchanged. Read-only/admin-only,
+full-day range, polling and source settings remain intact. Prior r12 is retained.
+`ha core check` passed; no Core upgrade/restart, calendar write, main merge or release.
+Exact operational paths, backups and configuration remain in the private HA workspace.
+
+Connected Chrome loaded the r28 banner and dated asset. Actual HA desktop 1512×729
+showed Timeline filling the remaining panel and the current-time marker. At 390×844,
+native horizontal panning kept a long event's title visible after the pinned names;
+its title opened the correct read-only details, and Escape restored event focus and
+browsing. Zoom reached 50%; Reset restored 100%. All five views were reachable and
+the populated Month grid fit phone width. Screenshots and console were reviewed with
+the frontend-testing skill. No new Family Board warning/error was observed; pre-existing
+HA routing/custom-sidebar and other-card messages remain, so the global console is not
+claimed clean. Original Timeline/Today, people visibility, collapsed Status tiles and
+normal viewport were restored; the updated HA page was left open in Chrome.
+
+**Open CAL-02 finding:** actual HA's content-sized host lets Agenda grow instead of
+constraining its internal scroller. At 390×844, the card was about 4949px high and
+`.agenda` had equal 4780px client/scroll heights with scrollTop 0. Today's group was
+below the viewport, and explicit Today did not reveal it. This host shape is missing
+from the bounded synthetic harness coverage. No fix was made during deployment;
+no r12 comparison establishes whether this is a regression. Add a content-sized
+HA-like host regression and correct Agenda sizing/selected-date navigation next.
+Do not infer Week/Month have the same defect without checking them.
+
+The earlier r13–r28 entries below describe their development-time no-deployment state;
+they reached this existing HA pilot together in this update. Pre-deployment checks
+remain 192 unit tests and 134 compiled-browser scenarios; those passing fixtures do
+not negate the actual-HA finding above. No new physical-device verification is claimed.
 
 ### Readable long Timeline event titles, 2026-09-23
 

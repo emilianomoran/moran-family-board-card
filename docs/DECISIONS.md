@@ -846,6 +846,7 @@ No broader Timeline redesign, live HA deployment or release is implied.
 
 | Discussion | Outcome and current disposition |
 |---|---|
+| Update HA, 2026-09-23 | Deployed tested/pushed r28 to the existing read-only pilot with targeted backups and a resource-only update. Configuration, other registrations and calendar data unchanged; no Core upgrade/restart or public release. Live Chrome review found an Agenda content-sized-host/Today-scroll gap, recorded under CAL-02 for the next bounded fix, not silently marked passed. STATUS owns deployment evidence. |
 | Continue after r27, 2026-09-23 | Chrome reproduced unlabeled long/all-day Timeline bars during time browsing. D40 keeps existing titles visible within their event boundaries; no new fixed section, event semantics or live deployment. |
 | Continue after r26, 2026-09-23 | Chrome reproduced the current-time label disappearing while scrolling people. D39 moves the label into the existing pinned hour axis, preserves horizontal clock position and protects pinned names; no extra fixed section or live deployment. |
 | Check in Chrome and continue, 2026-09-23 | Used the connected Chrome extension, verified existing navigation, then reproduced and repaired an off-screen name in tall Timeline rows (D38). Continue in the existing repo; no extra plugin, live-calendar write or deployment. |

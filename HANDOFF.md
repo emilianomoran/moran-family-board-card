@@ -23,7 +23,8 @@ when the task originated in the separate Home Assistant operations workspace.
   DOM wrapper, state, read or listener. Source
   `44644e1b16f9a4ef727fab7ac888252fde76d922` is pushed to personal origin; remote HEAD
   matched and hosted CI/Validate passed. STATUS owns evidence; later docs-only receipts
-  retain this build. No HA deployment.
+  retain this build. R28 was deployed to the existing HA pilot on 2026-09-23 at 23:10 CDT;
+  STATUS owns the live checks and open Agenda host-sizing finding.
 - Previous development build r27 kept Timeline's current-time label on
   the pinned hour axis (D39). Vertical people scrolling no longer loses the label;
   horizontal time browsing keeps it attached to the line. Range-edge labels stay inside
@@ -110,9 +111,11 @@ when the task originated in the separate Home Assistant operations workspace.
 - ENG-05 is repaired in code: `vitest.config.ts` sets Chicago before worker creation.
   `TZ=UTC npm test` now passes all 192; no DST assertion or app runtime timezone was changed.
   Do not restore ineffective in-worker timezone hooks. Hosted CI passed; ENG-05 is closed.
-- Installed HA version remains `0.25.1-moran.12`, source
-  `4b6530ff7e52d800f8a69ea590ef07b0d026d0f1`, deployed 2026-09-21 at 10:28 CDT.
-  The r13–r28 presentation changes target the laptop prototype; they are not deployed to HA.
+- Installed HA version is `0.25.1-moran.28`, source
+  `44644e1b16f9a4ef727fab7ac888252fde76d922`, deployed 2026-09-23 at 23:10 CDT.
+  Only the existing preview resource changed; configuration and other registrations did not.
+  R12 is retained for targeted rollback in private operations records. Individual no-deploy
+  receipts above describe development-time state; r13–r28 reached HA together in this update.
 - The handoff milestone `e3b5b7dd38fcc057f5c096643635cb83de139847` and 29 earlier local
   commits were pushed to personal origin on 2026-09-21; remote HEAD was verified.
   No main merge, release or additional HA deployment occurred. Recheck Git for later work.
@@ -138,8 +141,12 @@ when the task originated in the separate Home Assistant operations workspace.
    Day, Timeline, Week and saved-zoom slices are implemented.** Next work belongs to CAL-02:
    feedback-driven usability/presentation across views. D32's Month-overflow, D33's keyboard-tab,
    D34's restricted Day-overflow, D35–D37's date/Today gaps and D38–D40's Timeline identity/labels
-   are repaired; do not reimplement
-   them or treat the fallback presentations as final design approval.
+   are implemented and synthetically verified; do not reimplement them or treat the fallback
+   presentations as final design approval. The next concrete defect is Agenda in actual HA's
+   content-sized host: its card grows to content height, so the internal scroller cannot
+   reveal Today. Add an HA-like unbounded-parent regression, fix sizing and selected-date
+   reveal, and verify actual HA as well as bounded desktop/phone fixtures. This was found
+   during r28 deployment; it has not been compared with r12 or fixed. See CAL-02/STATUS.
    Do not assume Month/Agenda zoom or
    silently turn the calendar milestone into meals/lists. Those modules remain deferred.
 4. Preserve [architecture invariants](docs/ARCHITECTURE.md). For live work, follow
@@ -224,8 +231,11 @@ Manual desktop/phone checks confirmed expansion → hidden appointment
 details → Escape → restored focus/context, and collapse. Screenshots/logs were checked;
 temporary viewport and the user's saved Day preference were restored.
 Do not infer deployment from a source push.
-Actual HA review remains at r12. The user confirmed physical
-iPhone HA-app lock/reopen refresh.
+Actual HA review reached r28 on 2026-09-23: Timeline's full-height layout, current-time
+position, native panning, readable long labels, zoom/Reset and read-only details passed
+desktop/phone-width review. Agenda's content-sized-host/Today-scroll gap remains open;
+do not describe the cross-view live smoke check as entirely passed. The user previously
+confirmed physical iPhone HA-app lock/reopen refresh.
 They waived the timed provider-edit/cancellation test. Do not reopen that as a gate or
 claim measured latency. No real appointment was mutated to test the card.
 

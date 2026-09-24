@@ -39,6 +39,21 @@ There is no approved Month/Agenda zoom design. Preserve preference
 migration/invalidation tests when extending scales; never store appointments. Do not add
 features during a documentation-only request.
 
+### CAL-02 next: Agenda sizing in the actual HA host
+
+Observed during the authorized r28 HA update, 2026-09-23; not fixed. At phone width,
+the HA host allowed Agenda/card height to follow all event content. The internal Agenda
+element had equal client/scroll heights, so its selected-date/Today action could not
+scroll today's group into view. This is not established as an r28 regression; r12 was
+not compared. Existing bounded-harness D35 tests still pass but miss this host shape.
+
+Add a synthetic content-sized HA-like parent, then constrain the intended wall scroll
+region without breaking legacy or bounded cards. Verify entry/Today/date reveal, manual
+browsing, resize, source refresh, details/focus and short/empty weeks at desktop/phone
+sizes; finish with actual HA review. Check other views for the same host condition
+before claiming their behavior. No new fixed toolbar, zoom mode or calendar writes.
+See [deployment evidence](STATUS.md#ha-r28-deployment-2026-09-23).
+
 ## Proposals and engineering follow-ups
 
 These are agent recommendations or unresolved questions, not already approved features.
@@ -74,8 +89,8 @@ are implemented. [STATUS](STATUS.md) contains the tests and deployment checkpoin
 
 Timeline's remaining-height correction (D24) is implemented and verified in r13;
 see STATUS for verification and delivery. CAL-01's wall Day slider follows in r16 and
-Timeline density in r17, saved zoom in r18, and Week list density in r19. These are source/prototype features;
-use STATUS for installed state.
+Timeline density in r17, saved zoom in r18, and Week list density in r19. These reached
+the existing HA pilot together with r28 on 2026-09-23; use STATUS for verification limits.
 Wall Timeline's initial/Today centering (D25) is implemented in r14; manual browsing
 is retained. See STATUS for local verification and separate HA/CI delivery boundaries.
 Date-label centering within the left-aligned group (D26) is implemented in r15.
